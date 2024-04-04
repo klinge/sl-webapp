@@ -40,6 +40,16 @@ class Medlem{
         $this->roller = $this->getRoles();
     }
 
+    public function getJson($id) {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
+        $stmt = $this->conn->prepare( $query );
+        $stmt->bindParam(1, $id);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return json_encode($results);
+    }
+
     public function getRoles() {
         $query = "SELECT mr.roll_id, r.roll_namn 
                     FROM Medlem_Roll mr
