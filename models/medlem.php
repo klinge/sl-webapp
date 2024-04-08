@@ -44,10 +44,15 @@ class Medlem{
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
         $stmt = $this->conn->prepare( $query );
         $stmt->bindParam(1, $id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return json_encode($results);
+        
+        try {
+            $stmt->execute();
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return json_encode($results);
+        }
+        catch(PDOException $e) {
+            echo "Error: " . $e->getMessage();
+        }
     }
 
     public function getRoles() {

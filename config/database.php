@@ -2,7 +2,7 @@
 class Database{
    
     // specify your own database credentials
-    private $dbfile = "db/sldb.sqlite";
+    private $dbfile = "./db/sldb.sqlite";
     public $conn;
    
     // get the database connection

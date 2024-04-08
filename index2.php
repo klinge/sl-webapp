@@ -2,25 +2,27 @@
 include_once "router.php";
 include_once 'config/database.php';
 include_once 'models/medlem.php';
-
-// get database connection
-$database = new Database();
-$conn = $database->getConnection();
+include_once 'models/medlemRepository.php';
 
 //create router instance
 $router = new Router();
 
 $router->addRoute('GET', '/medlem', function () {
-    echo "TODO-Lista alla medlemmar!";
-    exit;
+    $conn = getDatabaseConn();
+    $medlemmar = new medlemRepository($conn);
+    echo $medlemmar->getAllJson();
 });
 
 $router->addRoute('GET', '/medlem/:id', function ($id) {
-    $database = new Database();
-    $conn = $database->getConnection();
+    $conn = getDatabaseConn();
     $medlem = new Medlem($conn, $id);
     echo $medlem->getJson($id);
-    exit;
 });
+
+function getDatabaseConn() {
+    // get database connection
+    $database = new Database();
+    return $database->getConnection();
+}
 
 $router->matchRoute();

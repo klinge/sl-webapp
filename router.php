@@ -14,7 +14,7 @@ class Router {
 
         if (isset($this->routes[$method])) {
             foreach ($this->routes[$method] as $routeUrl => $target) {
-                // Simple string comparison to see if the route URL matches the requested URL
+                // Add subfolder to url before doing the pattern matching.. 
                 $routeUrl = $this->dir . $routeUrl; 
                 // Use named subpatterns in the regular expression pattern to capture each parameter value separately
                 $pattern = preg_replace('/\/:([^\/]+)/', '/(?P<$1>[^/]+)', $routeUrl);
