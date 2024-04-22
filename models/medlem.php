@@ -10,19 +10,42 @@ class Medlem{
     public string $fornamn;
     public string $efternamn;
     public string $email;
+    public string $mobil;
+    public string $telefon;
+    public string $adress;
+    public string $postnummer;
+    public string $postort;
+    public string $kommentar;
     public array $roller = [];
     public string $created_at;
     public string $updated_at;
-  
+
+
+    
     public function __construct($db, $id = null){
         $this->conn = $db;
-        $this->id = $id;
-
-        if( isset($this->id) ) {
+        
+        if( isset($id) ) {
+            $this->id = $id;
             $this->get($this->id);
         }
     }
   
+    public function getAll($from_record_num, $records_per_page) {
+        $query = "SELECT
+                *
+            FROM
+                " . $this->table_name . "
+            ORDER BY
+                efternamn ASC
+            LIMIT
+                {$from_record_num}, {$records_per_page}";
+
+        $stmt = $this->conn->prepare( $query );
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function get($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
   
@@ -35,9 +58,17 @@ class Medlem{
         $this->fornamn = $row['fornamn'];
         $this->efternamn = $row['efternamn'];
         $this->email = $row['email'];
+        $this->mobil = isset($row['mobil']) ? $row['mobil'] : ""; 
+        $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
+        $this->adress = isset($row['adress']) ? $row['adress'] : ""; 
+        $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : ""; 
+        $this->postort = isset($row['postort']) ? $row['postort'] : "";
+        $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
+        $this->created_at = $row['created_at'];
+        $this->updated_at = $row['updated_at'];
 
         //Get roller from junction table
-        $this->roller = $this->getRoles();
+        $this->roller = $this->fetchRoles();
     }
 
     public function getJson($id) {
@@ -55,7 +86,7 @@ class Medlem{
         }
     }
 
-    public function getRoles() {
+    public function fetchRoles() {
         $query = "SELECT mr.roll_id, r.roll_namn 
                     FROM Medlem_Roll mr
                     INNER JOIN Roll r ON mr.roll_id = r.id

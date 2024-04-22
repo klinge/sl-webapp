@@ -12,7 +12,8 @@ class Database{
    
         try{
             $this->conn = new PDO("sqlite:" . $this->dbfile);
-        }catch(PDOException $exception){
+        }
+        catch(PDOException $exception){
             echo "Connection error: " . $exception->getMessage();
         }
    
