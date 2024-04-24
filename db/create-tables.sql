@@ -57,6 +57,7 @@ CREATE TABLE Segling (
     "batsman_extra_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
     "kock_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
     "kock_extra_id" INTEGER REFERENCES Medlem(id)ON DELETE SET NULL,
+    "kommentar" VARCHAR(500),
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -125,11 +126,11 @@ VALUES
     (4, 1),
     (4, 4);
 
-INSERT INTO Segling (startdatum, slutdatum, skeppslag, skeppar_id, batsman_id, kock_id) 
+INSERT INTO Segling (startdatum, slutdatum, skeppslag, skeppar_id, batsman_id, kock_id, kommentar) 
 VALUES 
-    ('2024-05-01', '2024-05-03', 'Grundkännarna', 4, 1, NULL),
-    ('2024-06-21', '2024-06-25', 'Slöseglarna', 4, 2, 3),
-    ('2024-05-15', '2024-05-18', 'Medvindarna', 3, 1, 2);
+    ('2024-05-01', '2024-05-03', 'Grundkännarna', 4, 1, NULL, "Jag har en kommentar"),
+    ('2024-06-21', '2024-06-25', 'Slöseglarna', 4, 2, 3, NULL),
+    ('2024-05-15', '2024-05-18', 'Medvindarna', 3, 1, 2, NULL);
 
 INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id)
 VALUES
