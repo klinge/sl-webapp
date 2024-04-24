@@ -20,7 +20,7 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg bg-primary" id="slnav" style="color:azure;" aria-label="Besättningsregister navbar">
+    <nav class="navbar navbar-expand-lg bg-primary" id="slnav" data-bs-theme="dark" style="color:azure;" aria-label="Besättningsregister navbar">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Sofia Linnea</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#slNavbar" aria-controls="slNavbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,10 +30,12 @@
             <div class="collapse navbar-collapse" id="slNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="viewMedlem.php">Besättning</a>
+                        <?php $isActive = ($page_title == "Besättning") ? "active" : ""; ?>
+                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="viewMedlem.php">Besättning</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="viewSegling.php">Seglingar</a>
+                        <?php $isActive = ($page_title == "Seglingar") ? "active" : ""; ?>
+                        <a class="nav-link <?= $isActive ?>" href="viewSegling.php">Seglingar</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
