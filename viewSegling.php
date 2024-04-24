@@ -53,7 +53,7 @@ $num = sizeof($result);
                 <td><?= $row['slutdatum'] ?></td>
                 <td>TODO</td>
                 <td><?= $row['skeppslag'] ?></td>
-                <td></td>
+                <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>
