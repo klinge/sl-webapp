@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS "Medlem_Roll";
 DROP TABLE IF EXISTS "Medlem";
 DROP TABLE IF EXISTS "Roll";
 DROP TABLE IF EXISTS "Segling";
+DROP TABLE IF EXISTS "Segling_Medlem_Roll";
 
 DROP TRIGGER IF EXISTS besattning_after_update;
 DROP TRIGGER IF EXISTS segling_after_update;
@@ -56,6 +57,15 @@ CREATE TABLE Segling (
     "batsman_extra_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
     "kock_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
     "kock_extra_id" INTEGER REFERENCES Medlem(id)ON DELETE SET NULL,
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Segling_Medlem_Roll (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "segling_id" INTEGER REFERENCES Segling(id) ON DELETE CASCADE,
+    "medlem_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
+    "roll_id" INTEGER REFERENCES Roll(id) ON DELETE SET NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -121,4 +131,14 @@ VALUES
     ('2024-06-21', '2024-06-25', 'Slöseglarna', 4, 2, 3),
     ('2024-05-15', '2024-05-18', 'Medvindarna', 3, 1, 2);
 
-
+INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id)
+VALUES
+    (1, 1, 1),
+    (1, 2, 2),
+    (1, 3, 3),
+    (2, 1, 1), 
+    (2, 2, 2),
+    (2, 3, 4),
+    (3, 1, 3),
+    (3, 2, 2),
+    (3, 3, 1);

@@ -96,5 +96,66 @@ class Medlem{
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $results;
     }
+
+    public function update() 
+    {
+        $query = "UPDATE $this->table_name SET 
+        fornamn = \"$this->fornamn\", 
+        efternamn = \"$this->efternamn\",
+        email = \"$this->email\" 
+        WHERE id = ?;"; 
+
+        $stmt = $this->conn->prepare( $query );
+        $stmt->bindParam(1, $this->id);
+        $stmt->execute();
+    
+        $this->updateRoles();
+    }
+
+    public function updateRoles()
+    {
+        $query = 'DELETE FROM Medlem_Roll WHERE medlem_id = ?; ';
+
+        $stmt = $this->conn->prepare( $query );
+        $stmt->bindParam(1, $this->id);
+        $stmt->execute();
+
+        foreach ($this->roller as $roll)
+        {
+            $query = 'INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (?, ?);';
+            $stmt = $this->conn->prepare( $query );
+            $stmt->bindParam(1, $this->id);
+            $stmt->bindParam(2, $roll["roll_id"]);
+            $stmt->execute();
+        }
+    }
+
+    public function delete()
+    {
+        $query = 'DELETE FROM Medlem WHERE id = ?; ';
+
+        $stmt = $this->conn->prepare( $query );
+        $stmt->bindParam(1, $this->id);
+        $stmt->execute();
+
+        $this->roller = [];
+        $this->updateRoles();
+    }
+    
+    public function create()
+    {
+        $query = 'CREATE INTO Medlem (fornamn, efternamn, email) VALUES (?,?,?); ';
+
+        $stmt = $this->conn->prepare( $query );
+        $stmt->bindParam(1, $this->fornamn);
+        $stmt->bindParam(2, $this->efternamn);
+        $stmt->bindParam(3, $this->email);
+
+        $stmt->execute();
+
+        $this->id = $this->conn->lastInsertId();
+        $this->updateRoles();
+        $this->getOne($this->id);
+    }
 }
 ?>
