@@ -11,7 +11,7 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = "Besättningsregister";
+$page_title = "Besättning";
 include_once $APP_DIR . "/layouts/header.php";
 
 // retrieve records here

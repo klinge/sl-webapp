@@ -5,13 +5,13 @@ ini_set('display_errors', 'On');
 
 // include database and object files
 include_once 'config/database.php';
-include_once 'models/medlem.php';
+include_once 'models/segling.php';
 
 $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = "Besättningsregister";
+$page_title = "Seglingar";
 include_once $APP_DIR . "/layouts/header.php";
 
 // retrieve records here
@@ -20,51 +20,55 @@ include_once $APP_DIR . "/layouts/header.php";
 $database = new Database();
 $db = $database->getConnection();
 
-$medlem = new Medlem($db);
+$segling = new Segling($db);
 
 // get all members
-$result = $medlem->getAll();
+$result = $segling->getAll();
 $num = sizeof($result);
-
 ?>
 
-<table class='table table-hover table-responsive table-bordered table-striped' id="memberTable">
+<table class='table table-hover table-responsive table-bordered table-striped' id="sailingTable">
     <thead>
         <tr>
             <th>Id</th>
-            <th>Förnamn</th>
-            <th>Eftermamn</th>
-            <th>Roll</th>
-            <th>Email</th>
-            <th>Mobil</th>
-            <th>Telefon</th>
-            <th>Adress</th>
-            <th>Postnr</th>
-            <th>Ort</th>
+            <th>Start</th>
+            <th>Slut</th>
+            <th>Dagar</th>
+            <th>Skeppslag</th>
+            <th>Skeppare</th>
+            <th>Båtsman</th>
+            <th>Kock</th>
+            <th>X-Kock</th>
+            <th>Kommentar</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        
+    <?php foreach ($result as $row) :
+            $segling = new Segling($db, $row['id']);
+        ?>
+            <tr>
+                <td><?= $row['id'] ?></td>
+                <td><?= $row['startdatum'] ?></td>
+                <td><?= $row['slutdatum'] ?></td>
+                <td>TODO</td>
+                <td><?= $row['skeppslag'] ?></td>
+                <td></td>
+                <td>TODO</td>
+                <td>TODO</td>
+                <td>TODO</td>
+                <td>TODO</td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-sm edit-member-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal" data-member-id="<?= $row['id'] ?>">Ändra</button>
+                </td>
+            </tr>
+        <?php endforeach; ?>
     </tbody>
 </table>
 
-<div class="modal fade" id="editMemberModal" tabindex="-1" aria-labelledby="editMemberModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editMemberModalLabel">Ändra medlem</h5>
-            </div>
-            <div class="modal-body">
-                This is the modal body
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Stäng</button>
-                <button type="submit" form="editMemberForm" class="btn btn-primary">Spara ändringar</button>
-            </div>
-        </div>
-    </div>
-</div>
+<?php //include modal
+    include_once $APP_DIR . "/viewMedlemModal.php"; 
+?>
 <script src="assets/js/site.js"></script>
 
 <!-- datatables js -->
@@ -72,7 +76,7 @@ $num = sizeof($result);
 <script src="https://cdn.datatables.net/2.0.5/js/dataTables.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/2.0.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
 <script>
-    let dataTable = new DataTable('#memberTable');
+    let dataTable = new DataTable('#sailingTable');
 </script>
 
 <?php

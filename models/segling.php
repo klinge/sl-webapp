@@ -16,13 +16,28 @@ class Segling{
 
     public function __construct($db, $id = null){
         $this->conn = $db;
-        $this->id = $id;
 
         if( isset($this->id) ) {
-            $this->get($this->id);
+            $this->id = $id;
+        echo $this->id;
+            $this->getOne($this->id);
         }
     }
-    function get($id){
+
+    public function getAll() {
+        $query = "SELECT
+                *
+            FROM
+                " . $this->table_name . "
+            ORDER BY
+                startdatum ASC";
+
+        $stmt = $this->conn->prepare( $query );
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    function getOne($id){
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
   
         $stmt = $this->conn->prepare( $query );
