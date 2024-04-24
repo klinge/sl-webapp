@@ -45,29 +45,7 @@ $num = sizeof($result);
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($result as $medlem) :
-            $thisMember = new Medlem($db, $medlem['id']);
-            $rollLista = "";
-            foreach ($thisMember->roller as $roll) {
-                $rollLista .= " " . $roll["roll_namn"];
-            }
-        ?>
-            <tr>
-                <td><?= $medlem['id'] ?></td>
-                <td><?= $medlem['fornamn'] ?></td>
-                <td><?= $medlem['efternamn'] ?></td>
-                <td><?= $rollLista ?></td>
-                <td><?= $medlem['email'] ?></td>
-                <td><?= $medlem['mobil'] ?></td>
-                <td><?= $medlem['telefon'] ?></td>
-                <td><?= $medlem['gatuadress'] ?></td>
-                <td><?= $medlem['postnummer'] ?></td>
-                <td><?= $medlem['postort'] ?></td>
-                <td>
-                    <button type="button" class="btn btn-primary btn-sm edit-member-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal" data-member-id="<?= $medlem['id'] ?>">Ändra</button>
-                </td>
-            </tr>
-        <?php endforeach; ?>
+        
     </tbody>
 </table>
 
