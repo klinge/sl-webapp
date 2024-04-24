@@ -35,11 +35,11 @@ $num = sizeof($result);
             <th>Slut</th>
             <th>Dagar</th>
             <th>Skeppslag</th>
+            <th>Kommentar</th>
             <th>Skeppare</th>
             <th>Båtsman</th>
             <th>Kock</th>
             <th>X-Kock</th>
-            <th>Kommentar</th>
             <th></th>
         </tr>
     </thead>
@@ -53,7 +53,7 @@ $num = sizeof($result);
                 <td><?= $row['slutdatum'] ?></td>
                 <td>TODO</td>
                 <td><?= $row['skeppslag'] ?></td>
-                <td>TODO</td>
+                <td><?= $row['kommentar'] ?></td>
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>

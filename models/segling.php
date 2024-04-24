@@ -10,6 +10,7 @@ class Segling{
      public string $start_dat;
      public string $slut_dat;
      public string $skeppslag;
+     public string $kommentar;
      public array $deltagare = [];
      public string $created_at;
      public string $updated_at;
@@ -49,6 +50,7 @@ class Segling{
         $this->start_dat = $row['startdatum'];
         $this->slut_dat = $row['slutdatum'];
         $this->skeppslag = $row['skeppslag'];
+        $this->kommentar = $row['kommentar'];
 
         //Get roller from junction table
         $this->deltagare = $this->getPeople();
