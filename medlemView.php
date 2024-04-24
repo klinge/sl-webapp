@@ -7,21 +7,14 @@ ini_set('display_errors', 'On');
 include_once 'config/database.php';
 include_once 'models/medlem.php';
 
+$config = require './config/config.php';
+$APP_DIR = $config['APP_DIR'];
+
 // set page headers
-$page_title = "Lista alla";
-include_once "./layouts/header.php";
-
-// page given in URL parameter, default page is one
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
-
-// set number of records per page
-$records_per_page = 5;
-
-// calculate for the query LIMIT clause
-$from_record_num = ($records_per_page * $page) - $records_per_page;
+$page_title = "Besättningsregister";
+include_once $APP_DIR . "/layouts/header.php";
 
 // retrieve records here
-
 
 // instantiate database and objects
 $database = new Database();
@@ -30,7 +23,7 @@ $db = $database->getConnection();
 $medlem = new Medlem($db);
 
 // get all members
-$result = $medlem->getAll($from_record_num, $records_per_page);
+$result = $medlem->getAll();
 $num = sizeof($result);
 
 ?>
@@ -106,5 +99,5 @@ $num = sizeof($result);
 
 <?php
 // footer
-include_once "./layouts/footer.php";
+include_once $APP_DIR . "/layouts/footer.php";
 ?>

@@ -2,7 +2,7 @@
 class Database{
    
     // specify your own database credentials
-    private $dbfile = "./db/sldb.sqlite";
+    private $dbfile = "/var/www/html/sl-webapp/db/sldb.sqlite";
     public $conn;
    
     // get the database connection
@@ -12,12 +12,11 @@ class Database{
    
         try{
             $this->conn = new PDO("sqlite:" . $this->dbfile);
+            return $this->conn;
         }
         catch(PDOException $exception){
             echo "Connection error: " . $exception->getMessage();
         }
-   
-        return $this->conn;
     }
 }
 ?>

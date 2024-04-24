@@ -1,2 +1,4 @@
 *.sqlite
 .vscode/
+*-TEST
+*-test

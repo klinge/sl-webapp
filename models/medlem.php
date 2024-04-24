@@ -27,26 +27,24 @@ class Medlem{
         
         if( isset($id) ) {
             $this->id = $id;
-            $this->get($this->id);
+            $this->getOne($this->id);
         }
     }
   
-    public function getAll($from_record_num, $records_per_page) {
+    public function getAll() {
         $query = "SELECT
                 *
             FROM
                 " . $this->table_name . "
             ORDER BY
-                efternamn ASC
-            LIMIT
-                {$from_record_num}, {$records_per_page}";
+                efternamn ASC";
 
         $stmt = $this->conn->prepare( $query );
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
-    public function get($id) {
+    public function getOne($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
   
         $stmt = $this->conn->prepare( $query );
@@ -68,7 +66,7 @@ class Medlem{
         $this->updated_at = $row['updated_at'];
 
         //Get roller from junction table
-        $this->roller = $this->fetchRoles();
+        $this->roller = $this->getRoles();
     }
 
     public function getJson($id) {
@@ -86,7 +84,7 @@ class Medlem{
         }
     }
 
-    public function fetchRoles() {
+    public function getRoles() {
         $query = "SELECT mr.roll_id, r.roll_namn 
                     FROM Medlem_Roll mr
                     INNER JOIN Roll r ON mr.roll_id = r.id

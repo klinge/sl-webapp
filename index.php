@@ -6,10 +6,8 @@ include_once 'models/medlem.php';
 //create router instance
 $router = new Router();
 
-$router->addRoute('GET', '/medlem', function () {
-    $targetURL = "medlem.php";
-    // Send the Location header with a 302 status code (temporary redirect)
-    header("Location: $targetURL", true, 302);
+$router->addRoute('GET', '/', function () {
+    echo "Hello World!";
 });
 
 $router->addRoute('GET', '/medlem/:id', function ($id) {
