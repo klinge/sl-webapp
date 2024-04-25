@@ -54,7 +54,7 @@ $num = sizeof($result);
                 <td>TODO</td>
                 <td><?= $row['skeppslag'] ?></td>
                 <td><?= $row['kommentar'] ?></td>
-                <td>TODO</td>
+                <td>Deltagare:<br/><?= var_dump($segling->deltagare) ?></td>
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>
