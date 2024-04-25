@@ -59,7 +59,7 @@ $num = sizeof($result);
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>
-                    <button type="button" class="btn btn-primary btn-sm edit-member-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal" data-member-id="<?= $row['id'] ?>">Ändra</button>
+                    <button type="button" class="btn btn-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editSeglingModal" data-segling-id="<?= $row['id'] ?>">Ändra</button>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -67,7 +67,7 @@ $num = sizeof($result);
 </table>
 
 <?php //include modal
-    include_once $APP_DIR . "/viewMedlemModal.php"; 
+    include_once $APP_DIR . "/viewSeglingModal.php"; 
 ?>
 <script src="assets/js/site.js"></script>
 
