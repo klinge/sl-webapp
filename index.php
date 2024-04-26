@@ -1,25 +1,40 @@
 <?php
-include_once "router.php";
-include_once 'config/database.php';
-include_once 'models/medlem.php';
+//https://dannyvankooten.github.io/AltoRouter/
+require __DIR__ . '/utils/AltoRouter.php';
+require __DIR__ . '/config/database.php';
+require __DIR__ . '/models/medlem.php';
 
-//create router instance
-$router = new Router();
+$router = new AltoRouter();
+$router->setBasePath('/sl-webapp');
 
-$router->addRoute('GET', '/', function () {
-    echo "Hello World!";
+$router->map( 'GET', '/', function() {
+    require __DIR__ . '/views/home.php';
 });
 
-$router->addRoute('GET', '/medlem/:id', function ($id) {
-    $conn = getDatabaseConn();
-    $medlem = new Medlem($conn, $id);
-    echo $medlem->getJson($id);
+$router->map( 'GET', '/medlem', function() {
+    require __DIR__ . '/views/viewMedlem.php';
 });
+
+$router->map( 'GET', '/segling', function() {
+    require __DIR__ . '/viewSegling.php';
+});
+
+$router->map('GET', '/hello/[a:name]', function($name) {
+    echo "Hello, " . $name;
+  }, 'hello');
+
+$match = $router->match();
+
+// dispatch or throw 404 status
+if( is_array($match) && is_callable( $match['target'] ) ) {
+	call_user_func_array( $match['target'], $match['params'] );
+} else {
+	// no route was matched
+	header( $_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+}
 
 function getDatabaseConn() {
     // get database connection
     $database = new Database();
     return $database->getConnection();
 }
-
-$router->matchRoute();
