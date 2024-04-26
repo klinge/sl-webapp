@@ -23,10 +23,80 @@ $urlParts = explode("/", $url); // Split the URL by "/"
 $id = end($urlParts); // Get the last element (member ID)
 
 $medlem = new Medlem($db, $id);
-var_dump($medlem);
 ?>
 
-HÄR KOMMER SJÄLVA INNEHÅLLET!
+<div class="container py-3">
+    <form>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="fornamn" class="form-label">Förnamn</label>
+                <input type="text" class="form-control" id="fornamn" placeholder="Ange förnamn" value="<?= $medlem->fornamn ?>">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="efternamn" class="form-label">Efternamn</label>
+                <input type="text" class="form-control" id="efternamn" placeholder="Ange efternamn" value="<?= $medlem->efternamn ?>">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" value="<?= $medlem->email ?>">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="mobil" class="form-label">Mobil</label>
+                <input type="text" class="form-control" id="mobil" placeholder="Mobilnummer" value="<?= $medlem->mobil ?>">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="telefon" class="form-label">Telefon</label>
+                <input type="text" class="form-control" id="telefon" placeholder="Annat telefonnummer" value="<?= $medlem->telefon ?>">
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="adress" class="form-label">Adress</label>
+                <input type="text" class="form-control" id="adress" placeholder="Ange gatuadress" value="<?= $medlem->adress ?>">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="postnr" class="form-label">Postnummer</label>
+                <input type="text" class="form-control" id="postnr" placeholder="Ange postnummer" value="<?= $medlem->postnummer ?>">
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="ort" class="form-label">Ort</label>
+                <input type="text" class="form-control" id="ort" placeholder="Ange ort" value="<?= $medlem->postort ?>">
+            </div>
+        </div>
+
+        <h5>Roller</h5>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+                <label class="form-check-label" for="inlineCheckbox1">En roll</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+                <label class="form-check-label" for="inlineCheckbox2">En annan roll</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
+                <label class="form-check-label" for="inlineCheckbox3">Roll 3</label>
+            </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="kommentar" class="form-label">Kommentar</label>
+                <input type="text" class="form-control" id="kommentar" value="<?= $medlem->kommentar ?>">
+            </div>
+        </div>
+
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+            <label class="form-check-label" for="exampleCheck1">Check me out</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Uppdatera</button>
+    </form>
+</div>
 
 
 <!-- datatables js -->
@@ -38,5 +108,5 @@ HÄR KOMMER SJÄLVA INNEHÅLLET!
 </script>
 
 <?php // footer
-    include_once $APP_DIR . "/layouts/footer.php";
+include_once $APP_DIR . "/layouts/footer.php";
 ?>
