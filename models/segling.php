@@ -81,6 +81,43 @@ class Segling{
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
     }
+    public function updatePeople()
+    {
+        $query = "DELETE FROM Segling_Medlem_Roll WHERE segling_id = ?; ";
+        $stmt = $this->conn->prepare( $query );
+        $stmt->bindParam(1, $this->id);
+        $stmt->execute();
+
+        foreach ($this->deltagare as $pers)
+        {
+            $query = 'INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id) VALUES (?, ?, ?);';
+            $stmt = $this->conn->prepare( $query );
+            $stmt->bindParam(1, $this->id);
+            $stmt->bindParam(2,$pers["medlem_id"]);
+            $stmt->bindParam(3, $pers["roll_id"]);
+            $stmt->execute();
+        }
+    }
+    public function delete()
+    {
+        $query = "DELETE FROM Segling WHERE segling_id = ?; ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1,$this->id);
+        $stmt->execute();   
+    }
+    public function create()
+    {
+        $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag) VALUES (?, ?, ?);';
+            $stmt = $this->conn->prepare( $query );
+            $stmt->bindParam(1, $this->start_dat);
+            $stmt->bindParam(2,$this->slut_dat);
+            $stmt->bindParam(3, $this->skeppslag);
+            $stmt->execute();
+
+            $this->id = $this->conn->lastInsertId();
+            $this->updatePeople();
+            $this->get($this->id);
+    }
 }
 
 ?>
