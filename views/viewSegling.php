@@ -46,7 +46,7 @@ $num = sizeof($result);
     <tbody>
     <?php foreach ($result as $row) :
             $segling = new Segling($db, $row['id']);
-        ?>
+    ?>
             <tr>
                 <td><?= $row['id'] ?></td>
                 <td><?= $row['startdatum'] ?></td>

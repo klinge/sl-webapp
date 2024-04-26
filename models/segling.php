@@ -10,7 +10,7 @@ class Segling{
      public string $start_dat;
      public string $slut_dat;
      public string $skeppslag;
-     public string $kommentar;
+     public ?string $kommentar;
      public array $deltagare = [];
      public string $created_at;
      public string $updated_at;
@@ -18,9 +18,8 @@ class Segling{
     public function __construct($db, $id = null){
         $this->conn = $db;
 
-        if( isset($this->id) ) {
+        if( isset($id) ) {
             $this->id = $id;
-        echo $this->id;
             $this->getOne($this->id);
         }
     }
