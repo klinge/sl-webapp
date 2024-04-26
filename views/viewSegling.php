@@ -46,6 +46,15 @@ $num = sizeof($result);
     <tbody>
     <?php foreach ($result as $row) :
             $segling = new Segling($db, $row['id']);
+            $skeppare = array_filter($segling->deltagare, function($member) {
+                return $member['roll_namn'] === "Skeppare";
+            });
+            if($skeppare) {
+                $skeppareName = current($skeppare)['fornamn'] . " " . current($skeppare)['efternamn'];
+            }
+            else {
+                $skeppareName = "TBD";
+            }
     ?>
             <tr>
                 <td><?= $row['id'] ?></td>
@@ -54,7 +63,7 @@ $num = sizeof($result);
                 <td>TODO</td>
                 <td><?= $row['skeppslag'] ?></td>
                 <td><?= $row['kommentar'] ?></td>
-                <td>Deltagare:<br/><?= var_dump($segling->deltagare) ?></td>
+                <td><?= $skeppareName ?></td>
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>
