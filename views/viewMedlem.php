@@ -64,16 +64,12 @@ $num = sizeof($result);
                 <td><?= $medlem['postnummer'] ?></td>
                 <td><?= $medlem['postort'] ?></td>
                 <td>
-                    <button type="button" class="btn btn-primary btn-sm edit-member-btn" data-bs-toggle="modal" data-bs-target="#editMemberModal" data-member-id="<?= $medlem['id'] ?>">Ändra</button>
+                    <a type="button" class="btn btn-primary btn-sm edit-member-btn" href="medlem/<?= $medlem['id'] ?>">Ändra</button>
                 </td>
             </tr>
         <?php endforeach; ?>
     </tbody>
 </table>
-
-<?php //include modal
-    include_once $APP_DIR . "/views/viewMedlemModal.php"; 
-?>
 
 <script src="assets/js/site.js"></script>
 

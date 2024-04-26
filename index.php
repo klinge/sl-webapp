@@ -16,6 +16,10 @@ $router->map( 'GET', '/medlem', function() {
     require __DIR__ . '/views/viewMedlem.php';
 });
 
+$router->map( 'GET', '/medlem/[i:id]', function($id) {
+    require __DIR__ . '/views/viewMedlemEdit.php';
+});
+
 $router->map( 'GET', '/segling', function() {
     require __DIR__ . '/views/viewSegling.php';
 });

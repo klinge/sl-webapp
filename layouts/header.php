@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="assets/css/site.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="/sl-webapp/assets/css/site.css" crossorigin="anonymous">
     <!-- Bootstrap CSS -->
     <!-- Using Bootswatch to get some styling -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootswatch@5/dist/sandstone/bootstrap.min.css" crossorigin="anonymous">
@@ -48,7 +48,7 @@
         </symbol>
     </svg>
 
-    <script src="assets/js/themeSwitcher.js"></script>
+    <script src="/sl-webapp/assets/js/themeSwitcher.js"></script>
 
     <nav class="navbar navbar-expand-lg bg-primary" id="slnav" data-bs-theme="dark" style="color:azure;" aria-label="Besättningsregister navbar">
         <div class="container-fluid">
@@ -61,11 +61,11 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Besättning") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="medlem">Besättning</a>
+                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="/sl-webapp/medlem">Besättning</a>
                     </li>
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Seglingar") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" href="segling">Seglingar</a>
+                        <a class="nav-link <?= $isActive ?>" href="/sl-webapp/segling">Seglingar</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
