@@ -31,11 +31,11 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Besättning") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="viewMedlem.php">Besättning</a>
+                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="medlem">Besättning</a>
                     </li>
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Seglingar") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" href="viewSegling.php">Seglingar</a>
+                        <a class="nav-link <?= $isActive ?>" href="segling">Seglingar</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>

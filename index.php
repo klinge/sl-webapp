@@ -16,7 +16,7 @@ $router->map( 'GET', '/medlem', function() {
 });
 
 $router->map( 'GET', '/segling', function() {
-    require __DIR__ . '/viewSegling.php';
+    require __DIR__ . '/views/viewSegling.php';
 });
 
 $router->map('GET', '/hello/[a:name]', function($name) {
