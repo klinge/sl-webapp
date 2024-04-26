@@ -1,6 +1,7 @@
 <?php
-//https://dannyvankooten.github.io/AltoRouter/
-require __DIR__ . '/utils/AltoRouter.php';
+
+require 'vendor/autoload.php';
+//Using AltoRouter for url routing: https://dannyvankooten.github.io/AltoRouter/
 require __DIR__ . '/config/database.php';
 require __DIR__ . '/models/medlem.php';
 

@@ -2,3 +2,5 @@
 .vscode/
 *-TEST
 *-test
+composer.lock
+vendor/
