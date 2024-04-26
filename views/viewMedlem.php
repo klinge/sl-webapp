@@ -72,7 +72,7 @@ $num = sizeof($result);
 </table>
 
 <?php //include modal
-    include_once $APP_DIR . "/viewMedlemModal.php"; 
+    include_once $APP_DIR . "/views/viewMedlemModal.php"; 
 ?>
 
 <script src="assets/js/site.js"></script>
