@@ -11,18 +11,19 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = "Ändra besättningsperson";
+$page_title = "Ändra besättning";
 include_once $APP_DIR . "/layouts/header.php";
 
 // retrieve records here
 $database = new Database();
 $db = $database->getConnection();
 
-$medlem = new Medlem($db);
+$url = $_SERVER['REQUEST_URI'];
+$urlParts = explode("/", $url); // Split the URL by "/"
+$id = end($urlParts); // Get the last element (member ID)
 
-// get all members
-$result = $medlem->getAll();
-$num = sizeof($result);
+$medlem = new Medlem($db, $id);
+var_dump($medlem);
 ?>
 
 HÄR KOMMER SJÄLVA INNEHÅLLET!
