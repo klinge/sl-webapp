@@ -95,6 +95,7 @@ $medlem = new Medlem($db, $id);
             <label class="form-check-label" for="exampleCheck1">Check me out</label>
         </div>
         <button type="submit" class="btn btn-primary">Uppdatera</button>
+        <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
     </form>
 </div>
 
