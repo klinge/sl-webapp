@@ -25,8 +25,8 @@ $id = end($urlParts); // Get the last element (member ID)
 $medlem = new Medlem($db, $id);
 ?>
 
-<div class="container py-3">
-    <form>
+<div class="container">
+    <form class="border border-primary rounded p-3">
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="fornamn" class="form-label">Förnamn</label>
