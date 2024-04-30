@@ -116,7 +116,7 @@ class Segling{
 
             $this->id = $this->conn->lastInsertId();
             $this->updatePeople();
-            $this->get($this->id);
+            $this->getOne($this->id);
     }
 }
 
