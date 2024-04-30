@@ -3,28 +3,14 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-// include database and object files
-include_once 'config/database.php';
-include_once 'models/medlem.php';
-
 $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = "Besättning";
+$page_title = $data['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-// retrieve records here
-
-// instantiate database and objects
-$database = new Database();
-$db = $database->getConnection();
-
-$medlem = new Medlem($db);
-
-// get all members
-$result = $medlem->getAll();
-$num = sizeof($result);
+$num = sizeof($data['items']);
 
 ?>
 

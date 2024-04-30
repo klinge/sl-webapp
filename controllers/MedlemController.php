@@ -15,6 +15,13 @@ class MedlemController{
     }
 
     public function list(){
+        $medlem = new Medlem($this->conn);
+        $result = $medlem->getAll();
+        //Put everyting in the data variable that is used by the view
+        $data = array(
+            "title" => "Besättningslista",
+            "items" => $result
+          );
         require __DIR__ . '/../views/viewMedlem.php';
     }
 
