@@ -6,9 +6,8 @@ ini_set('display_errors', 'On');
 
 require 'vendor/autoload.php';
 //Using AltoRouter for url routing: https://dannyvankooten.github.io/AltoRouter/
-require __DIR__ . '/config/database.php';
-require __DIR__ . '/models/medlem.php';
 require __DIR__ . '/controllers/TestController.php';
+require __DIR__ . '/controllers/MedlemController.php';
 
 $router = new AltoRouter();
 $router->setBasePath('/sl-webapp');
@@ -17,13 +16,8 @@ $router->map( 'GET', '/', function() {
     require __DIR__ . '/views/home.php';
 });
 
-$router->map( 'GET', '/medlem', function() {
-    require __DIR__ . '/views/viewMedlem.php';
-});
-
-$router->map( 'GET', '/medlem/[i:id]', function($id) {
-    require __DIR__ . '/views/viewMedlemEdit.php';
-});
+$router->map('GET', '/medlem', 'MedlemController#list', 'medlem-lista');
+$router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
 
 $router->map( 'GET', '/segling', function() {
     require __DIR__ . '/views/viewSegling.php';
@@ -67,10 +61,4 @@ function dispatch($match, $request) {
         header( $_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
     }
 
-}
-
-function getDatabaseConn() {
-    // get database connection
-    $database = new Database();
-    return $database->getConnection();
 }
