@@ -16,7 +16,7 @@ class MedlemController{
 
     public function list(){
         $medlem = new Medlem($this->conn);
-        $result = $medlem->getAll();
+        $result = $medlem->getAllWithRoles();
         //Put everyting in the data variable that is used by the view
         $data = array(
             "title" => "Besättningslista",
@@ -26,6 +26,12 @@ class MedlemController{
     }
 
     public function edit(array $params){
+        $id = $params['id'];
+        $medlem = new Medlem($this->conn, $id);
+        $data = array(
+            "title" => "Visa medlem",
+            "items" => $medlem
+          );
         require __DIR__ . '/../views/viewMedlemEdit.php';
     }
 

@@ -3,26 +3,14 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-// include database and object files
-include_once 'config/database.php';
-include_once 'models/medlem.php';
-
 $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = "Ändra besättning";
+$page_title = $data['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-// retrieve records here
-$database = new Database();
-$db = $database->getConnection();
-
-$url = $_SERVER['REQUEST_URI'];
-$urlParts = explode("/", $url); // Split the URL by "/"
-$id = end($urlParts); // Get the last element (member ID)
-
-$medlem = new Medlem($db, $id);
+$medlem = $data['items'];
 ?>
 
 <div class="container">

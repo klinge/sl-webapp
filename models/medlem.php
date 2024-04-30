@@ -44,6 +44,17 @@ class Medlem{
         return $stmt->fetchAll();
     }
 
+    public function getAllWithRoles() {
+        $query = "SELECT m.*, GROUP_CONCAT(r.roll_namn, ', ') AS roller
+            FROM Medlem m
+            INNER JOIN Medlem_Roll mr ON m.id = mr.medlem_id
+            INNER JOIN Roll r ON mr.roll_id = r.id
+            GROUP BY m.id";
+        $stmt = $this->conn->prepare( $query );
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
     public function getOne($id) {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
   

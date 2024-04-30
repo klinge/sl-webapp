@@ -31,18 +31,12 @@ $num = sizeof($data['items']);
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($result as $medlem) :
-            $thisMember = new Medlem($db, $medlem['id']);
-            $rollLista = "";
-            foreach ($thisMember->roller as $roll) {
-                $rollLista .= " " . $roll["roll_namn"];
-            }
-        ?>
+        <?php foreach ($result as $medlem): ?>
             <tr>
                 <td><?= $medlem['id'] ?></td>
                 <td><?= $medlem['fornamn'] ?></td>
                 <td><?= $medlem['efternamn'] ?></td>
-                <td><?= $rollLista ?></td>
+                <td><?= $medlem['roller'] ?></td>
                 <td><?= $medlem['email'] ?></td>
                 <td><?= $medlem['mobil'] ?></td>
                 <td><?= $medlem['telefon'] ?></td>
