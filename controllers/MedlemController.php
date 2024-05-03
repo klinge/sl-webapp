@@ -2,21 +2,10 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-require __DIR__ . '/../config/database.php';
+require __DIR__ . '/BaseController.php';
 require __DIR__ . '/../models/medlem.php';
 
-class MedlemController{  
-
-    private $conn;
-    private $request;
-    private $router;
-
-    public function __construct($request, $router) 
-    {
-        $this->request = $request;
-        $this->conn = $this->getDatabaseConn();
-        $this->router = $router;
-    }
+class MedlemController extends BaseController {  
 
     public function list(){
         $medlem = new Medlem($this->conn);
@@ -44,12 +33,6 @@ class MedlemController{
         $id = $params['id'];
         echo "In member#save";
         die;
-    }
-
-    private function getDatabaseConn() {
-        // get database connection
-        $database = new Database();
-        return $database->getConnection();
     }
 
 }
