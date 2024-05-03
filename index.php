@@ -9,6 +9,9 @@ require 'vendor/autoload.php';
 require __DIR__ . '/controllers/TestController.php';
 require __DIR__ . '/controllers/MedlemController.php';
 
+ini_set('session.cookie_lifetime', 3600);  // Session expires after 1 hour (in seconds)
+session_start();
+
 $router = new AltoRouter();
 $router->setBasePath('/sl-webapp');
 

@@ -131,6 +131,17 @@
 
     <!-- container -->
     <div class="container">
+    <?php
+        if (isset($_SESSION['flash_message'])) {
+            // Bootstrap alert structure
+            echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
+            echo $_SESSION['flash_message']['message'];
+            echo '</div>';
+
+            // Unset the message from the session
+            unset($_SESSION['flash_message']);
+        }
+    ?>
         <div class='page-header'>
             <h1><?php echo $page_title ?></h1>
         </div>
