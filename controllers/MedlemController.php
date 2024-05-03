@@ -31,6 +31,9 @@ class MedlemController extends BaseController {
 
     public function save(array $params) {
         $id = $params['id'];
+        foreach ($_POST as $key => $value) {
+            $_POST[$key] = $this->sanitizeInput($value);
+          }
         var_dump($_POST);
         exit;
     }
