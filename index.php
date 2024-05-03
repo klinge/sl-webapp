@@ -29,6 +29,12 @@ $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
 $router->map( 'GET', '/test', function() {
     echo "Hello from a closure!";
 });
+$router->map( 'GET', '/form', function() {
+    require __DIR__ . '/views/home.php';
+});
+$router->map( 'POST', '/form', function() {
+    var_dump($_POST);
+});
 
 $match = $router->match();
 

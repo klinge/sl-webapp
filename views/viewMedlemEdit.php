@@ -14,30 +14,32 @@ $medlem = $data['items'];
 ?>
 
 <div class="container">
-<form class="border border-primary rounded p-3" action="<?= $formAction ?>" method="POST">
+    <form class="border border-primary rounded p-3" action="<?= $formAction ?>" method="POST">
+        <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
+        
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="fornamn" class="form-label">Förnamn</label>
-                <input type="text" class="form-control" id="fornamn" placeholder="Ange förnamn" value="<?= $medlem->fornamn ?>">
+                <input type="text" class="form-control" id="fornamn" name="fornamn" placeholder="Ange förnamn" value="<?= $medlem->fornamn ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="efternamn" class="form-label">Efternamn</label>
-                <input type="text" class="form-control" id="efternamn" placeholder="Ange efternamn" value="<?= $medlem->efternamn ?>">
+                <input type="text" class="form-control" id="efternamn" name="efternamn" placeholder="Ange efternamn" value="<?= $medlem->efternamn ?>">
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" value="<?= $medlem->email ?>">
+                <input type="email" class="form-control" id="email" name="email" value="<?= $medlem->email ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="mobil" class="form-label">Mobil</label>
-                <input type="text" class="form-control" id="mobil" placeholder="Mobilnummer" value="<?= $medlem->mobil ?>">
+                <input type="text" class="form-control" id="mobil" name="mobil" placeholder="Mobilnummer" value="<?= $medlem->mobil ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="telefon" class="form-label">Telefon</label>
-                <input type="text" class="form-control" id="telefon" placeholder="Annat telefonnummer" value="<?= $medlem->telefon ?>">
+                <input type="text" class="form-control" id="telefon" name="telefon" placeholder="Annat telefonnummer" value="<?= $medlem->telefon ?>">
             </div>
         </div>
 
@@ -45,41 +47,41 @@ $medlem = $data['items'];
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label for="adress" class="form-label">Adress</label>
-                <input type="text" class="form-control" id="adress" placeholder="Ange gatuadress" value="<?= $medlem->adress ?>">
+                <input type="text" class="form-control" id="adress" name="adress" placeholder="Ange gatuadress" value="<?= $medlem->adress ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="postnr" class="form-label">Postnummer</label>
-                <input type="text" class="form-control" id="postnr" placeholder="Ange postnummer" value="<?= $medlem->postnummer ?>">
+                <input type="text" class="form-control" id="postnr" name="postnr" placeholder="Ange postnummer" value="<?= $medlem->postnummer ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="ort" class="form-label">Ort</label>
-                <input type="text" class="form-control" id="ort" placeholder="Ange ort" value="<?= $medlem->postort ?>">
+                <input type="text" class="form-control" id="ort" name="ort" placeholder="Ange ort" value="<?= $medlem->postort ?>">
             </div>
         </div>
 
         <h5>Roller</h5>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
-                <label class="form-check-label" for="inlineCheckbox1">En roll</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
-                <label class="form-check-label" for="inlineCheckbox2">En annan roll</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox3" value="option3">
-                <label class="form-check-label" for="inlineCheckbox3">Roll 3</label>
-            </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller" value="option1">
+            <label class="form-check-label" for="inlineCheckbox1">En roll</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="roller" value="option2">
+            <label class="form-check-label" for="inlineCheckbox2">En annan roll</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="roller" value="option3">
+            <label class="form-check-label" for="inlineCheckbox3">Roll 3</label>
+        </div>
 
         <div class="row">
             <div class="col-md-12 mb-3">
                 <label for="kommentar" class="form-label">Kommentar</label>
-                <input type="text" class="form-control" id="kommentar" value="<?= $medlem->kommentar ?>">
+                <input type="text" class="form-control" id="kommentar" name="kommentar" value="<?= $medlem->kommentar ?>">
             </div>
         </div>
 
         <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="exampleCheck1">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1" name="checkbox">
             <label class="form-check-label" for="exampleCheck1">Check me out</label>
         </div>
         <button type="submit" class="btn btn-primary">Uppdatera</button>

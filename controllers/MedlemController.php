@@ -31,8 +31,8 @@ class MedlemController extends BaseController {
 
     public function save(array $params) {
         $id = $params['id'];
-        echo "In member#save";
-        die;
+        var_dump($_POST);
+        exit;
     }
 
 }
