@@ -51,11 +51,11 @@ $medlem = $data['items'];
             </div>
             <div class="col-md-4 mb-3">
                 <label for="postnr" class="form-label">Postnummer</label>
-                <input type="text" class="form-control" id="postnr" name="postnr" placeholder="Ange postnummer" value="<?= $medlem->postnummer ?>">
+                <input type="text" class="form-control" id="postnr" name="postnummer" placeholder="Ange postnummer" value="<?= $medlem->postnummer ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="ort" class="form-label">Ort</label>
-                <input type="text" class="form-control" id="ort" name="ort" placeholder="Ange ort" value="<?= $medlem->postort ?>">
+                <input type="text" class="form-control" id="ort" name="postort" placeholder="Ange ort" value="<?= $medlem->postort ?>">
             </div>
         </div>
 

@@ -31,11 +31,15 @@ class MedlemController extends BaseController {
 
     public function save(array $params) {
         $id = $params['id'];
+        $medlem = new Medlem($this->conn, $id);
         foreach ($_POST as $key => $value) {
-            $_POST[$key] = $this->sanitizeInput($value);
+          $_POST[$key] = $this->sanitizeInput($value);
+          if (property_exists($medlem, $key)) {
+            $medlem->$key = $value; // Assign value to corresponding property
           }
-        var_dump($_POST);
-        exit;
+        }
+        $medlem->update();
+        $this->list();
     }
 
 }
