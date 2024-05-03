@@ -39,7 +39,13 @@ class MedlemController extends BaseController {
           }
         }
         $medlem->update();
-        $this->list();
+        //TODO add error handling
+        $_SESSION['flash_message'] = array('type'=>'ok', 'message'=>'Medlem uppdaterad!');
+
+        // Set the URL and redirect
+        $redirectUrl = $this->router->generate('medlem-lista');
+        header('Location: ' . $redirectUrl);
+        exit;
     }
 
 }
