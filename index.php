@@ -18,6 +18,7 @@ $router->map( 'GET', '/', function() {
 
 $router->map('GET', '/medlem', 'MedlemController#list', 'medlem-lista');
 $router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
+$router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
 
 $router->map( 'GET', '/segling', function() {
     require __DIR__ . '/views/viewSegling.php';
@@ -25,6 +26,9 @@ $router->map( 'GET', '/segling', function() {
 
 $router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
+$router->map( 'GET', '/test', function() {
+    echo "Hello from a closure!";
+});
 
 $match = $router->match();
 
@@ -33,10 +37,10 @@ if ($match === false) {
     // here you can handle 404
 } else {
     $request = $_SERVER;
-    dispatch($match, $request);
+    dispatch($match, $request, $router);
 }
 
-function dispatch($match, $request) {
+function dispatch($match, $request, $router) {
     //If we have a string with a # then it's a controller action pair
     if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
         //Parse the match to get controller, action and params
@@ -45,7 +49,7 @@ function dispatch($match, $request) {
 
         //Check that the controller has the requested method and call it
         if ( method_exists($controller, $action) ) {
-            $thisController = new $controller($request);
+            $thisController = new $controller($request, $router);
             $thisController->{$action}($params);
         } 
         else {
