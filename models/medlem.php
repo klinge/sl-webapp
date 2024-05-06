@@ -80,35 +80,39 @@ class Medlem{
         $this->roller = $this->getRoles();
     }
 
-    public function getJson($id) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
-        $stmt = $this->conn->prepare( $query );
-        $stmt->bindParam(1, $id);
-        
-        try {
-            $stmt->execute();
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return json_encode($results);
-        }
-        catch(PDOException $e) {
-            echo "Error: " . $e->getMessage();
-        }
-    }
-
     public function getRoles() {
         $query = "SELECT mr.roll_id, r.roll_namn 
                     FROM Medlem_Roll mr
                     INNER JOIN Roll r ON mr.roll_id = r.id
-                    WHERE mr.medlem_id = ?";
+                    WHERE mr.medlem_id = :id";
         
         $stmt = $this->conn->prepare( $query );
-        $stmt->bindParam(1, $this->id);
+        $stmt->bindParam(':id', $this->id);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $results;
     }
 
-    public function update() 
+    function updateMedlemRoles($newRoleIds) {
+        var_dump($this->roller);
+        //first remove roles from that no longer exist
+        $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
+      
+        foreach ($rolesToRemove as $roleId) {
+          $key = array_search($roleId, array_column($this->roller, 'roll_id'));
+          unset($this->roller[$key]);
+        }
+        //then add new roles
+        foreach ($newRoleIds as $roleId) {
+          if (!in_array($roleId, array_column($this->roller, 'roll_id'))) {
+            $newRole = array('roll_id'=>$roleId);
+            $this->roller[] = $newRole;
+          }
+        }
+        var_dump($this->roller);
+      }
+
+    public function save() 
     {
         $query = "UPDATE $this->table_name SET 
         fornamn = \"$this->fornamn\", 
@@ -120,10 +124,10 @@ class Medlem{
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
     
-        $this->updateRoles();
+        $this->saveRoles();
     }
 
-    public function updateRoles()
+    public function saveRoles()
     {
         $query = 'DELETE FROM Medlem_Roll WHERE medlem_id = ?; ';
 
@@ -150,12 +154,12 @@ class Medlem{
         $stmt->execute();
 
         $this->roller = [];
-        $this->updateRoles();
+        $this->saveRoles();
     }
     
     public function create()
     {
-        $query = 'CREATE INTO Medlem (fornamn, efternamn, email) VALUES (?,?,?); ';
+        $query = 'INSERT INTO Medlem (fornamn, efternamn, email) VALUES (?,?,?); ';
 
         $stmt = $this->conn->prepare( $query );
         $stmt->bindParam(1, $this->fornamn);
@@ -165,7 +169,7 @@ class Medlem{
         $stmt->execute();
 
         $this->id = $this->conn->lastInsertId();
-        $this->updateRoles();
+        $this->saveRoles();
         $this->getOne($this->id);
     }
 }
