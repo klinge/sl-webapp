@@ -82,7 +82,18 @@ function hasRole($role, $arrayOfRoles) {
         <div class="row">
             <div class="col-md-12 mb-3">
                 <label for="kommentar" class="form-label">Kommentar</label>
-                <input type="text" class="form-control" id="kommentar" name="kommentar" value="<?= $medlem->kommentar ?>">
+                <textarea class="form-control" id="kommentar" name="kommentar"><?= $medlem->kommentar ?></textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="d-inline-flex col-md-3 mb-3">
+                <label for="created" class="form-label form-control-sm">Skapad:</label>
+                <span class="form-control-plaintext form-control-sm" id="created"><?= $medlem->created_at ?></span>
+            </div>
+            <div class="d-inline-flex col-md-3 mb-3">
+                <label for="updated" class="form-label form-control-sm">Ändrad:</label>
+                <span class="form-control-plaintext form-control-sm" id="updated"><?= $medlem->updated_at ?></span>
             </div>
         </div>
 
