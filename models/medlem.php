@@ -115,13 +115,29 @@ class Medlem{
     public function save() 
     {
         $query = "UPDATE $this->table_name SET 
-        fornamn = \"$this->fornamn\", 
-        efternamn = \"$this->efternamn\",
-        email = \"$this->email\" 
-        WHERE id = ?;"; 
+        fornamn = :fornamn, 
+        efternamn = :efternamn,
+        email = :email,
+        gatuadress = :gatuadress,
+        postnummer = :postnummer, 
+        postort = :postort, 
+        mobil = :mobil, 
+        telefon = :telefon, 
+        kommentar = :kommentar
+        WHERE id = :id;"; 
 
         $stmt = $this->conn->prepare( $query );
-        $stmt->bindParam(1, $this->id);
+        $stmt->bindParam(':fornamn', $this->fornamn);
+        $stmt->bindParam(':efternamn', $this->efternamn);
+        $stmt->bindParam(':email', $this->email);
+        $stmt->bindParam(':gatuadress', $this->adress);
+        $stmt->bindParam(':postnummer', $this->postnummer);
+        $stmt->bindParam(':postort', $this->postort);
+        $stmt->bindParam(':mobil', $this->mobil);
+        $stmt->bindParam(':telefon', $this->telefon);
+        $stmt->bindParam(':kommentar', $this->kommentar);
+        $stmt->bindParam(':id', $this->id);
+        
         $stmt->execute();
     
         $this->saveRoles();
