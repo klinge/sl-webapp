@@ -11,6 +11,17 @@ $page_title = $data['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
 $medlem = $data['items'];
+$roller = $data['roles'];
+
+//Function to check if a member has a given role, used for the role checkboxes
+function hasRole($role, $arrayOfRoles) {
+    foreach ($arrayOfRoles as $innerArray) {
+      if (isset($innerArray['roll_id']) && $innerArray['roll_id'] === $role) {
+        return true;
+      }
+    }
+    return false;
+  }
 ?>
 
 <div class="container">
@@ -60,18 +71,13 @@ $medlem = $data['items'];
         </div>
 
         <h5>Roller</h5>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller" value="option1">
-            <label class="form-check-label" for="inlineCheckbox1">En roll</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="roller" value="option2">
-            <label class="form-check-label" for="inlineCheckbox2">En annan roll</label>
-        </div>
-        <div class="form-check form-check-inline">
-            <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="roller" value="option3">
-            <label class="form-check-label" for="inlineCheckbox3">Roll 3</label>
-        </div>
+        <?php foreach ($roller as $roll): ?>
+            <div class="form-check form-check-inline">
+                <?php $checked = hasRole($roll['id'], $medlem->roller) ? 'checked' : ''; ?>
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller[]" value="<?= $roll['id'] ?>" <?= $checked ?> >
+                <label class="form-check-label" for="inlineCheckbox1"><?= $roll['roll_namn'] ?></label>
+            </div>
+        <?php endforeach ?>
 
         <div class="row">
             <div class="col-md-12 mb-3">
@@ -80,10 +86,6 @@ $medlem = $data['items'];
             </div>
         </div>
 
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="exampleCheck1" name="checkbox">
-            <label class="form-check-label" for="exampleCheck1">Check me out</label>
-        </div>
         <button type="submit" class="btn btn-primary">Uppdatera</button>
         <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
     </form>

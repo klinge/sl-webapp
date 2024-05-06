@@ -39,6 +39,8 @@ class MedlemController extends BaseController {
     public function save(array $params) {
         $id = $params['id'];
         $medlem = new Medlem($this->conn, $id);
+        var_dump($_POST);
+        exit;
         foreach ($_POST as $key => $value) {
           $_POST[$key] = $this->sanitizeInput($value);
           if (property_exists($medlem, $key)) {
