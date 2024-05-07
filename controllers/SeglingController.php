@@ -5,6 +5,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/Segling.php';
 require_once __DIR__ . '/../models/Roll.php';
+require_once __DIR__ . '/../models/MedlemRepository.php';
 
 class SeglingController extends BaseController {  
 
@@ -34,6 +35,7 @@ class SeglingController extends BaseController {
         $roll = new Roll($this->conn);
         //Fetch all available roles
         $roller = $roll->getAll();
+ 
         $data = array(
             "title" => "Visa segling",
             "items" => $segling,

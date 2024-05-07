@@ -44,7 +44,7 @@ class Medlem
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAllWithRoles()
@@ -56,7 +56,7 @@ class Medlem
             GROUP BY m.id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getOne($id)

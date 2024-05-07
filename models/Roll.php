@@ -23,6 +23,6 @@ class Roll{
         $stmt = $this->conn->prepare( $query );
         $stmt->execute();
 
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

@@ -31,7 +31,7 @@ class Segling
         $query = "SELECT * FROM " . $this->table_name . " ORDER BY startdatum ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        $result = $stmt->fetchAll();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         //Create a segling object for each row in the database, this also fetches deltagare
         foreach ($result as $row) {
             $segling = new Segling($this->conn, $row['id']);
