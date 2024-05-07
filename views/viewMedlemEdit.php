@@ -12,16 +12,6 @@ include_once $APP_DIR . "/layouts/header.php";
 
 $medlem = $data['items'];
 $roller = $data['roles'];
-
-//Function to check if a member has a given role, used for the role checkboxes
-function hasRole($role, $arrayOfRoles) {
-    foreach ($arrayOfRoles as $innerArray) {
-      if (isset($innerArray['roll_id']) && $innerArray['roll_id'] === $role) {
-        return true;
-      }
-    }
-    return false;
-  }
 ?>
 
 <div class="container">
@@ -73,7 +63,7 @@ function hasRole($role, $arrayOfRoles) {
         <h5>Roller</h5>
         <?php foreach ($roller as $roll): ?>
             <div class="form-check form-check-inline">
-                <?php $checked = hasRole($roll['id'], $medlem->roller) ? 'checked' : ''; ?>
+                <?php $checked = $medlem->hasRole($roll['id']) ? 'checked' : ''; ?>
                 <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller[]" value="<?= $roll['id'] ?>" <?= $checked ?> >
                 <label class="form-check-label" for="inlineCheckbox1"><?= $roll['roll_namn'] ?></label>
             </div>
