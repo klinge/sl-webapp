@@ -67,7 +67,7 @@ $roller = $data['roles'];
         </div>
 
         <button type="submit" class="btn btn-primary">Uppdatera</button>
-        <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
+        <a class="button btn btn-secondary" href="/sl-webapp/segling">Tillbaka</a>
     </form>
 </div>
 
