@@ -41,6 +41,8 @@ class SeglingController extends BaseController {
         $segling = new Segling($this->conn, $id);
         
         //TODO add logic to save
+        var_dump($_POST);
+        exit;
         
         //TODO add error handling
         $_SESSION['flash_message'] = array('type'=>'ok', 'message'=>'Medlem uppdaterad!');

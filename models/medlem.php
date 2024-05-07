@@ -195,7 +195,7 @@ class Medlem
         $this->getOne($this->id);
     }
 
-    //Function to check if a member has a given role, used for the role checkboxes
+    //Method to check if a member has a given role
     function hasRole($searchRole)
     {
         foreach ($this->roller as $role) {
