@@ -30,18 +30,7 @@ $num = sizeof($data['items']);
         </tr>
     </thead>
     <tbody>
-    <?php foreach ($result as $row) :
-            $segling = new Segling($db, $row['id']);
-            $skeppare = array_filter($segling->deltagare, function($member) {
-                return $member['roll_namn'] === "Skeppare";
-            });
-            if($skeppare) {
-                $skeppareName = current($skeppare)['fornamn'] . " " . current($skeppare)['efternamn'];
-            }
-            else {
-                $skeppareName = "TBD";
-            }
-    ?>
+    <?php foreach ($result as $row) : ?>
             <tr>
                 <td><?= $row['id'] ?></td>
                 <td><?= $row['startdatum'] ?></td>
@@ -49,21 +38,18 @@ $num = sizeof($data['items']);
                 <td>TODO</td>
                 <td><?= $row['skeppslag'] ?></td>
                 <td><?= $row['kommentar'] ?></td>
-                <td><?= $skeppareName ?></td>
+                <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>TODO</td>
                 <td>
-                    <button type="button" class="btn btn-primary btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editSeglingModal" data-segling-id="<?= $row['id'] ?>">Ändra</button>
+                <a type="button" class="btn btn-primary btn-sm edit-segling-btn" href="segling/<?= $row['id'] ?>">Ändra</button>
                 </td>
             </tr>
         <?php endforeach; ?>
     </tbody>
 </table>
 
-<?php //include modal
-    include_once $APP_DIR . "/views/viewSeglingModal.php"; 
-?>
 <script src="assets/js/site.js"></script>
 
 <!-- datatables js -->
