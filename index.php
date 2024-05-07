@@ -26,6 +26,7 @@ $router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
 
 $router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
 $router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
+$router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save');
 
 $router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
