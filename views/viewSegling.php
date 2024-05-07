@@ -10,7 +10,10 @@ $APP_DIR = $config['APP_DIR'];
 $page_title = $data['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-$num = sizeof($data['items']);
+//Seglingar is an array of Segling objects
+$seglingar = $data['items'];
+$num = sizeof($seglingar);
+
 ?>
 
 <table class='table table-hover table-responsive table-bordered table-striped' id="sailingTable">
@@ -25,25 +28,31 @@ $num = sizeof($data['items']);
             <th>Skeppare</th>
             <th>Båtsman</th>
             <th>Kock</th>
-            <th>X-Kock</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-    <?php foreach ($result as $row) : ?>
+    <?php foreach ($seglingar as $segling) : 
+        //fetch who has what role
+        $skeppare = $segling->getDeltagareByRoleName("Skeppare");
+        $skepparNamn = $skeppare ? $skeppare[0]['fornamn'] . " " . $skeppare[0]['efternamn'] : "TBD";
+        $batsman = $segling->getDeltagareByRoleName("Båtsman");
+        $batsmanNamn = $batsman ? $batsman[0]['fornamn'] . " " . $batsman[0]['efternamn'] : "TBD";
+        $kock = $segling->getDeltagareByRoleName("Kock");
+        $kockNamn = $kock ? $kock[0]['fornamn'] . " " . $kock[0]['efternamn'] : "TBD";
+    ?>
             <tr>
-                <td><?= $row['id'] ?></td>
-                <td><?= $row['startdatum'] ?></td>
-                <td><?= $row['slutdatum'] ?></td>
+                <td><?= $segling->id ?></td>
+                <td><?= $segling->start_dat ?></td>
+                <td><?= $segling->slut_dat ?></td>
                 <td>TODO</td>
-                <td><?= $row['skeppslag'] ?></td>
-                <td><?= $row['kommentar'] ?></td>
-                <td>TODO</td>
-                <td>TODO</td>
-                <td>TODO</td>
-                <td>TODO</td>
+                <td><?= $segling->skeppslag ?></td>
+                <td><?= $segling->kommentar ?></td>
+                <td><?= $skepparNamn ?></td>
+                <td><?= $batsmanNamn ?></td>
+                <td><?= $kockNamn ?></td>
                 <td>
-                <a type="button" class="btn btn-primary btn-sm edit-segling-btn" href="segling/<?= $row['id'] ?>">Ändra</button>
+                    <a type="button" class="btn btn-primary btn-sm edit-segling-btn" href="segling/<?= $segling->id ?>">Ändra</button>
                 </td>
             </tr>
         <?php endforeach; ?>

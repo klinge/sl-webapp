@@ -26,7 +26,7 @@ class SeglingController extends BaseController {
         //Fetch member data
         $segling = new Segling($this->conn, $id);
         $roll = new Roll($this->conn);
-        //Fetch roles to populate checkboxes
+        //Fetch all available roles
         $roller = $roll->getAll();
         $data = array(
             "title" => "Visa segling",
