@@ -25,6 +25,12 @@ class SeglingController extends BaseController {
         $formAction = $this->router->generate('segling-save', ['id' => $id]);
         //Fetch member data
         $segling = new Segling($this->conn, $id);
+        
+        //Check if segling exists otherwise throw a 404
+        if(!isset($segling->start_dat)) {
+            header("HTTP/1.1 404 Not Found");
+            exit();
+        } 
         $roll = new Roll($this->conn);
         //Fetch all available roles
         $roller = $roll->getAll();

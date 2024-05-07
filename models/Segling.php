@@ -50,16 +50,19 @@ class Segling
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $this->id = $id;
-        $this->start_dat = $row['startdatum'];
-        $this->slut_dat = $row['slutdatum'];
-        $this->skeppslag = $row['skeppslag'];
-        $this->kommentar = $row['kommentar'];
-        $this->created_at = $row['created_at'];
-        $this->updated_at = $row['updated_at'];
+        //if we got a result set object values
+        if($row !== false) {
+            $this->id = $id;
+            $this->start_dat = $row['startdatum'];
+            $this->slut_dat = $row['slutdatum'];
+            $this->skeppslag = $row['skeppslag'];
+            $this->kommentar = $row['kommentar'];
+            $this->created_at = $row['created_at'];
+            $this->updated_at = $row['updated_at'];
 
-        //Get roller from junction table
-        $this->deltagare = $this->getPeople();
+            //Get roller from junction table
+            $this->deltagare = $this->getPeople();
+        }
     }
 
     public function getPeople()
