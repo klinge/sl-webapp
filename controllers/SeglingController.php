@@ -27,7 +27,7 @@ class SeglingController extends BaseController {
         $segling = new Segling($this->conn, $id);
         
         //Check if segling exists otherwise throw a 404
-        if(!isset($segling->start_dat)) {
+        if(!isset($segling->id)) {
             header("HTTP/1.1 404 Not Found");
             exit();
         } 

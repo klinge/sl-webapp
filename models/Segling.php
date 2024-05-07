@@ -21,8 +21,7 @@ class Segling
         $this->conn = $db;
 
         if (isset($id)) {
-            $this->id = $id;
-            $this->getOne($this->id);
+            $this->getOne($id);
         }
     }
 
