@@ -22,16 +22,21 @@ class MedlemController extends BaseController {
 
     public function edit(array $params){
         $id = $params['id'];
+        //Used in the view to set the proper action url for the form
         $formAction = $this->router->generate('medlem-save', ['id' => $id]);
+        
         //Fetch member data
         $medlem = new Medlem($this->conn, $id);
         $roll = new Roll($this->conn);
-        //Fetch roles to populate checkboxes
+        //Fetch roles and seglingar to use in the view
         $roller = $roll->getAll();
+        $seglingar = $medlem->getSeglingar();
+
         $data = array(
             "title" => "Visa medlem",
             "items" => $medlem,
-            "roles" => $roller
+            "roles" => $roller,
+            'seglingar' => $seglingar
           );
         require __DIR__ . '/../views/viewMedlemEdit.php';
     }

@@ -205,4 +205,23 @@ class Medlem
         }
         return false;
     }
+    //find Seglingar a Medlem has participated in.. 
+    function getSeglingar() 
+    {
+        $query = 'SELECT smr.medlem_id, r.roll_namn, s.skeppslag, s.startdatum
+            FROM Segling_Medlem_Roll smr
+            INNER JOIN Roll r ON r.id = smr.roll_id
+            INNER JOIN Segling s ON s.id = smr.segling_id
+            WHERE smr.medlem_id = :id
+            ORDER BY s.startdatum DESC
+            LIMIT 10;';
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $this->id);
+        $stmt->execute();
+        
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        return $results;
+    }
 }
