@@ -8,6 +8,7 @@ require 'vendor/autoload.php';
 //Using AltoRouter for url routing: https://dannyvankooten.github.io/AltoRouter/
 require __DIR__ . '/controllers/TestController.php';
 require __DIR__ . '/controllers/MedlemController.php';
+require __DIR__ . '/controllers/SeglingController.php';
 
 ini_set('session.cookie_lifetime', 3600);  // Session expires after 1 hour (in seconds)
 session_start();
@@ -19,23 +20,19 @@ $router->map( 'GET', '/', function() {
     require __DIR__ . '/views/home.php';
 });
 
-$router->map('GET', '/medlem', 'MedlemController#list', 'medlem-lista');
+$router->map('GET', '/medlem', 'MedlemController#list', 'medlem-list');
 $router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
 $router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
 
-$router->map( 'GET', '/segling', function() {
-    require __DIR__ . '/views/viewSegling.php';
-});
+$router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
+$router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
 
 $router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
-$router->map( 'GET', '/test', function() {
-    echo "Hello from a closure!";
-});
-$router->map( 'GET', '/form', function() {
+$router->map( 'GET', '/formtest', function() {
     require __DIR__ . '/views/home.php';
 });
-$router->map( 'POST', '/form', function() {
+$router->map( 'POST', '/formtest', function() {
     var_dump($_POST);
 });
 

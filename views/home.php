@@ -10,11 +10,31 @@
 
 <body>
   <h1>This is the homepage</h1>
-  
-  <form action="form" method="POST">
+
+  <form action="formtest" method="POST">
     <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
     Name: <input type="text" name="name"><br>
     E-mail: <input type="text" name="email"><br>
+    <label for="cars">Välj en bil:</label>
+    <select name="cars" id="cars">
+      <option value="volvo">Volvo</option>
+      <option value="saab">Saab</option>
+      <option value="mercedes">Peugeot</option>
+      <option value="audi">Kia</option>
+      <option value="mercedes">Mercedes</option>
+    </select>
+    <br/>
+    <p>Best programming language: </p>
+    <label>
+      <input type="radio" name="editList" value="js" />JavaScript
+    </label>
+    <label>
+      <input type="radio" name="editList" value="py" />Python
+    </label>
+    <label>
+      <input type="radio" name="editList" value="cpp" />C++
+    </label>
+    <br />
     <input type="submit">
   </form>
 

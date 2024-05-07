@@ -2,9 +2,9 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-require __DIR__ . '/BaseController.php';
-require __DIR__ . '/../models/medlem.php';
-require __DIR__ . '/../models/Roll.php';
+require_once __DIR__ . '/BaseController.php';
+require_once __DIR__ . '/../models/medlem.php';
+require_once __DIR__ . '/../models/Roll.php';
 
 class MedlemController extends BaseController {  
 
@@ -55,7 +55,7 @@ class MedlemController extends BaseController {
         $_SESSION['flash_message'] = array('type'=>'ok', 'message'=>'Medlem uppdaterad!');
 
         // Set the URL and redirect
-        $redirectUrl = $this->router->generate('medlem-lista');
+        $redirectUrl = $this->router->generate('medlem-list');
         header('Location: ' . $redirectUrl);
         exit;
     }
