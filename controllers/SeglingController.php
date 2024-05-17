@@ -49,12 +49,20 @@ class SeglingController extends BaseController {
         $segling = new Segling($this->conn, $id);
         
         //TODO add logic to save
-        var_dump($_POST);
-        exit;
+        $segling->start_dat = $this->sanitizeInput($_POST['startdat']);
+        $segling->start_dat = $this->sanitizeInput($_POST['slutdat']);
+        $segling->skeppslag = $this->sanitizeInput($_POST['skeppslag']);
+        if(isset($_POST['kommentar'])) {
+            $segling->kommentar = $this->sanitizeInput($_POST['kommentar']);
+        }
+        $segling->update();
         
         //TODO add error handling
-        $_SESSION['flash_message'] = array('type'=>'ok', 'message'=>'Medlem uppdaterad!');
-
+        $_SESSION['flash_message'] = array('type'=>'ok', 'message'=>'Segling uppdaterad!');
+        
+        // Set the URL and redirect
+        $redirectUrl = $this->router->generate('segling-list');
+        header('Location: ' . $redirectUrl);
         exit;
     }
 

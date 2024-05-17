@@ -82,13 +82,18 @@ class Segling
     public function update()
     {
         $query = "UPDATE $this->table_name SET 
-        startdatum = \"$this->start_dat \", 
-        slutdatum = \"$this->slut_dat\",
-        skeppslag = \"$this->skeppslag\" 
-        WHERE id = ?;";
+        startdatum = :startdatum, 
+        slutdatum = :slutdatum, 
+        skeppslag = :skeppslag, 
+        kommentar = :kommentar
+        WHERE id = :id;";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
+        $stmt->bindParam(':startdatum', $this->start_dat);
+        $stmt->bindParam(':slutdatum', $this->slut_dat);
+        $stmt->bindParam(':skeppslag', $this->skeppslag);
+        $stmt->bindParam(':kommentar', $this->kommentar);
+        $stmt->bindParam(':id', $this->id);
         $stmt->execute();
     }
     public function updatePeople()
