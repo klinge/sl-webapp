@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../models/medlem.php';
+require_once __DIR__ . '/../models/Medlem.php';
 require_once __DIR__ . '/../config/database.php';
 
 class MedlemRepository

@@ -3,7 +3,7 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../models/medlem.php';
+require_once __DIR__ . '/../models/Medlem.php';
 require_once __DIR__ . '/../models/Roll.php';
 
 class MedlemController extends BaseController {  
