@@ -24,7 +24,7 @@ class MedlemRepository
     }
 
 
-    public function getMembersByRollId($rollId)
+    public function getMembersByRollName($rollId)
     {
         // Implement logic to query Medlem, Roll, and Medlem_Roll tables
         // to find members with the specified roll ID

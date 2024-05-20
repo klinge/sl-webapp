@@ -32,14 +32,23 @@ class SeglingController extends BaseController {
             header("HTTP/1.1 404 Not Found");
             exit();
         } 
-        $roll = new Roll($this->conn);
         //Fetch all available roles
+        $roll = new Roll($this->conn);
         $roller = $roll->getAll();
  
+        //Fetch lists of persons who has a role to populate select boxes
+        $medlemmar = new MedlemRepository($this->conn);
+        $allaSkeppare = $medlemmar->getMembersByRollName('Skeppare');
+        $allaBatsman = $medlemmar->getMembersByRollName('Båtsman');
+        $allaKockar = $medlemmar->getMembersByRollName('Kock');
+
         $data = array(
             "title" => "Visa segling",
             "items" => $segling,
-            "roles" => $roller
+            "roles" => $roller,
+            "allaSkeppare" => $allaSkeppare,
+            "allaBatsman" => $allaBatsman,
+            "allaKockar" => $allaKockar
           );
         require __DIR__ . '/../views/viewSeglingEdit.php';
     }
@@ -47,6 +56,8 @@ class SeglingController extends BaseController {
     public function save(array $params) {
         $id = $params['id'];
         $segling = new Segling($this->conn, $id);
+        var_dump($_POST);
+        exit;
         
         //TODO add logic to save
         $segling->start_dat = $this->sanitizeInput($_POST['startdat']);
