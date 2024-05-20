@@ -33,7 +33,7 @@ $roller = $data['roles'];
             </div>
         </div>
 
-        //TODO Implement handling "selected" based on who participates in $segling->deltagare
+        <!-- TODO Implement handling "selected" based on who participates in $segling->deltagare -->
         <div class="row">
             <div class="col-md-2 mb-3">
                 <label for="skeppare" class="form-label">Skeppare</label>
@@ -84,7 +84,7 @@ $roller = $data['roles'];
 
         <div class="row">
             <div class="col-md-6 mb-3">
-                <p>Bemanning</p>
+                <p>Deltagare</p>
                 <table class="table table-striped">
                     <?php foreach ($segling->deltagare as $deltagare) : ?>
                         <tr>
