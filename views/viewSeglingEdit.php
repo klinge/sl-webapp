@@ -34,6 +34,54 @@ $roller = $data['roles'];
         </div>
 
         <div class="row">
+            <div class="col-md-2 mb-3">
+                <label for="skeppare" class="form-label">Skeppare</label>
+                <select class="form-select" id="skeppare" name="skeppare" aria-label="Skeppare select box">
+                    <option selected>Välj skeppare</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="batsman" class="form-label">Båtsman</label>
+                <select class="form-select" id="batsman" name="batsman" aria-label="Båtsman select box">
+                    <option selected>Välj båtsman</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="xbatsman" class="form-label">Extra båtsman</label>
+                <select class="form-select" id="xbatsman" name="xbatsman" aria-label="Extrabås select box">
+                    <option selected>Välj extra båtsman</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="kock" class="form-label">Kock</label>
+                <select class="form-select" id="kock" name="kock" aria-label="Kock select box">
+                    <option selected>Välj kock</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="xkock" class="form-label">Extra kock</label>
+                <select class="form-select" id="xkock" name="xkock" aria-label="Extrakock select box">
+                    <option selected>Välj extrakock</option>
+                    <option value="1">One</option>
+                    <option value="2">Two</option>
+                    <option value="3">Three</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-6 mb-3">
                 <p>Bemanning</p>
                 <table class="table table-striped">
@@ -45,7 +93,6 @@ $roller = $data['roles'];
                 <?php endforeach ?>
                 </table>
             </div>
-
         </div>
 
         <div class="row">
