@@ -60,11 +60,11 @@ class Segling
             $this->updated_at = $row['updated_at'];
 
             //Get roller from junction table
-            $this->deltagare = $this->getPeople();
+            $this->deltagare = $this->getDeltagare();
         }
     }
 
-    public function getPeople()
+    private function getDeltagare()
     {
         $query = "SELECT smr.medlem_id, m.fornamn, m.efternamn, smr.roll_id, r.roll_namn
                     FROM Segling_Medlem_Roll smr
@@ -79,7 +79,7 @@ class Segling
         return $results;
     }
 
-    public function update()
+    public function save()
     {
         $query = "UPDATE $this->table_name SET 
         startdatum = :startdatum, 
@@ -96,7 +96,7 @@ class Segling
         $stmt->bindParam(':id', $this->id);
         $stmt->execute();
     }
-    public function updatePeople()
+    public function saveDeltagare()
     {
         $query = "DELETE FROM Segling_Medlem_Roll WHERE segling_id = ?; ";
         $stmt = $this->conn->prepare($query);
@@ -129,7 +129,7 @@ class Segling
         $stmt->execute();
 
         $this->id = $this->conn->lastInsertId();
-        $this->updatePeople();
+        $this->saveDeltagare();
         $this->getOne($this->id);
     }
 
@@ -137,10 +137,11 @@ class Segling
     {
         $results = [];
 
-        // Loop through each inner array and fetch fornamn, efternamn for matching persons
+        // Loop through each inner array and fetch id, fornamn, efternamn for matching persons
         foreach ($this->deltagare as $crewMember) {
             if ($crewMember['roll_namn'] === $targetRole) {
                 $newDeltagare = [
+                    'id' => $crewMember['medlem_id'],
                     'fornamn' => $crewMember['fornamn'],
                     'efternamn' => $crewMember['efternamn']
                 ];

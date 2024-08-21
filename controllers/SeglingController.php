@@ -66,7 +66,7 @@ class SeglingController extends BaseController {
         if(isset($_POST['kommentar'])) {
             $segling->kommentar = $this->sanitizeInput($_POST['kommentar']);
         }
-        $segling->update();
+        $segling->save();
         
         //TODO add error handling
         $_SESSION['flash_message'] = array('type'=>'ok', 'message'=>'Segling uppdaterad!');

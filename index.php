@@ -9,6 +9,7 @@ require 'vendor/autoload.php';
 require __DIR__ . '/controllers/TestController.php';
 require __DIR__ . '/controllers/MedlemController.php';
 require __DIR__ . '/controllers/SeglingController.php';
+require __DIR__ . '/controllers/BetalningController.php';
 
 ini_set('session.cookie_lifetime', 3600);  // Session expires after 1 hour (in seconds)
 session_start();
@@ -24,6 +25,9 @@ $router->map('GET', '/medlem', 'MedlemController#list', 'medlem-list');
 $router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
 $router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
 
+$router->map('GET', '/betalning', 'BetalningController#list', 'betalning-list');
+$router->map('GET', '/betalning/[i:id]', 'BetalningController#getBetalning', 'betalning-edit');
+
 $router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
 $router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
 $router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save');
@@ -31,7 +35,7 @@ $router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save'
 $router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
 $router->map( 'GET', '/formtest', function() {
-    require __DIR__ . '/views/home.php';
+    require __DIR__ . '/views/formTest.php';
 });
 $router->map( 'POST', '/formtest', function() {
     var_dump($_POST);

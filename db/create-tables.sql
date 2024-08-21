@@ -1,10 +1,14 @@
+PRAGMA foreign_keys = OFF;
+
 DROP TABLE IF EXISTS "Medlem_Roll";
 DROP TABLE IF EXISTS "Medlem";
+DROP TABLE IF EXISTS "Betalning";
 DROP TABLE IF EXISTS "Roll";
 DROP TABLE IF EXISTS "Segling";
 DROP TABLE IF EXISTS "Segling_Medlem_Roll";
 
 DROP TRIGGER IF EXISTS besattning_after_update;
+DROP TRIGGER IF EXISTS betalning_after_update;
 DROP TRIGGER IF EXISTS segling_after_update;
 DROP TRIGGER IF EXISTS roll_after_update;
 
@@ -22,14 +26,23 @@ CREATE TABLE Medlem (
 	"mobil" VARCHAR(20) NULL,
 	"telefon" VARCHAR(20) NULL,
 	"email" VARCHAR(50) NULL,
---	"skeppare" TINYINT NULL DEFAULT "0",
---	"kock" TINYINT NULL DEFAULT "0",
---	"batsman" TINYINT NULL DEFAULT "0",
---	"styrman" TINYINT NULL DEFAULT "0",
 	"kommentar" VARCHAR(500) NULL,
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE Betalning (
+	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "medlem_id" INTEGER, 
+	"belopp" DECIMAL NOT NULL,
+  "datum" DATE, 
+  "avser_ar" INT NOT NULL,
+	"kommentar" VARCHAR(200) NULL,
+  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (medlem_id) REFERENCES Medlem(id) ON DELETE CASCADE
+);
+
 
 CREATE TABLE Roll (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,6 +97,13 @@ BEGIN
   UPDATE Medlem SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
+CREATE TRIGGER betalning_after_update 
+AFTER UPDATE ON Betalning
+FOR EACH ROW
+BEGIN
+  UPDATE Betalning SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+END;
+
 CREATE TRIGGER segling_after_update 
 AFTER UPDATE ON Segling
 FOR EACH ROW
@@ -106,6 +126,13 @@ VALUES
     ('Måns', 'Klinge', 'mans@dev.null'),
     ('Emma', 'Klinge', 'emma@dev.null'),
     ('Anders', 'Jansson', 'anders@test.nu');
+
+INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) 
+VALUES 
+    (1, 300, '2024-06-30', 2024, "Här är en kommentar"),
+    (1, 300, '2024-12-24', 2023, "Försenad inbetalning för 2023"),
+    (2, 300, '2024-05-01', 2024, ""),
+    (4, 400, '2024-01-21', 2024, "Medlemsavgift och 100 kr donation");
 
 INSERT INTO Roll (roll_namn, kommentar) 
 VALUES 
@@ -143,3 +170,5 @@ VALUES
     (3, 1, 3),
     (3, 2, 2),
     (3, 3, 1);
+
+PRAGMA foreign_keys = ON;
