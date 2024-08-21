@@ -16,12 +16,24 @@ class Betalning
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db, $id = null)
+    public function __construct($db, $paymentData = null)
     {
         $this->conn = $db;
+
+        //if created with paymentsData set the properties
+        if ($paymentData !== null) {
+            $this->id = $paymentData['id'];
+            $this->belopp = $paymentData['belopp'];
+            $this->medlem_id = $paymentData['medlem_id'];
+            $this->datum = $paymentData['datum'];
+            $this->avser_ar = $paymentData['avser_ar'];
+            $this->kommentar = $paymentData['kommentar'];
+            $this->created_at = $paymentData['created_at'];
+            $this->updated_at = $paymentData['updated_at'];
+        }
     }
 
-    public function getOne($id)
+    public function get($id)
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
 

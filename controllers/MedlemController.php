@@ -5,6 +5,7 @@ require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/Medlem.php';
 require_once __DIR__ . '/../models/Roll.php';
+require_once __DIR__ . '/../models/BetalningRepository.php';
 
 class MedlemController extends BaseController {  
 
@@ -31,12 +32,17 @@ class MedlemController extends BaseController {
         //Fetch roles and seglingar to use in the view
         $roller = $roll->getAll();
         $seglingar = $medlem->getSeglingar();
+        //fetch betalningar for member
+        $betalRepo = new BetalningRepository($this->conn);
+        $betalningar = $betalRepo->getBetalningForMedlem($id);
 
         $data = array(
             "title" => "Visa medlem",
             "items" => $medlem,
             "roles" => $roller,
-            'seglingar' => $seglingar
+            'seglingar' => $seglingar,
+            'betalningar' => $betalningar,
+            'formAction' => $formAction
           );
         require __DIR__ . '/../views/viewMedlemEdit.php';
     }

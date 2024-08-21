@@ -91,7 +91,20 @@ $roller = $data['roles'];
         <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
     </form>
 
-    <div class="border border-primary rounded p-3 mt-2" style="background-color: var(--bs-gray-200);">
+    <div class="border border-primary rounded p-3 mt-2">
+        <h3>Betalningar:</h3>
+        <ul>
+            <?php foreach($data['betalningar'] as $betalning) : ?>
+                <li>
+                    <?= $betalning->datum ?>: <?= $betalning->belopp ?> kr. 
+                    Avser år: <?= $betalning->avser_ar ?>. 
+                    Kommentar: <?= $betalning->kommentar ?>
+                </li>
+            <?php endforeach ?>
+        </ul>
+    </div>
+
+    <div class="border border-primary rounded p-3 mt-2">
         <h3>Senaste seglingarna:</h3>
         <ul>
             <?php foreach($data['seglingar'] as $segling) : ?>

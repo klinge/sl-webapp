@@ -9,10 +9,9 @@ class MedlemRepository
     private $conn;
     public $medlemmar;
 
-
-    public function __construct()
+    public function __construct($db)
     {
-        $this->conn = $this->getDatabaseConn();
+        $this->conn = $db;
     }
 
     public function getAll()
@@ -39,10 +38,4 @@ class MedlemRepository
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    private function getDatabaseConn()
-    {
-        // get database connection
-        $database = new Database();
-        return $database->getConnection();
-    }
 }
