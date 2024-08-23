@@ -25,6 +25,7 @@ class MedlemController extends BaseController {
         $id = $params['id'];
         //Used in the view to set the proper action url for the form
         $formAction = $this->router->generate('medlem-save', ['id' => $id]);
+        $listBetalningAction = $this->router->generate('betalning-medlem', ['id' => $id]);
         
         //Fetch member data
         $medlem = new Medlem($this->conn, $id);
@@ -42,7 +43,8 @@ class MedlemController extends BaseController {
             "roles" => $roller,
             'seglingar' => $seglingar,
             'betalningar' => $betalningar,
-            'formAction' => $formAction
+            'formAction' => $formAction,
+            'createBetalningAction' => $listBetalningAction
           );
         require __DIR__ . '/../views/viewMedlemEdit.php';
     }

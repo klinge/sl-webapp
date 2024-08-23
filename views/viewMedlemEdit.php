@@ -91,48 +91,63 @@ $roller = $data['roles'];
         <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
     </form>
 
-
-    <!-- Betalningar -->
-    <div class="border border-primary rounded p-3 mt-2">
-        <h3>Betalningar</h3>
-        <p>Senaste 5 betalningarna</p>
-        <div class="table-responsive">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Datum</th>
-                        <th>Belopp</th>
-                        <th>Avser år</th>
-                        <th>Kommentar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                <?php foreach (array_slice($data['betalningar'], 0, 5) as $betalning) : ?>
+    <div class="row rounded p-3 mt-2">
+        <!-- Betalningar -->
+        <div class="col-md-6">
+            <h3>Betalningar - senaste 5</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
                         <tr>
-                            <td><?= htmlspecialchars($betalning->datum) ?></td>
-                            <td><?= htmlspecialchars($betalning->belopp) ?> kr</td>
-                            <td><?= htmlspecialchars($betalning->avser_ar) ?></td>
-                            <td><?= htmlspecialchars($betalning->kommentar) ?></td>
+                            <th>Datum</th>
+                            <th>Belopp</th>
+                            <th>Avser år</th>
+                            <th>Kommentar</th>
                         </tr>
-                    <?php endforeach ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach (array_slice($data['betalningar'], 0, 5) as $betalning) : ?>
+                            <tr>
+                                <td><?= htmlspecialchars($betalning->datum) ?></td>
+                                <td><?= htmlspecialchars($betalning->belopp) ?> kr</td>
+                                <td><?= htmlspecialchars($betalning->avser_ar) ?></td>
+                                <td><?= htmlspecialchars($betalning->kommentar) ?></td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-3">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                    Lägg till ny betalning
+                </button>
+                <a href="<?= $listBetalningAction ?>" class="btn btn-secondary">Visa alla</a>
+            </div>
         </div>
-        <div class="mt-3">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
-                Lägg till ny betalning
-            </button>
+        <!-- Seglingar -->
+        <div class="col-md-6">
+            <h3>Seglingar - senaste 5</h3>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Startdatum</th>
+                            <th>Roll</th>
+                            <th>Skeppslag</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach (array_slice($data['seglingar'], 0, 5) as $segling) : ?>
+                            <tr>
+                                <td><?= htmlspecialchars($segling['startdatum']) ?></td>
+                                <td><?= htmlspecialchars($segling['roll_namn']) ?></td>
+                                <td><?= htmlspecialchars($segling['skeppslag']) ?></td>
+                            </tr>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-
-    <!-- Seglingar -->
-    <div class="border border-primary rounded p-3 mt-2">
-        <h3>Seglingar</h3>
-        <ul>
-            <?php foreach ($data['seglingar'] as $segling) : ?>
-                <li><?= $segling['startdatum'] ?> <?= $segling['roll_namn'] ?>, Skeppslag: <?= $segling['skeppslag'] ?></li>
-            <?php endforeach ?>
-        </ul>
     </div>
 </div>
 
@@ -142,37 +157,37 @@ include_once $APP_DIR . "/views/modals/memberBetalningModal.php";
 ?>
 
 <script>
-// Set default year to current year
-document.addEventListener('DOMContentLoaded', function() {
-    const currentYear = new Date().getFullYear();
-    document.getElementById('avser_ar').value = currentYear;
-});
+    // Set default year to current year
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentYear = new Date().getFullYear();
+        document.getElementById('avser_ar').value = currentYear;
+    });
 </script>
 
 <script>
-function submitPayment() {
-    const form = document.getElementById('addPaymentForm');
-    const formData = new FormData(form);
+    function submitPayment() {
+        const form = document.getElementById('addPaymentForm');
+        const formData = new FormData(form);
 
-    fetch('/sl-webapp/betalning/create', {  // Adjust this URL to match your routing structure
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            var modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
-            modal.hide();
-            location.reload();
-        } else {
-            alert('Error: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while submitting the payment.');
-    });
-}
+        fetch('/sl-webapp/betalning/create', { // Adjust this URL to match your routing structure
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
+                    modal.hide();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the payment.');
+            });
+    }
 </script>
 
 <?php // footer
