@@ -35,11 +35,21 @@ class BetalningController extends BaseController
         $id = $params['id'];
         $repo = new BetalningRepository($this->conn);
         $result = $repo->getBetalningForMedlem($id);
+
         if (!empty($result)) {
-            var_dump($result);
+            $data = array(
+                "success" => true,
+                "title" => "Betalningar för medlem_id: " . $id ,
+                "items" => $result
+              );
         } else {
-            echo "Inga betalningar hittades";
+            $data = array(
+                "success" => false,
+                "title" => "Inga betalningar hittades"
+              );
         }
+
+        require __DIR__ . '/../views/viewBetalning.php';
     }
 
     public function createBetalning(array $params)

@@ -15,7 +15,7 @@ class MedlemController extends BaseController {
 
         //Put everyting in the data variable that is used by the view
         $data = array(
-            "title" => "Besättningslista",
+            "title" => "Medlemmar",
             "items" => $result
           );
         require __DIR__ . '/../views/viewMedlem.php';

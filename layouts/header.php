@@ -60,12 +60,16 @@
             <div class="collapse navbar-collapse" id="slNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <?php $isActive = ($page_title == "Besättning") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="/sl-webapp/medlem">Besättning</a>
+                        <?php $isActive = ($page_title == "Medlemmar") ? "active" : ""; ?>
+                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="/sl-webapp/medlem">Medlemmar</a>
                     </li>
                     <li class="nav-item">
-                        <?php $isActive = ($page_title == "Seglingar") ? "active" : ""; ?>
+                        <?php $isActive = ($page_title == "Bokningslista") ? "active" : ""; ?>
                         <a class="nav-link <?= $isActive ?>" href="/sl-webapp/segling">Seglingar</a>
+                    </li>
+                    <li class="nav-item">
+                        <?php $isActive = ($page_title == "Betalningslista") ? "active" : ""; ?>
+                        <a class="nav-link <?= $isActive ?>" href="/sl-webapp/betalning">Betalningar</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
