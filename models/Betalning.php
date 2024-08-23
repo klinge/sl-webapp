@@ -51,5 +51,29 @@ class Betalning
         $this->created_at = $row['created_at'];
         $this->updated_at = $row['updated_at'];
     }
+
+    public function create()
+    {
+        try {
+            $query = "INSERT INTO " . $this->table_name . " (medlem_id, belopp, datum, avser_ar, kommentar) VALUES (?, ?, ?, ?, ?)";
+    
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(1, $this->medlem_id);
+            $stmt->bindParam(2, $this->belopp);
+            $stmt->bindParam(3, $this->datum);
+            $stmt->bindParam(4, $this->avser_ar);
+            $stmt->bindValue(5, $this->kommentar, PDO::PARAM_STR);
+    
+            if ($stmt->execute()) {
+                $newBetalningId = $this->conn->lastInsertId();
+                return ['success' => true, 'message' => 'Betalning created successfully', 'id' => $newBetalningId];
+            } else {
+                $error = $stmt->errorInfo();
+                return ['success' => false, 'message' => 'Error creating Betalning: ' . $error[2]];
+            }
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Unexpected error: ' . $e->getMessage()];
+        }
+    }
     
 }
