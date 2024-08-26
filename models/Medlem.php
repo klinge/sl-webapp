@@ -23,47 +23,23 @@ class Medlem
 
 
 
-    public function __construct($db, $data = null)
+    public function __construct($db, $id = null)
     {
         $this->conn = $db;
 
-        if (isset($data)) {
-            $this->id = $data['id'];
-            $this->fornamn = $data['fornamn'];
-            $this->efternamn = $data['efternamn'];
-            $this->email = $data['email'];
-            $this->mobil = isset($data['mobil']) ? $data['mobil'] : "";
-            $this->telefon = isset($data['telefon']) ? $data['telefon'] : "";
-            $this->adress = isset($data['adress']) ? $data['adress'] : "";
-            $this->postnummer = isset($data['postnummer']) ? $data['postnummer'] : "";
-            $this->postort = isset($data['postort']) ? $data['postort'] : "";
-            $this->kommentar = isset($data['kommentar']) ? $data['kommentar'] : "";
-            $this->created_at = $data['created_at'];
-            $this->updated_at = $data['updated_at'];
-
+        if (isset($id)) {
+            $this->getDataFromDb($id);
             $this->roller = $this->getRoles();
 
         }
     }
 
-    public function getAllWithRoles()
+    private function getDataFromDb($id)
     {
-        $query = "SELECT m.*, GROUP_CONCAT(r.roll_namn, ', ') AS roller
-            FROM Medlem m
-            INNER JOIN Medlem_Roll mr ON m.id = mr.medlem_id
-            INNER JOIN Roll r ON mr.roll_id = r.id
-            GROUP BY m.id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function getOne($id)
-    {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $id);
+        $stmt->bindParam(':id', $id);
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -73,15 +49,12 @@ class Medlem
         $this->email = $row['email'];
         $this->mobil = isset($row['mobil']) ? $row['mobil'] : "";
         $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
-        $this->adress = isset($row['adress']) ? $row['adress'] : "";
+        $this->adress = isset($row['gatuadress']) ? $row['gatuadress'] : "";
         $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
         $this->postort = isset($row['postort']) ? $row['postort'] : "";
         $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
         $this->created_at = $row['created_at'];
         $this->updated_at = $row['updated_at'];
-
-        //Get roller from junction table
-        $this->roller = $this->getRoles();
     }
 
     public function getRoles()
@@ -100,7 +73,6 @@ class Medlem
 
     function updateMedlemRoles($newRoleIds)
     {
-        var_dump($this->roller);
         //first remove roles from that no longer exist
         $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
 
@@ -115,7 +87,6 @@ class Medlem
                 $this->roller[] = $newRole;
             }
         }
-        var_dump($this->roller);
     }
 
     public function save()
@@ -191,7 +162,7 @@ class Medlem
 
         $this->id = $this->conn->lastInsertId();
         $this->saveRoles();
-        $this->getOne($this->id);
+        $this->getDataFromDb($this->id);
     }
 
     //Method to check if a member has a given role

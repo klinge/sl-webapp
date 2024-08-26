@@ -21,13 +21,13 @@ class MedlemRepository
     {
         $medlemmar = [];
 
-        $query = "SELECT * from Medlem";
+        $query = "SELECT id from Medlem";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $members =  $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         foreach ($members as $member) {
-            $medlem = new Medlem($this->conn, $member);
+            $medlem = new Medlem($this->conn, $member['id']);
             $medlemmar[] = $medlem;
         }
         return $medlemmar;
@@ -45,6 +45,20 @@ class MedlemRepository
             ORDER BY m.efternamn ASC;";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':rollnamn', $rollName);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    //NOT USED?
+    //Returns an array with member data and roles
+    //Use getAll() instead as it returns proper member objects including roles.. 
+    public function getAllWithRoles()
+    {
+        $query = "SELECT m.*, GROUP_CONCAT(r.roll_namn, ', ') AS roller
+            FROM Medlem m
+            INNER JOIN Medlem_Roll mr ON m.id = mr.medlem_id
+            INNER JOIN Roll r ON mr.roll_id = r.id
+            GROUP BY m.id";
+        $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
