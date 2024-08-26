@@ -4,14 +4,15 @@ require __DIR__ . '/../vendor/autoload.php';
 
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../models/Medlem.php';
+require_once __DIR__ . '/../models/MedlemRepository.php';
 require_once __DIR__ . '/../models/Roll.php';
 require_once __DIR__ . '/../models/BetalningRepository.php';
 
 class MedlemController extends BaseController {  
 
     public function list(){
-        $medlem = new Medlem($this->conn);
-        $result = $medlem->getAllWithRoles();
+        $medlemRepo = new MedlemRepository($this->conn);
+        $result = $medlemRepo->getAll();
 
         //Put everyting in the data variable that is used by the view
         $data = array(

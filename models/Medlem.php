@@ -23,28 +23,27 @@ class Medlem
 
 
 
-    public function __construct($db, $id = null)
+    public function __construct($db, $data = null)
     {
         $this->conn = $db;
 
-        if (isset($id)) {
-            $this->id = $id;
-            $this->getOne($this->id);
+        if (isset($data)) {
+            $this->id = $data['id'];
+            $this->fornamn = $data['fornamn'];
+            $this->efternamn = $data['efternamn'];
+            $this->email = $data['email'];
+            $this->mobil = isset($data['mobil']) ? $data['mobil'] : "";
+            $this->telefon = isset($data['telefon']) ? $data['telefon'] : "";
+            $this->adress = isset($data['adress']) ? $data['adress'] : "";
+            $this->postnummer = isset($data['postnummer']) ? $data['postnummer'] : "";
+            $this->postort = isset($data['postort']) ? $data['postort'] : "";
+            $this->kommentar = isset($data['kommentar']) ? $data['kommentar'] : "";
+            $this->created_at = $data['created_at'];
+            $this->updated_at = $data['updated_at'];
+
+            $this->roller = $this->getRoles();
+
         }
-    }
-
-    public function getAll()
-    {
-        $query = "SELECT
-                *
-            FROM
-                " . $this->table_name . "
-            ORDER BY
-                efternamn ASC";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function getAllWithRoles()

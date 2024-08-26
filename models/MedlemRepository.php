@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../models/Medlem.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../models/Medlem.php';
 
 class MedlemRepository
 {
@@ -14,12 +14,23 @@ class MedlemRepository
         $this->conn = $db;
     }
 
+
+    // Fetches all members by querying Medlem table in DB
+    // Return: array of Medlem objects
     public function getAll()
     {
-        $query = "SELECT id from Medlem";
+        $medlemmar = [];
+
+        $query = "SELECT * from Medlem";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $members =  $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        foreach ($members as $member) {
+            $medlem = new Medlem($this->conn, $member);
+            $medlemmar[] = $medlem;
+        }
+        return $medlemmar;
     }
 
     // Query Medlem, Roll, and Medlem_Roll tables
