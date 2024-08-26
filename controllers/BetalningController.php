@@ -33,13 +33,15 @@ class BetalningController extends BaseController
     public function getMedlemBetalning(array $params)
     {
         $id = $params['id'];
+        $medlem = new Medlem($this->conn, $id);
+        $namn = $medlem->getNamn();
         $repo = new BetalningRepository($this->conn);
         $result = $repo->getBetalningForMedlem($id);
 
         if (!empty($result)) {
             $data = array(
                 "success" => true,
-                "title" => "Betalningar för medlem_id: " . $id ,
+                "title" => "Betalningar för: " . $namn ,
                 "items" => $result
               );
         } else {
@@ -87,5 +89,20 @@ class BetalningController extends BaseController
         } catch (Exception $e) {
             $this->jsonResponse(['success' => false, 'message' => 'Error creating Betalning: ' . $e->getMessage()]);
         }
+    }
+
+    public function deleteBetalning(array $params)
+    {
+        $id = $params['id'];
+        $betalning = new Betalning($this->conn);
+        $betalning->get($id);
+        try{
+            $betalning->delete();
+        }
+        catch(Exception $e)
+        {
+
+        }
+
     }
 }

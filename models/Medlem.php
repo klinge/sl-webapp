@@ -69,7 +69,12 @@ class Medlem
         else {
             return false;
         }
+    }
 
+    public function getNamn() 
+    {
+        $namn = $this->fornamn . " " . $this->efternamn;
+        return $namn;
     }
 
     public function getRoles()

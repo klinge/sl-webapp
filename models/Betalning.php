@@ -75,5 +75,20 @@ class Betalning
             return ['success' => false, 'message' => 'Unexpected error: ' . $e->getMessage()];
         }
     }
+
+    public function delete()
+    {
+        $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $this->id);
+
+        if ($stmt->execute()) {
+            return ['success' => true, 'message' => 'Betalning deleted successfully'];
+        } else {
+            $error = $stmt->errorInfo();
+            return ['success' => false, 'message' => 'Error deleting Betalning: ' . $error[2]];
+        }
+    }
     
 }

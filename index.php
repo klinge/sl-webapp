@@ -32,6 +32,7 @@ $router->map('GET', '/betalning', 'BetalningController#list', 'betalning-list');
 $router->map('GET', '/betalning/[i:id]', 'BetalningController#getBetalning', 'betalning-edit');
 $router->map('GET', '/betalning/medlem/[i:id]', 'BetalningController#getMedlemBetalning', 'betalning-medlem');
 $router->map('POST', '/betalning/create', 'BetalningController#createBetalning', 'betalning-create');
+$router->map('POST', '/betalning/delete/[i:id]', 'BetalningController#deleteBetalning', 'betalning-delete');
 
 $router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
 $router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');

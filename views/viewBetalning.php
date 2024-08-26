@@ -10,9 +10,16 @@ $APP_DIR = $config['APP_DIR'];
 $page_title = $data['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-$num = sizeof($data['items']);
-$result = $data['items'];
-
+if(isset($data['items'])) 
+{
+    $num = sizeof($data['items']);
+    $result = $data['items'];
+}
+else 
+{
+    $num = 0;
+    $result = [];
+}
 ?>
 
 <table class='table table-hover table-responsive table-bordered table-striped' id="betalningTable">
