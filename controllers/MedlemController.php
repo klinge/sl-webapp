@@ -19,7 +19,8 @@ class MedlemController extends BaseController
     //Put everyting in the data variable that is used by the view
     $data = array(
       "title" => "Medlemmar",
-      "items" => $result
+      "items" => $result,
+      'newAction' => $this->router->generate('medlem-new')
     );
     require __DIR__ . '/../views/viewMedlem.php';
   }
@@ -48,6 +49,7 @@ class MedlemController extends BaseController
         //Used in the view to set the proper action url for the form
         'formAction' => $this->router->generate('medlem-save', ['id' => $id]),
         'createBetalningAction' => $this->router->generate('betalning-medlem', ['id' => $id]),
+        'listBetalningAction' => $this->router->generate('betalning-medlem', ['id' => $id]),
         'deleteAction' => $this->router->generate('medlem-delete')
       );
       require __DIR__ . '/../views/viewMedlemEdit.php';
@@ -73,9 +75,15 @@ class MedlemController extends BaseController
         $medlem->$key = $value; // Assign value to corresponding property
       }
     }
-    $medlem->save();
-    //TODO add error handling
-    $_SESSION['flash_message'] = array('type' => 'ok', 'message' => 'Medlem uppdaterad!');
+    try
+    {
+      $medlem->save();
+      $_SESSION['flash_message'] = array('type' => 'success', 'message' => 'Medlem uppdaterad!');
+    }
+    catch (Exception $e)
+    {
+      $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
+    }
 
     // Set the URL and redirect
     $redirectUrl = $this->router->generate('medlem-list');
@@ -110,9 +118,17 @@ class MedlemController extends BaseController
         $medlem->$key = $value; // Assign value to corresponding property
       }
     }
-    $medlem->create();
-    //TODO add error handling
-    $_SESSION['flash_message'] = array('type' => 'ok', 'message' => 'Medlem skapad!');
+
+    try 
+    {
+      $medlem->create();
+      $_SESSION['flash_message'] = array('type' => 'success', 'message' => 'Medlem ". $medlem-fornamn . " " . $medlem->efternamn . " skapad!');
+    }
+    catch (Exception $e)
+    {
+      $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Kunde inte skapa medlem!');
+    }
+
 
     // Set the URL and redirect
     $redirectUrl = $this->router->generate('medlem-list');

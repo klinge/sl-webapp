@@ -24,7 +24,7 @@ $router->map( 'GET', '/', function() {
 $router->map('GET', '/medlem', 'MedlemController#list', 'medlem-list');
 $router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
 $router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
-$router->map('GET', '/medlem/new', 'MedlemController#new', 'medlem-form');
+$router->map('GET', '/medlem/new', 'MedlemController#new', 'medlem-new');
 $router->map('POST', '/medlem/new', 'MedlemController#insertNew', 'medlem-create');
 $router->map('POST', '/medlem/delete', 'MedlemController#delete', 'medlem-delete');
 

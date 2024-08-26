@@ -166,12 +166,20 @@ class Medlem
 
     public function create()
     {
-        $query = 'INSERT INTO Medlem (fornamn, efternamn, email) VALUES (?,?,?); ';
+        $query = 'INSERT INTO Medlem 
+            (fornamn, efternamn, email, gatuadress, postnummer, postort, mobil, telefon, kommentar) 
+            VALUES (:fornamn, :efternamn, :email, :gatuadress, :postnummer, :postort, :mobil, :telefon, :kommentar); ';
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->fornamn);
-        $stmt->bindParam(2, $this->efternamn);
-        $stmt->bindParam(3, $this->email);
+        $stmt->bindParam(':fornamn', $this->fornamn);
+        $stmt->bindParam(':efternamn', $this->efternamn);
+        $stmt->bindParam(':email', $this->email);
+        $stmt->bindParam(':gatuadress', $this->adress);
+        $stmt->bindParam(':postnummer', $this->postnummer);
+        $stmt->bindParam(':postort', $this->postort);
+        $stmt->bindParam(':mobil', $this->mobil);
+        $stmt->bindParam(':telefon', $this->telefon);
+        $stmt->bindParam(':kommentar', $this->kommentar);
 
         $stmt->execute();
 

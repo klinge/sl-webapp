@@ -126,7 +126,7 @@ $roller = $data['roles'];
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
                     Lägg till ny betalning
                 </button>
-                <a href="<?= $listBetalningAction ?>" class="btn btn-secondary">Visa alla</a>
+                <a href="<?= $data['listBetalningAction'] ?>" class="btn btn-secondary">Visa alla</a>
             </div>
         </div>
         <!-- Seglingar -->

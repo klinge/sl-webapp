@@ -14,6 +14,12 @@ $num = sizeof($data['items']);
 
 ?>
 
+<div class="d-flex justify-content-end">
+    <a href="<?= $data['newAction'] ?>" class="btn btn-primary btn-lg" alt="Lägg till medlem">
+        Ny medlem
+    </a>
+</div>
+
 <table class='table table-hover table-responsive table-bordered table-striped' id="memberTable">
     <thead>
         <tr>
@@ -36,7 +42,8 @@ $num = sizeof($data['items']);
                 <td><?= $medlem->id ?></td>
                 <td><?= $medlem->fornamn ?></td>
                 <td><?= $medlem->efternamn ?></td>
-                <td><?php $roll_namn_array = array_column($medlem->roller, 'roll_namn'); echo(implode(', ', $roll_namn_array )); ?></td>
+                <td><?php $roll_namn_array = array_column($medlem->roller, 'roll_namn');
+                    echo (implode(', ', $roll_namn_array)); ?></td>
                 <td><?= $medlem->email ?></td>
                 <td><?= $medlem->mobil ?></td>
                 <td><?= $medlem->telefon ?></td>
@@ -59,10 +66,12 @@ $num = sizeof($data['items']);
 <script src="https://cdn.datatables.net/2.0.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
 <script>
     let dataTable = new DataTable('#memberTable', {
-        order: [[2, 'asc']] // Sort the third column (index 2) in ascending order by default
+        order: [
+            [2, 'asc']
+        ] // Sort on the third column (index 2) in ascending order by default
     });
 </script>
 
 <?php // footer
-    include_once $APP_DIR . "/layouts/footer.php";
+include_once $APP_DIR . "/layouts/footer.php";
 ?>
