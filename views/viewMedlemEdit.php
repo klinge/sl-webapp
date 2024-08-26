@@ -15,7 +15,7 @@ $roller = $data['roles'];
 ?>
 
 <div class="container">
-    <form class="border border-primary rounded p-3" action="<?= $formAction ?>" method="POST">
+    <form class="border border-primary rounded p-3" action="<?= $data['formAction'] ?>" method="POST">
         <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
 
         <div class="row">
@@ -89,6 +89,11 @@ $roller = $data['roles'];
 
         <button type="submit" class="btn btn-primary">Uppdatera</button>
         <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
+    </form>
+    <!-- Begin the delete form -->
+    <form class="p-3" action="<?= $data['deleteAction'] ?>" method="POST">
+        <input type="hidden" name="id" value="<?= $medlem->id; ?>">
+        <button type="submit" class="btn btn-danger">Ta bort medlem</button>
     </form>
 
     <div class="row rounded p-3 mt-2">

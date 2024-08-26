@@ -28,9 +28,15 @@ class Medlem
         $this->conn = $db;
 
         if (isset($id)) {
-            $this->getDataFromDb($id);
-            $this->roller = $this->getRoles();
-
+            $result = $this->getDataFromDb($id);
+            if ($result) 
+            {
+                $this->roller = $this->getRoles();
+            }
+            else {
+                throw new Exception("Medlem med id: " . $id . "hittades inte");
+            }
+            
         }
     }
 
@@ -43,18 +49,27 @@ class Medlem
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $this->id = $id;
-        $this->fornamn = $row['fornamn'];
-        $this->efternamn = $row['efternamn'];
-        $this->email = $row['email'];
-        $this->mobil = isset($row['mobil']) ? $row['mobil'] : "";
-        $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
-        $this->adress = isset($row['gatuadress']) ? $row['gatuadress'] : "";
-        $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
-        $this->postort = isset($row['postort']) ? $row['postort'] : "";
-        $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
-        $this->created_at = $row['created_at'];
-        $this->updated_at = $row['updated_at'];
+        //If we got a result from db then set values for the object
+        if($row !== false) 
+        {
+            $this->id = $id;
+            $this->fornamn = $row['fornamn'];
+            $this->efternamn = $row['efternamn'];
+            $this->email = $row['email'];
+            $this->mobil = isset($row['mobil']) ? $row['mobil'] : "";
+            $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
+            $this->adress = isset($row['gatuadress']) ? $row['gatuadress'] : "";
+            $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
+            $this->postort = isset($row['postort']) ? $row['postort'] : "";
+            $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
+            $this->created_at = $row['created_at'];
+            $this->updated_at = $row['updated_at'];
+            return true;
+        }
+        else {
+            return false;
+        }
+
     }
 
     public function getRoles()

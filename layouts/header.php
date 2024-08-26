@@ -138,7 +138,12 @@
     <?php
         if (isset($_SESSION['flash_message'])) {
             // Bootstrap alert structure
-            echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
+            if($_SESSION['flash_message']['type'] === 'error') {
+                echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';    
+            }
+            else {
+                echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
+            }
             echo $_SESSION['flash_message']['message'];
             echo '</div>';
 

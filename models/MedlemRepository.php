@@ -27,8 +27,16 @@ class MedlemRepository
         $members =  $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         foreach ($members as $member) {
-            $medlem = new Medlem($this->conn, $member['id']);
-            $medlemmar[] = $medlem;
+            try
+            {
+                $medlem = new Medlem($this->conn, $member['id']);
+                $medlemmar[] = $medlem;
+            }
+            catch (Exception $e)
+            {
+                //Do nothing right now.. 
+            }
+            
         }
         return $medlemmar;
     }
