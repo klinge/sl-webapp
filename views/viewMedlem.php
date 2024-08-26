@@ -19,7 +19,7 @@ $num = sizeof($data['items']);
         <tr>
             <th>Id</th>
             <th>Förnamn</th>
-            <th>Eftermamn</th>
+            <th>Efternamn</th>
             <th>Roll</th>
             <th>Email</th>
             <th>Mobil</th>
@@ -58,7 +58,9 @@ $num = sizeof($data['items']);
 <script src="https://cdn.datatables.net/2.0.5/js/dataTables.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/2.0.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
 <script>
-    let dataTable = new DataTable('#memberTable');
+    let dataTable = new DataTable('#memberTable', {
+        order: [[2, 'asc']] // Sort the third column (index 2) in ascending order by default
+    });
 </script>
 
 <?php // footer
