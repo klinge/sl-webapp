@@ -21,7 +21,7 @@ class MedlemRepository
     {
         $medlemmar = [];
 
-        $query = "SELECT id from Medlem";
+        $query = "SELECT id from Medlem ORDER BY efternamn ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $members =  $stmt->fetchAll(PDO::FETCH_ASSOC);
