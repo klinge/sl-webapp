@@ -33,18 +33,18 @@ $num = sizeof($data['items']);
     <tbody>
         <?php foreach ($result as $medlem): ?>
             <tr>
-                <td><?= $medlem['id'] ?></td>
-                <td><?= $medlem['fornamn'] ?></td>
-                <td><?= $medlem['efternamn'] ?></td>
-                <td><?= $medlem['roller'] ?></td>
-                <td><?= $medlem['email'] ?></td>
-                <td><?= $medlem['mobil'] ?></td>
-                <td><?= $medlem['telefon'] ?></td>
-                <td><?= $medlem['gatuadress'] ?></td>
-                <td><?= $medlem['postnummer'] ?></td>
-                <td><?= $medlem['postort'] ?></td>
+                <td><?= $medlem->id ?></td>
+                <td><?= $medlem->fornamn ?></td>
+                <td><?= $medlem->efternamn ?></td>
+                <td><?php $roll_namn_array = array_column($medlem->roller, 'roll_namn'); echo(implode(', ', $roll_namn_array )); ?></td>
+                <td><?= $medlem->email ?></td>
+                <td><?= $medlem->mobil ?></td>
+                <td><?= $medlem->telefon ?></td>
+                <td><?= $medlem->adress ?></td>
+                <td><?= $medlem->postnummer ?></td>
+                <td><?= $medlem->postort ?></td>
                 <td>
-                    <a type="button" class="btn btn-primary btn-sm edit-member-btn" href="medlem/<?= $medlem['id'] ?>">Ändra</button>
+                    <a type="button" class="btn btn-primary btn-sm edit-member-btn" href="medlem/<?= $medlem->id ?>">Ändra</button>
                 </td>
             </tr>
         <?php endforeach; ?>
