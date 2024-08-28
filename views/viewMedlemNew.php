@@ -26,7 +26,7 @@ include_once $APP_DIR . "/layouts/header.php";
             </div>
             <div class="col-md-4 mb-3">
                 <label for="fodelsedatum" class="form-label">Födelsedatum</label>
-                <input type="text" class="form-control" id="fodelsedatum" name="fodelsedatum" placeholder="YYYY-MM-DD">
+                <input type="date" class="form-control" id="fodelsedatum" name="fodelsedatum" placeholder="YYYY-MM-DD">
             </div>
         </div>
 

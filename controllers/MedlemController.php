@@ -69,13 +69,13 @@ class MedlemController extends BaseController
     //Start by validating fodelsedatum and fail early if not valid
     if (!$this->validateDate($_POST['fodelsedatum'])) {
       $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Felaktigt fodelsedatum!');
-      $redirectUrl = $this->router->generate('medlem-edit', ['id' => $id ]);
+      $redirectUrl = $this->router->generate('medlem-edit', ['id' => $id]);
       header('Location: ' . $redirectUrl);
       exit;
     }
 
     //Loop over everything in POST and set values on the Medlem object
-    
+
     //Loop over everything in POST and set values on the Medlem object
     foreach ($_POST as $key => $value) {
       //Special handling for roller that is an array of ids
@@ -137,6 +137,17 @@ class MedlemController extends BaseController
         $_POST[$key] = $this->sanitizeInput($value);
         $medlem->$key = $value; // Assign value to corresponding property
       }
+    }
+    
+    //If preference checkboxes are not checked they don't exist in $_POST so set to False/0
+    if (!isset($_POST['godkant_gdpr'])) {
+      $medlem->godkant_gdpr = 0;
+    }
+    if (!isset($_POST['pref_kommunikation'])) {
+      $medlem->pref_kommunikation = 0;
+    }
+    if (!isset($_POST['isAdmin'])) {
+      $medlem->isAdmin = 0;
     }
 
     try {
