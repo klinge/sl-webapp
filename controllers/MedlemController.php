@@ -66,6 +66,7 @@ class MedlemController extends BaseController
     $id = $params['id'];
     $medlem = new Medlem($this->conn, $id);
 
+    //Loop over everything in POST and set values on the Medlem object
     foreach ($_POST as $key => $value) {
       //Special handling for roller that is an array of ids
       if ($key === 'roller') {
@@ -75,13 +76,23 @@ class MedlemController extends BaseController
         $medlem->$key = $value; // Assign value to corresponding property
       }
     }
-    try
-    {
+
+    //If preference checkboxes are not checked they don't exist in $_POST so set to False/0
+    if (!isset($_POST['godkant_gdpr'])) {
+      $medlem->godkant_gdpr = 0;
+    }
+    if (!isset($_POST['pref_kommunikation'])) {
+      $medlem->pref_kommunikation = 0;
+    }
+    if (!isset($_POST['isAdmin'])) {
+      $medlem->isAdmin = 0;
+    }
+
+    //After setting all values on the member object try to save it
+    try {
       $medlem->save();
       $_SESSION['flash_message'] = array('type' => 'success', 'message' => 'Medlem uppdaterad!');
-    }
-    catch (Exception $e)
-    {
+    } catch (Exception $e) {
       $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
     }
 
@@ -119,13 +130,10 @@ class MedlemController extends BaseController
       }
     }
 
-    try 
-    {
+    try {
       $medlem->create();
       $_SESSION['flash_message'] = array('type' => 'success', 'message' => 'Medlem ". $medlem-fornamn . " " . $medlem->efternamn . " skapad!');
-    }
-    catch (Exception $e)
-    {
+    } catch (Exception $e) {
       $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Kunde inte skapa medlem!');
     }
 
