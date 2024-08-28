@@ -24,6 +24,10 @@ include_once $APP_DIR . "/layouts/header.php";
                 <label for="efternamn" class="form-label">Efternamn</label>
                 <input type="text" class="form-control" id="efternamn" name="efternamn" placeholder="Ange efternamn">
             </div>
+            <div class="col-md-4 mb-3">
+                <label for="fodelsedatum" class="form-label">Födelsedatum</label>
+                <input type="text" class="form-control" id="fodelsedatum" name="fodelsedatum" placeholder="YYYY-MM-DD">
+            </div>
         </div>
 
         <div class="row">
@@ -57,13 +61,32 @@ include_once $APP_DIR . "/layouts/header.php";
             </div>
         </div>
 
-        <h5>Roller</h5>
-        <?php foreach ($roller as $roll): ?>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller[]" value="<?= $roll['id'] ?>">
-                <label class="form-check-label" for="inlineCheckbox1"><?= $roll['roll_namn'] ?></label>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <h5>Roller</h5>
+                <?php foreach ($roller as $roll): ?>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller[]" value="<?= $roll['id'] ?>">
+                        <label class="form-check-label" for="inlineCheckbox1"><?= $roll['roll_namn'] ?></label>
+                    </div>
+                <?php endforeach ?>
             </div>
-        <?php endforeach ?>
+            <div class="col-md-6 mb-3">
+                <h5>Andra val</h5>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" name="godkant_gdpr" value="1">
+                    <label class="form-check-label" for="inlineCheckbox2">Godkänt GDPR</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox3" name="pref_kommunikation" value="1" checked>
+                    <label class="form-check-label" for="inlineCheckbox3">Önskar kommunikation</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox4" name="isAdmin" value="1">
+                    <label class="form-check-label" for="inlineCheckbox4">Admin</label>
+                </div>
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-12 mb-3">
