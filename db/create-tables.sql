@@ -18,15 +18,20 @@ DROP INDEX IF EXISTS idx_kock_id;
 
 CREATE TABLE Medlem (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
+  "fodelsedatum" VARCHAR(10), 
 	"fornamn" VARCHAR(50) NOT NULL,
 	"efternamn" VARCHAR(100) NOT NULL,
-	"gatuadress" VARCHAR(100) NULL,
-	"postnummer" VARCHAR(10) NULL,
-	"postort" VARCHAR(50) NULL,
-	"mobil" VARCHAR(20) NULL,
-	"telefon" VARCHAR(20) NULL,
-	"email" VARCHAR(50) NULL,
-	"kommentar" VARCHAR(500) NULL,
+	"gatuadress" VARCHAR(100),
+	"postnummer" VARCHAR(10),
+	"postort" VARCHAR(50),
+	"mobil" VARCHAR(20),
+	"telefon" VARCHAR(20),
+	"email" VARCHAR(50) UNIQUE,
+	"kommentar" VARCHAR(500),
+  "godkant_gdpr" BOOLEAN,
+  "pref_kommunikation" BOOLEAN,
+  "password" VARCHAR(50),
+  "isAdmin" BOOLEAN, 
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -37,7 +42,7 @@ CREATE TABLE Betalning (
 	"belopp" DECIMAL NOT NULL,
   "datum" DATE, 
   "avser_ar" INT NOT NULL,
-	"kommentar" VARCHAR(200) NULL,
+	"kommentar" VARCHAR(200),
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (medlem_id) REFERENCES Medlem(id) ON DELETE CASCADE
@@ -47,7 +52,7 @@ CREATE TABLE Betalning (
 CREATE TABLE Roll (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
 	"roll_namn" VARCHAR(50) NOT NULL,
-	"kommentar" VARCHAR(100) NULL,
+	"kommentar" VARCHAR(100),
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -120,12 +125,12 @@ END;
 
 --INSERT SOME TEST DATA
 
-INSERT INTO Medlem (fornamn, efternamn, email) 
+INSERT INTO Medlem (fodelsedatum, fornamn, efternamn, email, mobil, godkant_gdpr, pref_kommunikation, password, isAdmin) 
 VALUES 
-    ('Johan', 'Klinge', 'johan@dev.null'),
-    ('Måns', 'Klinge', 'mans@dev.null'),
-    ('Emma', 'Klinge', 'emma@dev.null'),
-    ('Anders', 'Jansson', 'anders@test.nu');
+  ('1965-04-19', 'Johan', 'Klinge', 'johan@dev.null', '070-123456', '1', '1', 'password', '1'),
+  ('1212-12-12', 'Måns', 'Klinge', 'mans@dev.null', '', '1', '1', '', '0'),
+  ('1212-12-12', 'Emma', 'Klinge', 'emma@dev.null', '', '1', '0', '', '0'),
+  ('1212-12-12', 'Anders', 'Jansson', 'anders@dev.null', '074-654321', '1', '1', 'anders', '1');
 
 INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) 
 VALUES 
