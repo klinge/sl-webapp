@@ -128,7 +128,7 @@ END;
 INSERT INTO Medlem (fodelsedatum, fornamn, efternamn, email, mobil, godkant_gdpr, pref_kommunikation, password, isAdmin) 
 VALUES 
   ('1965-04-19', 'Johan', 'Klinge', 'johan@dev.null', '070-123456', '1', '1', 'password', '1'),
-  ('1212-12-12', 'Måns', 'Klinge', 'mans@dev.null', '', '1', '1', '', '0'),
+  ('1212-12-12', 'Måns', 'Klinge', 'mans@dev.null', '', '0', '1', '', '0'),
   ('1212-12-12', 'Emma', 'Klinge', 'emma@dev.null', '', '1', '0', '', '0'),
   ('1212-12-12', 'Anders', 'Jansson', 'anders@dev.null', '074-654321', '1', '1', 'anders', '1');
 
