@@ -31,7 +31,7 @@ CREATE TABLE Medlem (
   "godkant_gdpr" BOOLEAN,
   "pref_kommunikation" BOOLEAN,
   "password" VARCHAR(50),
-  "isAdmin" BOOLEAN, 
+  "isAdmin" BOOLEAN DEFAULT 0, 
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
