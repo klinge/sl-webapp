@@ -66,14 +66,23 @@ class MedlemController extends BaseController
     $id = $params['id'];
     $medlem = new Medlem($this->conn, $id);
 
+    //Start by validating fodelsedatum and fail early if not valid
+    if (!$this->validateDate($_POST['fodelsedatum'])) {
+      $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Felaktigt fodelsedatum!');
+      $redirectUrl = $this->router->generate('medlem-edit', ['id' => $id ]);
+      header('Location: ' . $redirectUrl);
+      exit;
+    }
+
+    //Loop over everything in POST and set values on the Medlem object
+    
     //Loop over everything in POST and set values on the Medlem object
     foreach ($_POST as $key => $value) {
       //Special handling for roller that is an array of ids
       if ($key === 'roller') {
         $medlem->updateMedlemRoles($value);
       } elseif (property_exists($medlem, $key)) {
-        $_POST[$key] = $this->sanitizeInput($value);
-        $medlem->$key = $value; // Assign value to corresponding property
+        $medlem->$key = $this->sanitizeInput($value); // Assign value to corresponding property
       }
     }
 

@@ -29,7 +29,7 @@ $roller = $data['roles'];
             </div>
             <div class="col-md-4 mb-3">
                 <label for="fodelsedatum" class="form-label">Födelsedatum</label>
-                <input type="text" class="form-control" id="fodelsedatum" name="fodelsedatum" placeholder="Ange födelsedatum" value="<?= $medlem->fodelsedatum ?>">
+                <input type="text" class="form-control" id="fodelsedatum" name="fodelsedatum" placeholder="YYYY-MM-DD" value="<?= $medlem->fodelsedatum ?>">
             </div>
         </div>
 
