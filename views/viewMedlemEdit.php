@@ -116,13 +116,14 @@ $roller = $data['roles'];
         <button type="submit" class="btn btn-primary">Uppdatera</button>
         <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
     </form>
+
     <!-- Begin the delete form -->
     <form class="p-3" action="<?= $data['deleteAction'] ?>" method="POST">
         <input type="hidden" name="id" value="<?= $medlem->id; ?>">
         <button type="submit" class="btn btn-danger">Ta bort medlem</button>
     </form>
 
-    <div class="row rounded p-3 mt-2">
+    <div class="row rounded px-3">
         <!-- Betalningar -->
         <div class="col-md-6">
             <h3>Betalningar - senaste 5</h3>

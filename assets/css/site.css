@@ -48,3 +48,8 @@
     vertical-align: -.125em;
     fill: currentcolor;
 }
+
+/* Rules to make forms more compact */
+.form-label { 
+    margin-bottom: .2rem !important; 
+}
