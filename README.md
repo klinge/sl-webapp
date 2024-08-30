@@ -2,7 +2,7 @@
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
 ##TODO: 
-* Login: add a register user form - only allow existing members to register
+* Login: add a register user form - only allow existing members to register #1
 * Login: add controller->requireAuth() to access all pages
 * Login: direct admin and non-admin to different pages after login
 * Segling: Fix database for members on Seglingar

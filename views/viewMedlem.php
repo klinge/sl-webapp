@@ -11,7 +11,6 @@ $page_title = $viewData['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
 $num = sizeof($viewData['items']);
-
 ?>
 
 <div class="d-flex justify-content-end">

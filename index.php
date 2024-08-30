@@ -6,7 +6,6 @@ ini_set('display_errors', 'On');
 
 require 'vendor/autoload.php';
 //Using AltoRouter for url routing: https://dannyvankooten.github.io/AltoRouter/
-require_once __DIR__ . '/controllers/TestController.php';
 require_once __DIR__ . '/controllers/HomeController.php';
 require_once __DIR__ . '/controllers/MedlemController.php';
 require_once __DIR__ . '/controllers/SeglingController.php';
@@ -45,15 +44,7 @@ $router->map('GET', '/login', 'AuthController#showLogin', 'show-login');
 $router->map('POST', '/login', 'AuthController#login', 'login');
 $router->map('GET', '/logout', 'AuthController#logout', 'logout');
 
-$router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/betalning/auth', 'BetalningController#testAuth');
-$router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
-$router->map( 'GET', '/formtest', function() {
-    require __DIR__ . '/views/formTest.php';
-});
-$router->map( 'POST', '/formtest', function() {
-    var_dump($_POST);
-});
 
 $match = $router->match();
 
