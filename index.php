@@ -10,6 +10,7 @@ require __DIR__ . '/controllers/TestController.php';
 require __DIR__ . '/controllers/MedlemController.php';
 require __DIR__ . '/controllers/SeglingController.php';
 require __DIR__ . '/controllers/BetalningController.php';
+require __DIR__ . '/controllers/AuthController.php';
 
 ini_set('session.cookie_lifetime', 3600);  // Session expires after 1 hour (in seconds)
 session_start();
@@ -37,6 +38,9 @@ $router->map('POST', '/betalning/delete/[i:id]', 'BetalningController#deleteBeta
 $router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
 $router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
 $router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save');
+
+$router->map('GET', '/login', 'AuthController#showLogin', 'view-login');
+$router->map('POST', '/login', 'AuthController#login', 'login');
 
 $router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');
