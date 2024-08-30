@@ -7,11 +7,11 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = $data['title'];
+$page_title = $viewData['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-$segling = $data['items'];
-$roller = $data['roles'];
+$segling = $viewData['items'];
+$roller = $viewData['roles'];
 ?>
 
 <div class="container">
@@ -39,7 +39,7 @@ $roller = $data['roles'];
                 <label for="skeppare" class="form-label">Skeppare</label>
                 <select class="form-select" id="skeppare" name="skeppare" aria-label="Skeppare select box">
                     <option value="null">Ingen</option>
-                    <?php foreach ($allaSkeppare as $person) : ?>
+                    <?php foreach ($viewData['allaSkeppare'] as $person) : ?>
                         <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
                     <?php endforeach ?>
                 </select>
@@ -48,7 +48,7 @@ $roller = $data['roles'];
                 <label for="batsman" class="form-label">Båtsman</label>
                 <select class="form-select" id="batsman" name="batsman" aria-label="Båtsman select box">
                     <option value="null">Ingen</option>
-                    <?php foreach ($allaBatsman as $person) : ?>
+                    <?php foreach ($viewData['allaBatsman'] as $person) : ?>
                         <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
                     <?php endforeach ?>
                 </select>
@@ -57,7 +57,7 @@ $roller = $data['roles'];
                 <label for="xbatsman" class="form-label">Extra båtsman</label>
                 <select class="form-select" id="xbatsman" name="xbatsman" aria-label="Extrabås select box">
                     <option value="null">Ingen</option>
-                    <?php foreach ($allaBatsman as $person) : ?>
+                    <?php foreach ($viewData['allaBatsman'] as $person) : ?>
                         <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
                     <?php endforeach ?>
                 </select>
@@ -66,7 +66,7 @@ $roller = $data['roles'];
                 <label for="kock" class="form-label">Kock</label>
                 <select class="form-select" id="kock" name="kock" aria-label="Kock select box">
                     <option value="null">Ingen</option>
-                    <?php foreach ($allaKockar as $person) : ?>
+                    <?php foreach ($viewData['allaKockar'] as $person) : ?>
                         <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
                     <?php endforeach ?>
                 </select>
@@ -75,7 +75,7 @@ $roller = $data['roles'];
                 <label for="xkock" class="form-label">Extra kock</label>
                 <select class="form-select" id="xkock" name="xkock" aria-label="Extrakock select box">
                     <option value="null">Ingen</option>
-                    <?php foreach ($allaKockar as $person) : ?>
+                    <?php foreach ($viewData['allaKockar'] as $person) : ?>
                         <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
                     <?php endforeach ?>
                 </select>

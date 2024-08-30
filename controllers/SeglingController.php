@@ -18,7 +18,7 @@ class SeglingController extends BaseController {
             "title" => "Bokningslista",
             "items" => $result
           );
-        require __DIR__ . '/../views/viewSegling.php';
+        $this->render('/../views/viewSegling.php', $data);
     }
 
     public function edit(array $params){
@@ -50,7 +50,7 @@ class SeglingController extends BaseController {
             "allaBatsman" => $allaBatsman,
             "allaKockar" => $allaKockar
           );
-        require __DIR__ . '/../views/viewSeglingEdit.php';
+        $this->render('/../views/viewSeglingEdit.php', $data);
     }
 
     public function save(array $params) {
@@ -58,6 +58,7 @@ class SeglingController extends BaseController {
         $segling = new Segling($this->conn, $id);
         var_dump($_POST);
         exit;
+        //TODO complete logic for saving a segling
         
         //TODO add logic to save
         $segling->start_dat = $this->sanitizeInput($_POST['startdat']);

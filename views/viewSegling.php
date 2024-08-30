@@ -7,11 +7,11 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = $data['title'];
+$page_title = $viewData['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
 //Seglingar is an array of Segling objects
-$seglingar = $data['items'];
+$seglingar = $viewData['items'];
 $num = sizeof($seglingar);
 
 ?>
@@ -52,7 +52,7 @@ $num = sizeof($seglingar);
                 <td><?= $batsmanNamn ?></td>
                 <td><?= $kockNamn ?></td>
                 <td>
-                    <a type="button" class="btn btn-primary btn-sm edit-segling-btn" href="segling/<?= $segling->id ?>">Ändra</button>
+                    <a type="button" class="btn btn-primary btn-sm edit-segling-btn" href="./segling/<?= $segling->id ?>">Ändra</button>
                 </td>
             </tr>
         <?php endforeach; ?>
