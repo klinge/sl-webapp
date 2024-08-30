@@ -1,7 +1,4 @@
 <?php
-// enable debug info
-error_reporting(E_ALL);
-ini_set('display_errors', 'On');
 
 $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
