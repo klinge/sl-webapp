@@ -7,15 +7,15 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = $data['title'];
+$page_title = $viewData['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-$num = sizeof($data['items']);
+$num = sizeof($viewData['items']);
 
 ?>
 
 <div class="d-flex justify-content-end">
-    <a href="<?= $data['newAction'] ?>" class="btn btn-primary btn-lg" alt="Lägg till medlem">
+    <a href="<?= $viewData['newAction'] ?>" class="btn btn-primary btn-lg" alt="Lägg till medlem">
         Ny medlem
     </a>
 </div>
@@ -39,7 +39,7 @@ $num = sizeof($data['items']);
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($result as $medlem): ?>
+                    <?php foreach ($viewData['items'] as $medlem): ?>
                         <tr>
                             <td><?= $medlem->id ?></td>
                             <td><?= $medlem->fornamn ?></td>

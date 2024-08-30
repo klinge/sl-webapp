@@ -7,12 +7,12 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = $data['title'];
+$page_title = $viewData['title'];
 include_once $APP_DIR . "/layouts/header.php";
 ?>
 
 <div class="container">
-    <form class="border border-primary rounded p-3" action="<?= $data['formAction'] ?>" method="POST">
+    <form class="border border-primary rounded p-3" action="<?= $viewData['formAction'] ?>" method="POST">
         <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
 
         <div class="row">
@@ -64,7 +64,7 @@ include_once $APP_DIR . "/layouts/header.php";
         <div class="row">
             <div class="col-md-6 mb-3">
                 <h5>Roller</h5>
-                <?php foreach ($roller as $roll): ?>
+                <?php foreach ($viewData['roller'] as $roll): ?>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="checkbox" id="inlineCheckbox1" name="roller[]" value="<?= $roll['id'] ?>">
                         <label class="form-check-label" for="inlineCheckbox1"><?= $roll['roll_namn'] ?></label>

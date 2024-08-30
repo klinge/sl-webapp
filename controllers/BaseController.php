@@ -1,7 +1,8 @@
 <?php
 
 require __DIR__ . '/../vendor/autoload.php';
-require __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../utils/Session.php';
 
 class BaseController
 {
@@ -9,13 +10,32 @@ class BaseController
   protected $conn;
   protected $request;
   protected $router;
+  protected $sessionData;
 
   public function __construct($request, $router)
   {
+    Session::start();
+    $this->initializeSessionData();
     $this->request = $request;
     $this->conn = $this->getDatabaseConn();
     $this->router = $router;
   }
+
+  protected function initializeSessionData()
+  {
+    $this->sessionData = [
+      'isLoggedIn' => Session::isLoggedIn(),
+      'userId' => Session::get('user_id'),
+      'fornamn' => Session::get('fornamn'),
+      'isAdmin' => Session::isAdmin()
+    ];
+  }
+
+  protected function render(string $viewUrl, array $data = []) {
+    // Merge the session data with the view-specific data
+    $viewData = array_merge($this->sessionData, $data);
+    require __DIR__ . $viewUrl;
+}
 
   private function getDatabaseConn()
   {
@@ -81,7 +101,8 @@ class BaseController
     }
   }
 
-  protected function requireAdmin() {
+  protected function requireAdmin()
+  {
     Session::start();
     if (!Session::isAdmin()) {
       echo "Requires admin!";

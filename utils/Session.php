@@ -3,8 +3,8 @@
 class Session {
     public static function start() {
         if (session_status() == PHP_SESSION_NONE) {
-            session_regenerate_id(true);
             session_start();
+            session_regenerate_id(true);
         }
     }
 

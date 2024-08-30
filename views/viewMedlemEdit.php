@@ -7,15 +7,15 @@ $config = require './config/config.php';
 $APP_DIR = $config['APP_DIR'];
 
 // set page headers
-$page_title = $data['title'];
+$page_title = $viewData['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-$medlem = $data['items'];
-$roller = $data['roles'];
+$medlem = $viewData['items'];
+$roller = $viewData['roles'];
 ?>
 
 <div class="container">
-    <form class="border border-primary rounded p-3" action="<?= $data['formAction'] ?>" method="POST">
+    <form class="border border-primary rounded p-3" action="<?= $viewData['formAction'] ?>" method="POST">
         <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
 
         <div class="row">
@@ -118,7 +118,7 @@ $roller = $data['roles'];
     </form>
 
     <!-- Begin the delete form -->
-    <form class="p-3" action="<?= $data['deleteAction'] ?>" method="POST">
+    <form class="p-3" action="<?= $viewData['deleteAction'] ?>" method="POST">
         <input type="hidden" name="id" value="<?= $medlem->id; ?>">
         <button type="submit" class="btn btn-danger">Ta bort medlem</button>
     </form>
@@ -138,7 +138,7 @@ $roller = $data['roles'];
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach (array_slice($data['betalningar'], 0, 5) as $betalning) : ?>
+                        <?php foreach (array_slice($viewData['betalningar'], 0, 5) as $betalning) : ?>
                             <tr>
                                 <td><?= htmlspecialchars($betalning->datum) ?></td>
                                 <td><?= htmlspecialchars($betalning->belopp) ?> kr</td>
@@ -153,7 +153,7 @@ $roller = $data['roles'];
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">
                     Lägg till ny betalning
                 </button>
-                <a href="<?= $data['listBetalningAction'] ?>" class="btn btn-secondary">Visa alla</a>
+                <a href="<?= $viewData['listBetalningAction'] ?>" class="btn btn-secondary">Visa alla</a>
             </div>
         </div>
         <!-- Seglingar -->
@@ -169,7 +169,7 @@ $roller = $data['roles'];
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach (array_slice($data['seglingar'], 0, 5) as $segling) : ?>
+                        <?php foreach (array_slice($viewData['seglingar'], 0, 5) as $segling) : ?>
                             <tr>
                                 <td><?= htmlspecialchars($segling['startdatum']) ?></td>
                                 <td><?= htmlspecialchars($segling['roll_namn']) ?></td>
