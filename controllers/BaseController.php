@@ -95,19 +95,19 @@ class BaseController
   {
     Session::start();
     if (!Session::isLoggedIn()) {
-      echo "Requires login!";
-      //header('Location: /login');
-      exit;
+      return false;
+      //TODO redirect to login page, maybe keeping the url in the session to redirect back to after login
     }
+    return true;
   }
 
-  protected function requireAdmin()
+  protected function requireAuthAdmin()
   {
     Session::start();
     if (!Session::isAdmin()) {
-      echo "Requires admin!";
-      //header('Location: /login');
-      exit;
+      return false;
+      //TODO show error message to user 
     }
+    return true;
   }
 }

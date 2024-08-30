@@ -10,7 +10,6 @@ class Session {
 
     public static function set($key, $value) {
         $_SESSION[$key] = $value;
-        print_r($_SESSION);
     }
 
     public static function get($key) {

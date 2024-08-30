@@ -7,7 +7,7 @@ include_once $APP_DIR . "/layouts/header.php";
 ?>
 
 <!-- Login 9 - Bootstrap Brain Component -->
-<section class="bg-primary py-3 py-md-4 py-xl-8">
+<section class="bg-primary py-3 py-md-4 py-xl-8 mt-md-4">
     <div class="container">
         <div class="row gy-4 align-items-center">
             <div class="col-12 col-md-6 col-xl-6">
