@@ -11,7 +11,7 @@ class AuthController extends BaseController
 
     public function showLogin()
     {
-        require __DIR__ . '/../views/viewLogin.php';
+        $this->render('/../views/viewLogin.php');
     }
 
     public function login()
@@ -27,8 +27,7 @@ class AuthController extends BaseController
         //User not found
         if (!$result) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! INTEIDB'));
-            header('Location: ./login');
-            return false;
+            $this->render('/../views/viewLogin.php');
         }
         //Catch exception if medlem not found
         try {
@@ -36,8 +35,7 @@ class AuthController extends BaseController
         }
         catch (Exception $e) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA'));
-            header('Location: ./login');
-            return false;
+            $this->render('/../views/viewLogin.php');
         }
         //Verify providedPassword with password from db
         if (password_verify($providedPassword, $medlem->password)) {
@@ -47,13 +45,11 @@ class AuthController extends BaseController
             if ($medlem->isAdmin) {
                 Session::set('isAdmin', true);
             }
-            $redirectUrl = $this->router->generate('home');
-            header('Location: ' . $redirectUrl);
+            $this->render('/../views/home.php');  
             return true;
         } else {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! FELLÖSEN'));
-            header('Location: ./login');
-            return false;
+            $this->render('/../views/viewLogin.php');
         }
     }
 

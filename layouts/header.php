@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11/font/bootstrap-icons.min.css" integrity="sha256-9kPW/n5nn53j4WMRYAxe9c1rCY96Oogo/MKSVdKzPmI=" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/2.0.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/sl-webapp/assets/css/site.css" crossorigin="anonymous">
-    
+
     <title><?php echo $page_title; ?></title>
 </head>
 
@@ -71,14 +71,23 @@
                         <?php $isActive = ($page_title == "Betalningslista") ? "active" : ""; ?>
                         <a class="nav-link <?= $isActive ?>" href="/sl-webapp/betalning">Betalningar</a>
                     </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">Dropdown</a>
+
+                    <?php if (isset($viewData) && $viewData['isLoggedIn']) : ?>
+                        <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">
+                            Inloggad: <?= $viewData['fornamn'] ?>
+                        </a>
                         <ul class="dropdown-menu" aria-labelledby="dropdown05">
                             <li><a class="dropdown-item" href="/sl-webapp/logout">Logout</a></li>
                             <li><a class="dropdown-item" href="#">Another action</a></li>
                             <li><a class="dropdown-item" href="#">Something else here</a></li>
                         </ul>
                     </li>
+                    <?php else : ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/sl-webapp/login">Logga in</a>
+                        </li>
+                    <?php endif; ?>
 
                     <!-- adding bootstrap color-mode switcher. See also "assets/js/themeSwitcher.js" -->
                     <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
@@ -135,13 +144,12 @@
 
     <!-- container -->
     <div class="container">
-    <?php
+        <?php
         if (isset($_SESSION['flash_message'])) {
             // Bootstrap alert structure
-            if($_SESSION['flash_message']['type'] === 'error') {
-                echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';    
-            }
-            else {
+            if ($_SESSION['flash_message']['type'] === 'error') {
+                echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';
+            } else {
                 echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
             }
             echo $_SESSION['flash_message']['message'];
@@ -150,7 +158,7 @@
             // Unset the message from the session
             unset($_SESSION['flash_message']);
         }
-    ?>
+        ?>
         <div class='page-header'>
             <h1><?php echo $page_title ?></h1>
         </div>
