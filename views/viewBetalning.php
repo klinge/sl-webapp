@@ -12,8 +12,8 @@ include_once $APP_DIR . "/layouts/header.php";
 
 if(isset($data['items'])) 
 {
-    $num = sizeof($data['items']);
-    $result = $data['items'];
+    $num = sizeof($viewData['items']);
+    $result = $viewData['items'];
 }
 else 
 {

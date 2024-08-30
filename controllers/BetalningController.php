@@ -19,7 +19,7 @@ class BetalningController extends BaseController
             "title" => "Betalningslista",
             "items" => $result
         );
-        require __DIR__ . '/../views/viewBetalning.php';
+        $this->render('/../views/viewBetalning.php', $data);
     }
 
     public function getBetalning(array $params)
@@ -28,6 +28,8 @@ class BetalningController extends BaseController
         $betalning = new Betalning($this->conn);
         $betalning->get($id);
         var_dump($betalning);
+        //TODO add a view or modal to edit a payment.. 
+        return $betalning;
     }
 
     public function getMedlemBetalning(array $params)
@@ -50,8 +52,7 @@ class BetalningController extends BaseController
                 "title" => "Inga betalningar hittades"
               );
         }
-
-        require __DIR__ . '/../views/viewBetalning.php';
+        $this->render('/../views/viewBetalning.php', $data);
     }
 
     public function createBetalning(array $params)
@@ -101,7 +102,7 @@ class BetalningController extends BaseController
         }
         catch(Exception $e)
         {
-
+            //TODO: Handle exception
         }
 
     }
