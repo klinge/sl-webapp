@@ -19,25 +19,50 @@ class AuthController extends BaseController
         $providedEmail = $_POST['email'];
         $providedPassword = $_POST['password'];
 
-        $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
+        $stmt = $this->conn->prepare("SELECT id FROM medlem WHERE email = :email");
         $stmt->bindParam(':email', $providedEmail);
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        //User not found
         if (!$result) {
-            echo "Invalid email or password";
+            Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! INTEIDB'));
+            header('Location: ./login');
             return false;
         }
-        $medlem = new Medlem($result['id']);
-        if ($medlem && password_verify($providedPassword, $medlem->password)) {
+        //Catch exception if medlem not found
+        try {
+            $medlem = new Medlem($this->conn, $result['id']);
+        }
+        catch (Exception $e) {
+            Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA'));
+            header('Location: ./login');
+            return false;
+        }
+        //Verify providedPassword with password from db
+        if (password_verify($providedPassword, $medlem->password)) {
             Session::start();
             Session::set('user_id', $medlem->id);
             Session::set('fornamn', $medlem->fornamn);
-            header('Location: /');
+            if ($medlem->isAdmin) {
+                Session::set('isAdmin', true);
+            }
+            $redirectUrl = $this->router->generate('home');
+            header('Location: ' . $redirectUrl);
             return true;
         } else {
-            echo "Invalid email or password";
+            Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! FELLÖSEN'));
+            header('Location: ./login');
             return false;
         }
+    }
+
+    public function logout() {
+        Session::remove('user_id');
+        Session::remove('fornamn');
+        Session::destroy();
+        $redirectUrl = $this->router->generate('show-login');
+        header('Location: ' . $redirectUrl);
+        exit;
     }
 }

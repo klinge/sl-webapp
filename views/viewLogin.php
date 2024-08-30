@@ -36,7 +36,7 @@ include_once $APP_DIR . "/layouts/header.php";
                                 </div>
                             </div>
                         </div>
-                        <form action="#!">
+                        <form action="./login" method="POST">
                             <div class="row gy-3 overflow-hidden">
                                 <div class="col-12">
                                     <div class="form-floating mb-3">

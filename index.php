@@ -6,21 +6,24 @@ ini_set('display_errors', 'On');
 
 require 'vendor/autoload.php';
 //Using AltoRouter for url routing: https://dannyvankooten.github.io/AltoRouter/
-require __DIR__ . '/controllers/TestController.php';
-require __DIR__ . '/controllers/MedlemController.php';
-require __DIR__ . '/controllers/SeglingController.php';
-require __DIR__ . '/controllers/BetalningController.php';
-require __DIR__ . '/controllers/AuthController.php';
+require_once __DIR__ . '/controllers/TestController.php';
+require_once __DIR__ . '/controllers/MedlemController.php';
+require_once __DIR__ . '/controllers/SeglingController.php';
+require_once __DIR__ . '/controllers/BetalningController.php';
+require_once __DIR__ . '/controllers/AuthController.php';
+require_once __DIR__ . '/utils/Session.php';
 
-ini_set('session.cookie_lifetime', 3600);  // Session expires after 1 hour (in seconds)
-session_start();
+ini_set('session.cookie_httponly', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.cookie_lifetime', 1800);  // Session expires after 30 mins (in seconds)
+Session::start();
 
 $router = new AltoRouter();
 $router->setBasePath('/sl-webapp');
 
 $router->map( 'GET', '/', function() {
     require __DIR__ . '/views/home.php';
-});
+}, 'home');
 
 $router->map('GET', '/medlem', 'MedlemController#list', 'medlem-list');
 $router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
@@ -39,8 +42,9 @@ $router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
 $router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
 $router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save');
 
-$router->map('GET', '/login', 'AuthController#showLogin', 'view-login');
+$router->map('GET', '/login', 'AuthController#showLogin', 'show-login');
 $router->map('POST', '/login', 'AuthController#login', 'login');
+$router->map('GET', '/logout', 'AuthController#logout', 'logout');
 
 $router->map('GET', '/hello', 'TestController#hello', 'hello');
 $router->map('GET', '/hello/[a:name]', 'TestController#helloName', 'helloName');

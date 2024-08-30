@@ -60,8 +60,7 @@ class BaseController
       }
 
       return $data;
-    }
-    else {
+    } else {
       return $data;
     }
   }
@@ -70,5 +69,24 @@ class BaseController
   {
     $d = DateTime::createFromFormat('Y-m-d', $date);
     return $d && $d->format('Y-m-d') === $date ? $date : false;
+  }
+
+  protected function requireAuth()
+  {
+    Session::start();
+    if (!Session::isLoggedIn()) {
+      echo "Requires login!";
+      //header('Location: /login');
+      exit;
+    }
+  }
+
+  protected function requireAdmin() {
+    Session::start();
+    if (!Session::isAdmin()) {
+      echo "Requires admin!";
+      //header('Location: /login');
+      exit;
+    }
   }
 }
