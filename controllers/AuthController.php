@@ -11,7 +11,7 @@ class AuthController extends BaseController
 
     public function showLogin()
     {
-        $this->render('/../views/viewLogin.php');
+        $this->render('/../views/login/viewLogin.php');
     }
 
     public function login()
@@ -27,7 +27,7 @@ class AuthController extends BaseController
         //User not found
         if (!$result) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! INTEIDB'));
-            $this->render('/../views/viewLogin.php');
+            $this->render('/../views/login/viewLogin.php');
         }
         //Catch exception if medlem not found
         try {
@@ -35,7 +35,7 @@ class AuthController extends BaseController
         }
         catch (Exception $e) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA'));
-            $this->render('/../views/viewLogin.php');
+            $this->render('/../views/login/viewLogin.php');
         }
         //Verify providedPassword with password from db
         if (password_verify($providedPassword, $medlem->password)) {
@@ -49,7 +49,7 @@ class AuthController extends BaseController
             return true;
         } else {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! FELLÖSEN'));
-            $this->render('/../views/viewLogin.php');
+            $this->render('/../views/login/viewLogin.php');
         }
     }
 

@@ -36,7 +36,7 @@ include_once $APP_DIR . "/layouts/header.php";
                                 </div>
                             </div>
                         </div>
-                        <form action="./login" method="POST">
+                        <form id="loginForm" action="./login" method="POST">
                             <div class="row gy-3 overflow-hidden">
                                 <div class="col-12">
                                     <div class="form-floating mb-3">
@@ -52,8 +52,8 @@ include_once $APP_DIR . "/layouts/header.php";
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" name="remember_me" id="remember_me">
-                                        <label class="form-check-label text-secondary" for="remember_me">
+                                        <input class="form-check-input" type="checkbox" value="" name="rememberMe" id="rememberMe">
+                                        <label class="form-check-label text-secondary" for="rememberMe">
                                             Kom ihåg mitt användarnamn
                                         </label>
                                     </div>
@@ -79,6 +79,32 @@ include_once $APP_DIR . "/layouts/header.php";
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('email');
+        const rememberCheckbox = document.getElementById('rememberMe');
+
+        // Check if there's a stored username and populate the input field
+        const storedUsername = localStorage.getItem('rememberedUsername');
+        if (storedUsername) {
+            usernameInput.value = storedUsername;
+            rememberCheckbox.checked = true;
+        }
+
+        loginForm.addEventListener('submit', function(e) {
+            const username = usernameInput.value;
+            const rememberUsername = rememberCheckbox.checked;
+            if (rememberUsername) {
+                localStorage.setItem('rememberedUsername', username);
+                console.log("Saved username:" + localStorage.getItem('rememberedUsername'));
+            } else {
+                localStorage.removeItem('rememberedUsername');
+            }
+        });
+    });
+</Script>
 
 <?php
 include_once $APP_DIR . "/layouts/footer.php";
