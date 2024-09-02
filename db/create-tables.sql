@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS "Betalning";
 DROP TABLE IF EXISTS "Roll";
 DROP TABLE IF EXISTS "Segling";
 DROP TABLE IF EXISTS "Segling_Medlem_Roll";
-DROP TABLE IF EXISTS "AuthTokens";
+DROP TABLE IF EXISTS "AuthToken";
 
 DROP TRIGGER IF EXISTS besattning_after_update;
 DROP TRIGGER IF EXISTS betalning_after_update;

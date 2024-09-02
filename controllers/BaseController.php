@@ -64,6 +64,10 @@ class BaseController
     exit;
   }
 
+  protected function createUrl(string $routeName, array $params = []) {
+    return $this->router->generate($routeName, $params);
+  }
+
 
   protected function sanitizeInput($data)
   {

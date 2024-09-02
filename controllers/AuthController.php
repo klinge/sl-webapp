@@ -92,7 +92,9 @@ class AuthController extends BaseController
         }
         //Save hashed password and generate a token to be sent by mail to the user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $token = bin2hex(random_bytes(16));
+        //$token = bin2hex(random_bytes(16));
+        //Changed to make url-safe tokens only containing alphanumeric characters
+        $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(18)));
 
         //Add values to AuthToken table
         $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, password_hash) VALUES (:email, :token, :password_hash)");
@@ -131,16 +133,32 @@ class AuthController extends BaseController
         //Fail if token not found
         if (!$result) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Ogiltig verifieringslänk.'));
-            $this->render('/../views/login/viewLogin.php');
-            return;
+            header('Location: ' . $this->createUrl('login'));
+            exit;
         }
         //Fail if token is expired
-        $expirationTime = strtotime($result['created_at']) + (60 * 60 * 24); // 24 hours
+        $expirationTime = strtotime($result['created_at']) + (60 * 15); // 15 minutes in seconds
         if (time() > $expirationTime) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Verifieringslänken har gått ut. Försök igen.'));
-            $this->render('/../views/login/viewLogin.php');
+            header('Location: ' . $this->createUrl('login'));
+            exit;
         }
-        //TODO handle happy flow!!
+        //If all is okay, add password to Medlem table
+        $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
+        $stmt->bindParam(':password', $result['password_hash']);
+        $stmt->bindParam(':email', $result['email']);
+        $stmt->execute();
+        //Delete token from db
+        $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE token = :token");
+        $stmt->bindParam(':token', $token);
+        $stmt->execute();
+        //Also take the chance to delete all remaining records in AuthToken older than 1 hour
+        $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE created_at < datetime('now', '-1 hour')");
+        $stmt->execute();
+
+        Session::set('flash_message', array('type' => 'success', 'message' => 'Ditt konto är aktiverat. Du kan nu logga in. '));
+        header('Location: ' . $this->createUrl('login'));
+        exit;
     }
 
     protected function getMemberByEmail($email)
@@ -158,7 +176,7 @@ class AuthController extends BaseController
         $senderEmail = 'info@sofialinnea.se';
         $senderName = 'Sofia Linnea Medlemsapp';
         // Construct the verification link
-        $verificationLink = 'http://localhost/sl-webapp/register/token=' . urlencode($token);
+        $verificationLink = 'http://localhost/sl-webapp/register/' . urlencode($token);
 
         // Create the email content
         $subject = 'Sofia Linnea: Aktivera ditt konto';
