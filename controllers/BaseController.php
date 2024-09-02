@@ -31,11 +31,12 @@ class BaseController
     ];
   }
 
-  protected function render(string $viewUrl, array $data = []) {
+  protected function render(string $viewUrl, array $data = [])
+  {
     // Merge the session data with the view-specific data
     $viewData = array_merge($this->sessionData, $data);
     require __DIR__ . $viewUrl;
-}
+  }
 
   private function getDatabaseConn()
   {
@@ -73,6 +74,8 @@ class BaseController
       // Sanitize based on data type
       if (is_numeric($data)) {
         $data = intval($data); // Convert to integer (removes non-numeric characters)
+      } else if (filter_var($data, FILTER_VALIDATE_EMAIL)) {
+        $data = filter_var($data, FILTER_SANITIZE_EMAIL);
       } else if (is_string($data)) {
         $data = htmlspecialchars($data, ENT_QUOTES); // Escape special characters for HTML output
       } else {

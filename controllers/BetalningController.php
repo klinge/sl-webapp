@@ -105,14 +105,4 @@ class BetalningController extends BaseController
             //TODO: Handle exception
         }
     }
-
-    public function testAuth() 
-    {
-        echo "Testar autentisering: ";
-        $result = $this->requireAuth() ? "Inloggning OK" : "Ej inloggad";
-        echo $result;
-
-        echo "<br>Testar autentisering som admin: ";
-        echo $this->requireAuthAdmin() ? "Är admin" : "Inte admin";
-    }
 }

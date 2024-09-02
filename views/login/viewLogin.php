@@ -9,6 +9,7 @@ include_once $APP_DIR . "/layouts/header.php";
 <!-- Login 9 - Bootstrap Brain Component -->
 <section class="bg-primary py-3 py-md-4 py-xl-8 mt-md-4">
     <div class="container">
+
         <div class="row gy-4 align-items-center">
             <div class="col-12 col-md-6 col-xl-6">
                 <div class="d-flex justify-content-center text-bg-primary">
@@ -26,55 +27,110 @@ include_once $APP_DIR . "/layouts/header.php";
                 </div>
             </div>
             <div class="col-12 col-md-4 col-xl-5">
-                <div class="card border-0 rounded-4">
-                    <div class="card-body p-3 p-md-4 p-xl-5">
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-4">
-                                    <h3>Logga in</h3>
-                                    <p>Har du inget konto? <a href="#!">Registrera dig</a></p>
-                                </div>
-                            </div>
-                        </div>
-                        <form id="loginForm" action="./login" method="POST">
-                            <div class="row gy-3 overflow-hidden">
-                                <div class="col-12">
-                                    <div class="form-floating mb-3">
-                                        <input type="email" class="form-control" name="email" id="email" placeholder="name@example.com" required>
-                                        <label for="email" class="form-label">Mail</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-floating mb-3">
-                                        <input type="password" class="form-control" name="password" id="password" value="" placeholder="Password" required>
-                                        <label for="password" class="form-label">Lösenord</label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" name="rememberMe" id="rememberMe">
-                                        <label class="form-check-label text-secondary" for="rememberMe">
-                                            Kom ihåg mitt användarnamn
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="d-grid">
-                                        <button class="btn btn-primary btn-lg" type="submit">Logga in</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end mt-4">
-                                    <a href="#!">Glömt lösenord</a>
-                                </div>
-                            </div>
-                        </div>
 
+                <nav>
+                    <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+                        <button class="nav-link active" id="nav-login-tab" data-bs-toggle="tab" data-bs-target="#nav-login" type="button" role="tab" aria-controls="nav-login" aria-selected="true">Logga in</button>
+                        <button class="nav-link" id="nav-register-tab" data-bs-toggle="tab" data-bs-target="#nav-register" type="button" role="tab" aria-controls="nav-register" aria-selected="false">Registrera dig</button>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <!-- Inloggning -->
+                    <div class="tab-pane fade show active" id="nav-login" role="tabpanel" aria-labelledby="nav-login-tab">
+                        <div class="card border-0 rounded-0">
+                            <div class="card-body p-3 p-md-4 p-xl-5">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-4">
+                                            <h3>Logga in</h3>
+                                            <p>Har du inget konto? <a href="#nav-register" data-bs-toggle="tab">Registrera dig</a></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="loginForm" action="./login" method="POST">
+                                    <div class="row gy-3 overflow-hidden">
+                                        <div class="col-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="email" class="form-control" name="email" id="loginEmail" placeholder="name@example.com" required>
+                                                <label for="loginEmail" class="form-label">Mail</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="password" class="form-control" name="password" id="password" value="" placeholder="Password" required>
+                                                <label for="password" class="form-label">Lösenord</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="" name="rememberMe" id="rememberMe">
+                                                <label class="form-check-label text-secondary" for="rememberMe">
+                                                    Kom ihåg mitt användarnamn
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-grid">
+                                                <button class="btn btn-primary btn-lg" type="submit">Logga in</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end mt-4">
+                                            <a href="#!">Glömt lösenord</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Registrering -->
+                    <div class="tab-pane fade" id="nav-register" role="tabpanel" aria-labelledby="nav-register-tab">
+                        <div class="card border-0 rounded-0">
+                            <div class="card-body p-3 p-md-4 p-xl-5">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="mb-4">
+                                            <h3>Registrera dig</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="registerForm" action="./register" method="POST">
+                                    <div class="row gy-3 overflow-hidden">
+                                        <div class="col-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="email" class="form-control" name="email" id="registerEmail" placeholder="name@example.com" required>
+                                                <label for="RegisterEmail" class="form-label">Mail</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="password" class="form-control" name="password" id="registerPassword" value="" placeholder="Password" required>
+                                                <label for="registerPassword" class="form-label">Lösenord</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="form-floating mb-3">
+                                                <input type="password" class="form-control" name="passwordRepeat" id="registerPasswordRepeat" value="" placeholder="Password" required>
+                                                <label for="registerPasswordRepeat" class="form-label">Repetera lösenord</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12">
+                                            <div class="d-grid">
+                                                <button class="btn btn-primary btn-lg" type="submit">Registrera</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+
             </div>
         </div>
     </div>
@@ -83,7 +139,7 @@ include_once $APP_DIR . "/layouts/header.php";
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const loginForm = document.getElementById('loginForm');
-        const usernameInput = document.getElementById('email');
+        const usernameInput = document.getElementById('loginEmail');
         const rememberCheckbox = document.getElementById('rememberMe');
 
         // Check if there's a stored username and populate the input field
@@ -103,6 +159,14 @@ include_once $APP_DIR . "/layouts/header.php";
                 localStorage.removeItem('rememberedUsername');
             }
         });
+
+        //If the user switches to the register tab, the email from the login form is copied to the register form
+        var registerTab = document.getElementById('nav-register-tab');
+        registerTab.addEventListener('show.bs.tab', function() {
+            const loginEmailValue = document.getElementById('loginEmail').value;
+            document.getElementById('registerEmail').value = loginEmailValue;
+        });
+
     });
 </Script>
 

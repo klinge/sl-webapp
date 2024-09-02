@@ -43,8 +43,8 @@ $router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save'
 $router->map('GET', '/login', 'AuthController#showLogin', 'show-login');
 $router->map('POST', '/login', 'AuthController#login', 'login');
 $router->map('GET', '/logout', 'AuthController#logout', 'logout');
-
-$router->map('GET', '/betalning/auth', 'BetalningController#testAuth');
+$router->map('POST', '/register', 'AuthController#register', 'register');
+$router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
 
 $match = $router->match();
 
