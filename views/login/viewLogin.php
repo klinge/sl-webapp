@@ -79,7 +79,7 @@ include_once $APP_DIR . "/layouts/header.php";
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end mt-4">
-                                            <a href="#!">Glömt lösenord</a>
+                                            <a href="auth/bytlosenord">Glömt lösenord</a>
                                         </div>
                                     </div>
                                 </div>

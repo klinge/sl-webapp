@@ -45,6 +45,8 @@ $router->map('POST', '/login', 'AuthController#login', 'login');
 $router->map('GET', '/logout', 'AuthController#logout', 'logout');
 $router->map('POST', '/register', 'AuthController#register', 'register');
 $router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
+$router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
+$router->map('POST', '/auth/bytlosenord', 'AuthController#handleRequestPwd', 'handle-request-password');
 
 $match = $router->match();
 

@@ -86,7 +86,7 @@ class AuthController extends BaseController
 
         //Fail if user already has a password
         if ($medlem->password) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Det finns redan ett lösenord registrerat. Prova att byta lösenord.'));
+            Session::set('flash_message', array('type' => 'error', 'message' => 'Konto redan registrerat. Prova att byta lösenord.'));
             $this->render('/../views/login/viewLogin.php');
             return;
         }
@@ -159,6 +159,18 @@ class AuthController extends BaseController
         Session::set('flash_message', array('type' => 'success', 'message' => 'Ditt konto är aktiverat. Du kan nu logga in. '));
         header('Location: ' . $this->createUrl('login'));
         exit;
+    }
+
+    public function showRequestPwd() {
+        $this->render('/../views/login/viewReqPassword.php');
+    }
+
+    public function handleRequestPwd() {
+        $email = $_POST['email'];
+        $member = $this->getMemberByEmail($email);
+        var_dump($member);
+        exit;
+        
     }
 
     protected function getMemberByEmail($email)
