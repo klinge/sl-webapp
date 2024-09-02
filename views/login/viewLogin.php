@@ -14,10 +14,10 @@ include_once $APP_DIR . "/layouts/header.php";
             <div class="col-12 col-md-6 col-xl-6">
                 <div class="d-flex justify-content-center text-bg-primary">
                     <div class="col-12 col-xl-9">
-                        <img class="img-fluid rounded mb-4" loading="lazy" src="./assets/img/bsb-logo-light.svg" width="245" height="80" alt="BootstrapBrain Logo">
+                        <img class="img-fluid rounded mb-4" loading="lazy" src="./assets/img/sl-logo.png" width="245" height="80" alt="BootstrapBrain Logo">
                         <hr class="border-primary-subtle mb-4">
-                        <h2 class="h1 mb-4">Sofia Linnea</h2>
-                        <p class="lead mb-5">Medlemsregister.</p>
+                        <h2 class="h1 mb-4">Medlemsregister</h2>
+                        <p class="lead mb-5">Ett medlems- och seglingsregister för Sofia Linnea.</p>
                         <div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-grip-horizontal h2" viewBox="0 0 16 16">
                                 <path d="M2 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
@@ -118,9 +118,10 @@ include_once $APP_DIR . "/layouts/header.php";
                                                 <label for="registerPasswordRepeat" class="form-label">Repetera lösenord</label>
                                             </div>
                                         </div>
+                                        <div id="passwordError" class="alert alert-danger" style="display: none;"></div>
                                         <div class="col-12">
                                             <div class="d-grid">
-                                                <button class="btn btn-primary btn-lg" type="submit">Registrera</button>
+                                                <button class="btn btn-primary btn-lg disabled" id="registerSubmit" type="submit">Registrera</button>
                                             </div>
                                         </div>
                                     </div>
@@ -151,6 +152,7 @@ include_once $APP_DIR . "/layouts/header.php";
 
         loginForm.addEventListener('submit', function(e) {
             const username = usernameInput.value;
+            //Save email to local storage if the user selected that
             const rememberUsername = rememberCheckbox.checked;
             if (rememberUsername) {
                 localStorage.setItem('rememberedUsername', username);
@@ -167,8 +169,31 @@ include_once $APP_DIR . "/layouts/header.php";
             document.getElementById('registerEmail').value = loginEmailValue;
         });
 
+        document.getElementById('registerPassword').addEventListener('blur', checkPasswords);
+        document.getElementById('registerPasswordRepeat').addEventListener('blur', checkPasswords);
+
     });
-</Script>
+
+    function checkPasswords() {
+        const password = document.getElementById('registerPassword').value;
+        const repeatPassword = document.getElementById('registerPasswordRepeat').value;
+        const submitButton = document.getElementById('registerSubmit');
+        const errorElement = document.getElementById('passwordError');
+
+        if (password === repeatPassword && password !== '') {
+            submitButton.classList.remove('disabled');
+            errorElement.style.display = 'none';
+        } else {
+            submitButton.classList.add('disabled');
+            if (repeatPassword !== '') {
+                errorElement.textContent = 'Lösenorden matchar inte!';
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        }
+    }
+</script>
 
 <?php
 include_once $APP_DIR . "/layouts/footer.php";

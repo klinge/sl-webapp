@@ -53,3 +53,12 @@
 .form-label { 
     margin-bottom: .2rem !important; 
 }
+
+/* Set an image as background for the login page */
+.login-background {
+    background-image: url('../img/banner.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
