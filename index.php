@@ -4,14 +4,18 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
+
 //Using AltoRouter for url routing: https://dannyvankooten.github.io/AltoRouter/
-require_once __DIR__ . '/controllers/HomeController.php';
-require_once __DIR__ . '/controllers/MedlemController.php';
-require_once __DIR__ . '/controllers/SeglingController.php';
-require_once __DIR__ . '/controllers/BetalningController.php';
-require_once __DIR__ . '/controllers/AuthController.php';
-require_once __DIR__ . '/utils/Session.php';
+use AltoRouter;
+
+use App\Utils\Session;
+use App\Controllers\HomeController;
+use App\Controllers\MedlemController;
+use App\Controllers\BetalningController;
+use App\Controllers\SeglingController;
+use App\Controllers\AuthController;
+
 
 ini_set('session.cookie_httponly', 1);
 ini_set('session.use_only_cookies', 1);
@@ -65,9 +69,15 @@ function dispatch($match, $request, $router) {
         list( $controller, $action ) = explode( '#', $match['target'] );
         $params = $match['params'];
 
+        //Autoloading does not work with dynamically created classes, manually load the class
+        $controllerClass = "App\\Controllers\\{$controller}";
+        if (!class_exists($controllerClass)) {
+            throw new Exception("Controller class {$controllerClass} not found");
+        }
+
         //Check that the controller has the requested method and call it
-        if ( method_exists($controller, $action) ) {
-            $thisController = new $controller($request, $router);
+        if ( method_exists($controllerClass, $action) ) {
+            $thisController = new $controllerClass($request, $router);
             $thisController->{$action}($params);
         } 
         else {
