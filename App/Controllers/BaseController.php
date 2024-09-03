@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 use Datetime;
 use App\Utils\Session;
 use App\Utils\Database;

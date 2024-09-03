@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 class HomeController extends BaseController
 {
 

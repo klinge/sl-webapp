@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 use Exception;
 use App\Models\Betalning;
 use App\Models\BetalningRepository;

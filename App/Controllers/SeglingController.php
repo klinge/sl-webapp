@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 use App\Models\Segling;
 use App\Models\MedlemRepository;
 use App\Models\Roll;

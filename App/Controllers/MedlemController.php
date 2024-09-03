@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-require __DIR__ . '/../vendor/autoload.php';
-
 use Exception;
 use App\Models\Medlem;
 use App\Models\MedlemRepository;
