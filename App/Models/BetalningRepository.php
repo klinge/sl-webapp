@@ -1,7 +1,8 @@
 <?php
 
-require_once __DIR__ . '/../models/Betalning.php';
-require_once __DIR__ . '/../config/database.php';
+namespace App\Models;
+
+use PDO;
 
 class BetalningRepository
 {
@@ -35,9 +36,9 @@ class BetalningRepository
 
         $query = "SELECT * from Betalning WHERE medlem_id = ? ORDER BY datum DESC";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $medlemId, PDO::PARAM_INT);
+        $stmt->bindParam(1, $medlemId, \PDO::PARAM_INT);
         $stmt->execute();
-        $payments =  $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $payments =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         foreach ($payments as $payment) {
             $betalning = new Betalning($this->conn, $payment);

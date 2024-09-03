@@ -1,17 +1,17 @@
 <?php
 
+namespace App\Controllers;
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use PDO;
+use App\Utils\Session;
+use App\Models\Medlem;
 
-require __DIR__ . '/../vendor/autoload.php';
-
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../models/Medlem.php';
-require_once __DIR__ . '/../utils/Session.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 class AuthController extends BaseController
 {
-
     public function showLogin()
     {
         $this->render('/../views/login/viewLogin.php');

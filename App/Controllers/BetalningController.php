@@ -1,10 +1,13 @@
 <?php
 
+namespace App\Controllers;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../models/Betalning.php';
-require_once __DIR__ . '/../models/BetalningRepository.php';
+use Exception;
+use App\Models\Betalning;
+use App\Models\BetalningRepository;
+use App\Models\Medlem;
 
 class BetalningController extends BaseController
 {

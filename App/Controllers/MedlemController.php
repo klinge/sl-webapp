@@ -1,12 +1,14 @@
 <?php
 
+namespace App\Controllers;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../models/Medlem.php';
-require_once __DIR__ . '/../models/MedlemRepository.php';
-require_once __DIR__ . '/../models/Roll.php';
-require_once __DIR__ . '/../models/BetalningRepository.php';
+use Exception;
+use App\Models\Medlem;
+use App\Models\MedlemRepository;
+use App\Models\Roll;
+use App\Models\BetalningRepository;
 
 class MedlemController extends BaseController
 {

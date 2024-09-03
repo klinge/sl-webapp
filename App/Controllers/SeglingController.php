@@ -1,11 +1,12 @@
 <?php
 
+namespace App\Controllers;
+
 require __DIR__ . '/../vendor/autoload.php';
 
-require_once __DIR__ . '/BaseController.php';
-require_once __DIR__ . '/../models/Segling.php';
-require_once __DIR__ . '/../models/Roll.php';
-require_once __DIR__ . '/../models/MedlemRepository.php';
+use App\Models\Segling;
+use App\Models\MedlemRepository;
+use App\Models\Roll;
 
 class SeglingController extends BaseController {  
 

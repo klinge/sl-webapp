@@ -1,6 +1,10 @@
 <?php
+
+namespace App\Models;
+
+use PDO;
+
 class Roll{
-  
     // database connection and table name
     private $conn;
     private $table_name = "Roll";

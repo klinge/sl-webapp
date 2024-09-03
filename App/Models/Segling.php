@@ -1,7 +1,11 @@
 <?php
+
+namespace App\Models;
+
+use PDO;
+
 class Segling
 {
-
     // database connection and table name
     private $conn;
     private $table_name = "Segling";

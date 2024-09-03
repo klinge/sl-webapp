@@ -1,8 +1,8 @@
 <?php
 
-require __DIR__ . '/../vendor/autoload.php';
+namespace App\Controllers;
 
-require_once __DIR__ . '/BaseController.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 class HomeController extends BaseController
 {

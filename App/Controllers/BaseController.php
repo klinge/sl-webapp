@@ -1,8 +1,12 @@
 <?php
 
+namespace App\Controllers;
+
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../utils/Session.php';
+
+use Datetime;
+use App\Utils\Session;
+use App\Utils\Database;
 
 class BaseController
 {

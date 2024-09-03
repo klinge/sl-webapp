@@ -1,7 +1,12 @@
 <?php
+
+namespace App\Models;
+
+use PDO;
+use Exception;
+
 class Medlem
 {
-
     // database connection and table name
     private $conn;
     private $table_name = "Medlem";
