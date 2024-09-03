@@ -13,7 +13,7 @@ class AuthController extends BaseController
 {
     public function showLogin()
     {
-        $this->render('/../views/login/viewLogin.php');
+        $this->render('login/viewLogin');
     }
 
     public function login()
@@ -26,14 +26,14 @@ class AuthController extends BaseController
         //User not found
         if (!$result) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! INTEIDB'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
         }
         //Catch exception if medlem not found
         try {
             $medlem = new Medlem($this->conn, $result['id']);
         } catch (Exception $e) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
         }
         //Verify providedPassword with password from db
         if (password_verify($providedPassword, $medlem->password)) {
@@ -43,11 +43,11 @@ class AuthController extends BaseController
             if ($medlem->isAdmin) {
                 Session::set('isAdmin', true);
             }
-            $this->render('/../views/home.php');
+            $this->render('home');
             return true;
         } else {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! FELLÖSEN'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
         }
     }
 
@@ -69,7 +69,7 @@ class AuthController extends BaseController
         //First validate that the passwords match
         if ($password != $repeatPassword) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Lösenorden matchar inte!'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
             return;
         }
         //Then check if the user exists and already has a password
@@ -77,7 +77,7 @@ class AuthController extends BaseController
         //Fail if user does not exist
         if (!$result) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Det finns ingen medlem med den emailadressen. Du måste vara medlem för att kunna registrera dig.'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
             return;
         }
 
@@ -86,7 +86,7 @@ class AuthController extends BaseController
         //Fail if user already has a password
         if ($medlem->password) {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Konto redan registrerat. Prova att byta lösenord.'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
             return;
         }
         //Save hashed password and generate a token to be sent by mail to the user
@@ -107,16 +107,16 @@ class AuthController extends BaseController
             try {
                 $this->sendVerificationEmail($email, $token);
                 Session::set('flash_message', array('type' => 'success', 'message' => 'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'));
-                $this->render('/../views/login/viewLogin.php');
+                $this->render('viewLogin');
                 return;
             } catch (Exception $e) {
                 Session::set('flash_message', array('type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ')'));
-                $this->render('/../views/login/viewLogin.php');
+                $this->render('login/viewLogin');
                 return;
             }
         } else {
             Session::set('flash_message', array('type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen.'));
-            $this->render('/../views/login/viewLogin.php');
+            $this->render('login/viewLogin');
             return;
         }
     }
@@ -161,7 +161,7 @@ class AuthController extends BaseController
     }
 
     public function showRequestPwd() {
-        $this->render('/../views/login/viewReqPassword.php');
+        $this->render('login/viewReqPassword');
     }
 
     public function handleRequestPwd() {

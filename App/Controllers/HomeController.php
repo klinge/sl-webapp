@@ -7,6 +7,6 @@ class HomeController extends BaseController
 
   public function index()
   {
-    $this->render('/../views/home.php');
+    $this->render('home');
   }
 }

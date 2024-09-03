@@ -20,7 +20,7 @@ class BetalningController extends BaseController
             "title" => "Betalningslista",
             "items" => $result
         );
-        $this->render('/../views/viewBetalning.php', $data);
+        $this->render('viewBetalning', $data);
     }
 
     public function getBetalning(array $params)
@@ -53,7 +53,7 @@ class BetalningController extends BaseController
                 "title" => "Inga betalningar hittades"
               );
         }
-        $this->render('/../views/viewBetalning.php', $data);
+        $this->render('viewBetalning', $data);
     }
 
     public function createBetalning(array $params)

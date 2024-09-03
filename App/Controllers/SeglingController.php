@@ -17,7 +17,7 @@ class SeglingController extends BaseController {
             "title" => "Bokningslista",
             "items" => $result
           );
-        $this->render('/../views/viewSegling.php', $data);
+        $this->render('viewSegling', $data);
     }
 
     public function edit(array $params){
@@ -49,7 +49,7 @@ class SeglingController extends BaseController {
             "allaBatsman" => $allaBatsman,
             "allaKockar" => $allaKockar
           );
-        $this->render('/../views/viewSeglingEdit.php', $data);
+        $this->render('viewSeglingEdit', $data);
     }
 
     public function save(array $params) {

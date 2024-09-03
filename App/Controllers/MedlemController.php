@@ -22,7 +22,7 @@ class MedlemController extends BaseController
       "items" => $result,
       'newAction' => $this->router->generate('medlem-new')
     );
-    $this->render('/../views/viewMedlem.php', $data);
+    $this->render('viewMedlem', $data);
   }
 
   public function edit(array $params)
@@ -52,7 +52,7 @@ class MedlemController extends BaseController
         'listBetalningAction' => $this->router->generate('betalning-medlem', ['id' => $id]),
         'deleteAction' => $this->router->generate('medlem-delete')
       );
-      $this->render('/../views/viewMedlemEdit.php', $data);
+      $this->render('viewMedlemEdit', $data);
     } catch (Exception $e) {
       $_SESSION['flash_message'] = array('type' => 'error', 'message' => 'Kunde inte hämta medlem!');
       $redirectUrl = $this->router->generate('medlem-list');
@@ -122,7 +122,7 @@ class MedlemController extends BaseController
       //Used in the view to set the proper action url for the form
       'formAction' => $this->router->generate('medlem-create')
     );
-    $this->render('/../views/viewMedlemNew.php', $data);
+    $this->render('viewMedlemNew', $data);
   }
 
   public function insertNew()

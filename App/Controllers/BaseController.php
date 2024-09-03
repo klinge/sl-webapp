@@ -33,11 +33,11 @@ class BaseController
     ];
   }
 
-  protected function render(string $viewUrl, array $data = [])
+  protected function render(string $viewName, array $data = [])
   {
     // Merge the session data with the view-specific data
     $viewData = array_merge($this->sessionData, $data);
-    require __DIR__ . $viewUrl;
+    require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
   }
 
   private function getDatabaseConn()
