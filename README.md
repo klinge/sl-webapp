@@ -3,7 +3,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 
 
 ## TODO (v0.9): 
-* DONE: Auth: add a register user form - only allow existing members to register #1
+* DONE Auth: add a register user form - only allow existing members to register #1
 * Auth: add a reset password flow
 * Auth: add controller->requireAuth() to access all pages
 * Auth: direct admin and non-admin to different pages after login
@@ -14,7 +14,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Segling: delete a Segling
 * Refactor: refactor the controller->render()-code to use a view-class
 * Refactor: create an Application class and use dotenv for global config
-* Refactor: introduce namespaces in entire application and move to a proper directory structure
+* DONE Refactor: introduce namespaces in entire application and move to a proper directory structure
 
 
 ## Longer term TODO (v1.0): 
