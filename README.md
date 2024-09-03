@@ -13,7 +13,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Segling: Create new Segling
 * Segling: delete a Segling
 * Refactor: refactor the controller->render()-code to use a view-class
-* Refactor: create an Application class and use dotenv for global config
+* DONE Refactor: create an Application class and use dotenv for global config
+* Refactor: Use global config and remove config values from classes
 * DONE Refactor: introduce namespaces in entire application and move to a proper directory structure
 
 
