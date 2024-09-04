@@ -15,6 +15,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Refactor: refactor the controller->render()-code to use a view-class
 * Refactor: database class
 * Refactor: remove PHP CodeSniff errors
+* Refactor: ensure consistent naming for CRUD operations..
+* Refactor: add DocBlocks for all classes
 * DONE Refactor: remove config.php and fix depending code (mostly views)
 * DONE Refactor: create an Application class and use dotenv for global config
 * DONE Refactor: introduce namespaces in entire application and move to a proper directory structure
@@ -23,6 +25,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 ## Longer term TODO (v1.0): 
 * Selfservice: Add a page to let members update their personal information
 * Medlem: Add more fields to Medlem (like last-login, received-mails, etc)
-* Refactor: ensure consistent naming for CRUD operations..
+* Aktier: db, relations to Medlem, controller and views
+
 
 
