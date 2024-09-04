@@ -5,7 +5,7 @@ $page_title = '404';
 include_once $APP_DIR . "/layouts/header.php";
 ?>
 
-404
+TODO - Gör en riktig 404-sida
 
 <?php // footer
 include_once $APP_DIR . "/layouts/footer.php";

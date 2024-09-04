@@ -52,6 +52,9 @@ class Application
         $this->router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
         $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
         $this->router->map('POST', '/auth/bytlosenord', 'AuthController#handleRequestPwd', 'handle-request-password');
+
+        //Route all other urls to 404
+        $this->router->map('GET|POST', '*', 'HomeController#PageNotFound', '404');
     }
 
     private function dispatch($match, $request, $router)

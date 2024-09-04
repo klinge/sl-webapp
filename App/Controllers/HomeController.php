@@ -9,4 +9,9 @@ class HomeController extends BaseController
   {
     $this->render('home');
   }
+
+  public function PageNotFound()
+  {
+    $this->render('404');
+  }
 }
