@@ -2,9 +2,6 @@
 // enable debug info
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
-
-$config = require './config/config.php';
-$APP_DIR = $config['APP_DIR'];
 ?>
 
 <!doctype html>
@@ -83,15 +80,15 @@ $APP_DIR = $config['APP_DIR'];
 
                     <?php if (isset($viewData) && $viewData['isLoggedIn']) : ?>
                         <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">
-                            Inloggad: <?= $viewData['fornamn'] ?>
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdown05">
-                            <li><a class="dropdown-item" href="/sl-webapp/logout">Logout</a></li>
-                            <li><a class="dropdown-item" href="#">Another action</a></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
-                        </ul>
-                    </li>
+                            <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">
+                                Inloggad: <?= $viewData['fornamn'] ?>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="dropdown05">
+                                <li><a class="dropdown-item" href="/sl-webapp/logout">Logout</a></li>
+                                <li><a class="dropdown-item" href="#">Another action</a></li>
+                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            </ul>
+                        </li>
                     <?php else : ?>
                         <li class="nav-item">
                             <a class="nav-link" href="/sl-webapp/login">Logga in</a>
