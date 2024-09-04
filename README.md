@@ -12,6 +12,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Segling: Fix viewSeglingEdit to allow adding and deleting participants on a segling
 * Segling: Create new Segling
 * Segling: delete a Segling
+* Other: make a proper 404 page
 * Refactor: refactor the controller->render()-code to use a view-class
 * Refactor: database class
 * Refactor: remove PHP CodeSniff errors
