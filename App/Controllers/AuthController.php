@@ -160,16 +160,17 @@ class AuthController extends BaseController
         exit;
     }
 
-    public function showRequestPwd() {
+    public function showRequestPwd()
+    {
         $this->render('login/viewReqPassword');
     }
 
-    public function handleRequestPwd() {
+    public function handleRequestPwd()
+    {
         $email = $_POST['email'];
         $member = $this->getMemberByEmail($email);
         var_dump($member);
         exit;
-        
     }
 
     protected function getMemberByEmail($email)
@@ -201,8 +202,8 @@ class AuthController extends BaseController
         //Create mail object and connect to smtp server - using Mailtrap for testing
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host = 'sandbox.smtp.mailtrap.io';
-        $mail->Port = 2525; //Valid ports are 25, 465, 587, 2525
+        $mail->Host = $this->app->getConfig("SMTP_HOST");
+        $mail->Port = $this->app->getConfig("SMTP_PORT"); //Valid ports are 25, 465, 587, 2525
         $mail->SMTPAuth = true;
         /*
         $mail->SMTPOptions = array(
@@ -215,8 +216,8 @@ class AuthController extends BaseController
         );
         */
         $mail->Timeout = 30; //set timeout to 30 seconds
-        $mail->Username = '7c02b152bb0bd1';
-        $mail->Password = 'b91a655e90b877';
+        $mail->Username = $this->app->getConfig("SMTP_USERNAME");
+        $mail->Password = $this->app->getConfig("SMTP_PASSWORD");
         $mail->SMTPDebug = 3;
 
         //Set email content
