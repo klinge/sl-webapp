@@ -1,7 +1,6 @@
 <?php
 
-$config = require './config/config.php';
-$APP_DIR = $config['APP_DIR'];
+$APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = "Begär nytt lösenord";

@@ -1,6 +1,5 @@
 <?php
-$config = require './config/config.php';
-$APP_DIR = $config['APP_DIR'];
+$APP_DIR = $viewData['APP_DIR'];
 // set page headers
 $page_title = "";
 include_once $APP_DIR . "/layouts/header.php";

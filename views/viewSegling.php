@@ -3,8 +3,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
-$config = require './config/config.php';
-$APP_DIR = $config['APP_DIR'];
+$APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = $viewData['title'];
@@ -32,15 +31,15 @@ $num = sizeof($seglingar);
         </tr>
     </thead>
     <tbody>
-    <?php foreach ($seglingar as $segling) : 
-        //fetch who has what role
-        $skeppare = $segling->getDeltagareByRoleName("Skeppare");
-        $skepparNamn = $skeppare ? $skeppare[0]['fornamn'] . " " . $skeppare[0]['efternamn'] : "TBD";
-        $batsman = $segling->getDeltagareByRoleName("Båtsman");
-        $batsmanNamn = $batsman ? $batsman[0]['fornamn'] . " " . $batsman[0]['efternamn'] : "TBD";
-        $kock = $segling->getDeltagareByRoleName("Kock");
-        $kockNamn = $kock ? $kock[0]['fornamn'] . " " . $kock[0]['efternamn'] : "TBD";
-    ?>
+        <?php foreach ($seglingar as $segling) :
+            //fetch who has what role
+            $skeppare = $segling->getDeltagareByRoleName("Skeppare");
+            $skepparNamn = $skeppare ? $skeppare[0]['fornamn'] . " " . $skeppare[0]['efternamn'] : "TBD";
+            $batsman = $segling->getDeltagareByRoleName("Båtsman");
+            $batsmanNamn = $batsman ? $batsman[0]['fornamn'] . " " . $batsman[0]['efternamn'] : "TBD";
+            $kock = $segling->getDeltagareByRoleName("Kock");
+            $kockNamn = $kock ? $kock[0]['fornamn'] . " " . $kock[0]['efternamn'] : "TBD";
+        ?>
             <tr>
                 <td><?= $segling->id ?></td>
                 <td><?= $segling->start_dat ?></td>

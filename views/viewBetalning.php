@@ -1,19 +1,15 @@
 <?php
 
-$config = require './config/config.php';
-$APP_DIR = $config['APP_DIR'];
+$APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = $data['title'];
 include_once $APP_DIR . "/layouts/header.php";
 
-if(isset($data['items'])) 
-{
+if (isset($data['items'])) {
     $num = sizeof($viewData['items']);
     $result = $viewData['items'];
-}
-else 
-{
+} else {
     $num = 0;
     $result = [];
 }
@@ -34,7 +30,7 @@ else
         </tr>
     </thead>
     <tbody>
-        <?php foreach($result as $betalning): ?>
+        <?php foreach ($result as $betalning): ?>
             <tr>
                 <td><?= $betalning->id ?></td>
                 <td><?= $betalning->medlem_id ?></td>
@@ -63,5 +59,5 @@ else
 </script>
 
 <?php // footer
-    include_once $APP_DIR . "/layouts/footer.php";
+include_once $APP_DIR . "/layouts/footer.php";
 ?>
