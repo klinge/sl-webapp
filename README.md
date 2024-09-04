@@ -16,6 +16,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Refactor: create an Application class and use dotenv for global config
 * Refactor: Use global config and remove config values from classes
 * DONE Refactor: introduce namespaces in entire application and move to a proper directory structure
+* Refactor: remove config.php and fix depending code (mostly views)
 
 
 ## Longer term TODO (v1.0): 

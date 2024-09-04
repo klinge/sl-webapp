@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<ruleset name="SL Webapp Coding Standard">
+    <description>Coding standard for SL Webapp project</description>
+
+    <!-- Scan all files in directory -->
+    <file>.</file>
+
+    <!-- Ignore vendor directory -->
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+
+    <!-- Use PSR-12 as a base -->
+    <rule ref="PSR12"/>
+
+    <!-- Additional rules -->
+    <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+    <rule ref="Generic.Formatting.SpaceAfterCast"/>
+    <rule ref="Generic.Functions.FunctionCallArgumentSpacing"/>
+    <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
+    <rule ref="Generic.PHP.LowerCaseConstant"/>
+    <rule ref="Generic.PHP.LowerCaseKeyword"/>
+    <rule ref="Generic.WhiteSpace.IncrementDecrementSpacing"/>
+
+    <!-- Line length -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="120"/>
+        </properties>
+    </rule>
+
+    <!-- Use color in output -->
+    <arg name="colors"/>
+
+    <!-- Show progress -->
+    <arg value="p"/>
+    <!-- Only scan php files -->
+    <arg name="extensions" value="php"/>
+</ruleset>
