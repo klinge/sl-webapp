@@ -70,8 +70,8 @@ class Application
 
             //Check that the controller has the requested method and call it
             if (method_exists($controllerClass, $action)) {
-                $thisController = new $controllerClass($request, $router);
-                $thisController->{$action}($params);
+                $controllerInstance = new $controllerClass($this, $request, $router);
+                $controllerInstance->{$action}($params);
             } else {
                 echo 'Error: can not call ' . $controller . '#' . $action;
                 //possibly throw a 404 error
@@ -97,6 +97,12 @@ class Application
         $this->config = array_map(function ($value) {
             return $value === 'true' ? true : ($value === 'false' ? false : $value);
         }, $_ENV);
+    }
+
+
+    public function getAppDir()
+    {
+        return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
     }
 
     public function getConfig($key)

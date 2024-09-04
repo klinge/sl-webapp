@@ -13,10 +13,12 @@ class BaseController
   protected $request;
   protected $router;
   protected $sessionData;
+  protected $app;
 
-  public function __construct($request, $router)
+  public function __construct($app, $request, $router)
   {
     Session::start();
+    $this->app = $app;
     $this->initializeSessionData();
     $this->request = $request;
     $this->conn = $this->getDatabaseConn();
@@ -37,6 +39,7 @@ class BaseController
   {
     // Merge the session data with the view-specific data
     $viewData = array_merge($this->sessionData, $data);
+    $viewData['APP_DIR'] = $this->app->getAppDir();
     require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
   }
 
@@ -66,7 +69,8 @@ class BaseController
     exit;
   }
 
-  protected function createUrl(string $routeName, array $params = []) {
+  protected function createUrl(string $routeName, array $params = [])
+  {
     return $this->router->generate($routeName, $params);
   }
 
