@@ -9,118 +9,118 @@ use App\Utils\Database;
 class BaseController
 {
 
-  protected $conn;
-  protected $request;
-  protected $router;
-  protected $sessionData;
-  protected $app;
+    protected $conn;
+    protected $request;
+    protected $router;
+    protected $sessionData;
+    protected $app;
 
-  public function __construct($app, $request, $router)
-  {
-    Session::start();
-    $this->app = $app;
-    $this->initializeSessionData();
-    $this->request = $request;
-    $this->conn = $this->getDatabaseConn();
-    $this->router = $router;
-  }
-
-  protected function initializeSessionData()
-  {
-    $this->sessionData = [
-      'isLoggedIn' => Session::isLoggedIn(),
-      'userId' => Session::get('user_id'),
-      'fornamn' => Session::get('fornamn'),
-      'isAdmin' => Session::isAdmin()
-    ];
-  }
-
-  protected function render(string $viewName, array $data = [])
-  {
-    // Merge the session data with the view-specific data
-    $viewData = array_merge($this->sessionData, $data);
-    $viewData['APP_DIR'] = $this->app->getAppDir();
-    require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
-  }
-
-  private function getDatabaseConn()
-  {
-    // get database connection
-    $database = new Database();
-    return $database->getConnection();
-  }
-
-  protected function jsonResponse(array $data)
-  {
-    // Set the content type to JSON
-    header('Content-Type: application/json');
-
-    // Encode the data as JSON
-    $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-
-    // Check for encoding errors
-    if (json_last_error() !== JSON_ERROR_NONE) {
-      // Handle encoding errors gracefully
-      $jsonData = json_encode(['success' => false, 'message' => 'Error encoding data']);
+    public function __construct($app, $request, $router)
+    {
+        Session::start();
+        $this->app = $app;
+        $this->initializeSessionData();
+        $this->request = $request;
+        $this->conn = $this->getDatabaseConn();
+        $this->router = $router;
     }
 
-    // Send the JSON response
-    echo $jsonData;
-    exit;
-  }
-
-  protected function createUrl(string $routeName, array $params = [])
-  {
-    return $this->router->generate($routeName, $params);
-  }
-
-
-  protected function sanitizeInput($data)
-  {
-    if (!empty($data)) {
-      $data = trim($data); // Remove leading and trailing whitespace
-      $data = stripslashes($data); // Remove backslashes
-
-      // Sanitize based on data type
-      if (is_numeric($data)) {
-        $data = intval($data); // Convert to integer (removes non-numeric characters)
-      } else if (filter_var($data, FILTER_VALIDATE_EMAIL)) {
-        $data = filter_var($data, FILTER_SANITIZE_EMAIL);
-      } else if (is_string($data)) {
-        $data = htmlspecialchars($data, ENT_QUOTES); // Escape special characters for HTML output
-      } else {
-        // TODO Handle other data types or throw an exception for unexpected types
-      }
-
-      return $data;
-    } else {
-      return $data;
+    protected function initializeSessionData()
+    {
+        $this->sessionData = [
+            'isLoggedIn' => Session::isLoggedIn(),
+            'userId' => Session::get('user_id'),
+            'fornamn' => Session::get('fornamn'),
+            'isAdmin' => Session::isAdmin()
+        ];
     }
-  }
 
-  protected function validateDate($date)
-  {
-    $d = DateTime::createFromFormat('Y-m-d', $date);
-    return $d && $d->format('Y-m-d') === $date ? $date : false;
-  }
-
-  protected function requireAuth()
-  {
-    Session::start();
-    if (!Session::isLoggedIn()) {
-      return false;
-      //TODO redirect to login page, maybe keeping the url in the session to redirect back to after login
+    protected function render(string $viewName, array $data = [])
+    {
+        // Merge the session data with the view-specific data
+        $viewData = array_merge($this->sessionData, $data);
+        $viewData['APP_DIR'] = $this->app->getAppDir();
+        require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
     }
-    return true;
-  }
 
-  protected function requireAuthAdmin()
-  {
-    Session::start();
-    if (!Session::isAdmin()) {
-      return false;
-      //TODO show error message to user 
+    private function getDatabaseConn()
+    {
+        // get database connection
+        $database = new Database();
+        return $database->getConnection();
     }
-    return true;
-  }
+
+    protected function jsonResponse(array $data)
+    {
+        // Set the content type to JSON
+        header('Content-Type: application/json');
+
+        // Encode the data as JSON
+        $jsonData = json_encode($data, JSON_PRETTY_PRINT);
+
+        // Check for encoding errors
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Handle encoding errors gracefully
+            $jsonData = json_encode(['success' => false, 'message' => 'Error encoding data']);
+        }
+
+        // Send the JSON response
+        echo $jsonData;
+        exit;
+    }
+
+    protected function createUrl(string $routeName, array $params = [])
+    {
+        return $this->router->generate($routeName, $params);
+    }
+
+
+    protected function sanitizeInput($data)
+    {
+        if (!empty($data)) {
+            $data = trim($data); // Remove leading and trailing whitespace
+            $data = stripslashes($data); // Remove backslashes
+
+            // Sanitize based on data type
+            if (is_numeric($data)) {
+                $data = intval($data); // Convert to integer (removes non-numeric characters)
+            } elseif (filter_var($data, FILTER_VALIDATE_EMAIL)) {
+                $data = filter_var($data, FILTER_SANITIZE_EMAIL);
+            } elseif (is_string($data)) {
+                $data = htmlspecialchars($data, ENT_QUOTES); // Escape special characters for HTML output
+            } else {
+                // TODO Handle other data types or throw an exception for unexpected types
+            }
+
+            return $data;
+        } else {
+            return $data;
+        }
+    }
+
+    protected function validateDate($date)
+    {
+        $d = DateTime::createFromFormat('Y-m-d', $date);
+        return $d && $d->format('Y-m-d') === $date ? $date : false;
+    }
+
+    protected function requireAuth()
+    {
+        Session::start();
+        if (!Session::isLoggedIn()) {
+            return false;
+            //TODO redirect to login page, maybe keeping the url in the session to redirect back to after login
+        }
+        return true;
+    }
+
+    protected function requireAuthAdmin()
+    {
+        Session::start();
+        if (!Session::isAdmin()) {
+            return false;
+            //TODO show error message to user
+        }
+        return true;
+    }
 }

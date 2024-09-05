@@ -6,11 +6,13 @@ use PDO;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use App\Utils\Session;
+use App\Utils\Email;
+use App\Utils\EmailType;
 use App\Models\Medlem;
-
 
 class AuthController extends BaseController
 {
+
     public function showLogin()
     {
         $this->render('login/viewLogin');
@@ -25,14 +27,20 @@ class AuthController extends BaseController
 
         //User not found
         if (!$result) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! INTEIDB'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! INTEIDB']
+            );
             $this->render('login/viewLogin');
         }
         //Catch exception if medlem not found
         try {
             $medlem = new Medlem($this->conn, $result['id']);
         } catch (Exception $e) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA']
+            );
             $this->render('login/viewLogin');
         }
         //Verify providedPassword with password from db
@@ -46,7 +54,10 @@ class AuthController extends BaseController
             $this->render('home');
             return true;
         } else {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! FELLÖSEN'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Felaktig e-postadress eller lösenord! FELLÖSEN']
+            );
             $this->render('login/viewLogin');
         }
     }
@@ -63,12 +74,16 @@ class AuthController extends BaseController
 
     public function register()
     {
+
         $email = $_POST['email'];
         $password = $_POST['password'];
         $repeatPassword = $_POST['passwordRepeat'];
         //First validate that the passwords match
         if ($password != $repeatPassword) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Lösenorden matchar inte!'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Lösenorden matchar inte!']
+            );
             $this->render('login/viewLogin');
             return;
         }
@@ -76,7 +91,10 @@ class AuthController extends BaseController
         $result = $this->getMemberByEmail($email);
         //Fail if user does not exist
         if (!$result) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Det finns ingen medlem med den emailadressen. Du måste vara medlem för att kunna registrera dig.'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Det finns ingen medlem med den emailadressen. Du måste vara medlem för att kunna registrera dig.']
+            );
             $this->render('login/viewLogin');
             return;
         }
@@ -85,7 +103,10 @@ class AuthController extends BaseController
 
         //Fail if user already has a password
         if ($medlem->password) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Konto redan registrerat. Prova att byta lösenord.'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Konto redan registrerat. Prova att byta lösenord.']
+            );
             $this->render('login/viewLogin');
             return;
         }
@@ -94,11 +115,15 @@ class AuthController extends BaseController
         //$token = bin2hex(random_bytes(16));
         //Changed to make url-safe tokens only containing alphanumeric characters
         $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(18)));
+        $token_type = 'activate';
 
         //Add values to AuthToken table
-        $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, password_hash) VALUES (:email, :token, :password_hash)");
+        $stmt = $this->conn->prepare(
+            "INSERT INTO AuthToken (email, token, token_type, password_hash) VALUES (:email, :token, :token_type, :password_hash)"
+        );
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':token', $token);
+        $stmt->bindParam(':token_type', $token_type);
         $stmt->bindParam(':password_hash', $hashedPassword);
         $stmt->execute();
 
@@ -106,16 +131,25 @@ class AuthController extends BaseController
             //Send email with token
             try {
                 $this->sendVerificationEmail($email, $token);
-                Session::set('flash_message', array('type' => 'success', 'message' => 'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'));
+                Session::set(
+                    'flash_message',
+                    ['type' => 'success', 'message' => 'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.']
+                );
                 $this->render('viewLogin');
                 return;
             } catch (Exception $e) {
-                Session::set('flash_message', array('type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ')'));
+                Session::set(
+                    'flash_message',
+                    ['type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ')']
+                );
                 $this->render('login/viewLogin');
                 return;
             }
         } else {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen.'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen.']
+            );
             $this->render('login/viewLogin');
             return;
         }
@@ -123,6 +157,7 @@ class AuthController extends BaseController
 
     public function activate(array $params)
     {
+
         $token = $params['token'];
         //Get token from db
         $stmt = $this->conn->prepare("SELECT * FROM AuthToken WHERE token = :token");
@@ -131,14 +166,20 @@ class AuthController extends BaseController
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         //Fail if token not found
         if (!$result) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Ogiltig verifieringslänk.'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Ogiltig verifieringslänk.']
+            );
             header('Location: ' . $this->createUrl('login'));
             exit;
         }
         //Fail if token is expired
         $expirationTime = strtotime($result['created_at']) + (60 * 15); // 15 minutes in seconds
         if (time() > $expirationTime) {
-            Session::set('flash_message', array('type' => 'error', 'message' => 'Verifieringslänken har gått ut. Försök igen.'));
+            Session::set(
+                'flash_message',
+                ['type' => 'error', 'message' => 'Verifieringslänken har gått ut. Försök igen.']
+            );
             header('Location: ' . $this->createUrl('login'));
             exit;
         }
@@ -155,7 +196,10 @@ class AuthController extends BaseController
         $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE created_at < datetime('now', '-1 hour')");
         $stmt->execute();
 
-        Session::set('flash_message', array('type' => 'success', 'message' => 'Ditt konto är aktiverat. Du kan nu logga in. '));
+        Session::set(
+            'flash_message',
+            ['type' => 'success', 'message' => 'Ditt konto är aktiverat. Du kan nu logga in. ']
+        );
         header('Location: ' . $this->createUrl('login'));
         exit;
     }
@@ -165,12 +209,46 @@ class AuthController extends BaseController
         $this->render('login/viewReqPassword');
     }
 
-    public function handleRequestPwd()
+    public function sendPwdRequestToken()
     {
         $email = $_POST['email'];
         $member = $this->getMemberByEmail($email);
-        var_dump($member);
-        exit;
+        if ($member) {
+            //Generate a token and save it in the database
+            $token = bin2hex(random_bytes(16));
+            $token_type = 'reset';
+
+            $stmt = $this->conn->prepare(
+                "INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)"
+            );
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':token', $token);
+            $stmt->bindParam(':token_type', $token_type);
+            $stmt->execute();
+
+            $mailer = new Email($this->app);
+            $data = [
+                'token' => $token,
+                'fornamn' => $member['fornamn']
+            ];
+
+            try {
+                $mailer->send(EmailType::TEST, $email, data: $data);
+                Session::set(
+                    'flash_message',
+                    ['type' => 'success', 'message' => 'E-post med återställningslänk har skickats till din e-postadress. Klicka på länken i e-posten för att återställa lösenordet.']
+                );
+                $this->render('login/viewLogin');
+                return;
+            } catch (Exception $e) {
+                Session::set(
+                    'flash_message',
+                    ['type' => 'error', 'message' => 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ')']
+                );
+                $this->render('login/viewLogin');
+                return;
+            }
+        }
     }
 
     protected function getMemberByEmail($email)
@@ -182,7 +260,7 @@ class AuthController extends BaseController
         return $result;
     }
 
-    function sendVerificationEmail($email, $token)
+    private function sendVerificationEmail($email, $token)
     {
         // Replace with your desired email settings
         $senderEmail = 'info@sofialinnea.se';

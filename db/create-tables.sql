@@ -93,6 +93,7 @@ CREATE TABLE AuthToken (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email VARCHAR(255) NOT NULL,
     token VARCHAR(255) NOT NULL,
+    token_type VARCHAR(16) NOT NULL,
     password_hash VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );

@@ -51,7 +51,9 @@ class Application
         $this->router->map('POST', '/register', 'AuthController#register', 'register');
         $this->router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
         $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
-        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#handleRequestPwd', 'handle-request-password');
+        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
+        $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showChangePassword', 'show-change-password');
+        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#changePassword', 'change-password');
 
         //Route all other urls to 404
         $this->router->map('GET|POST', '*', 'HomeController#PageNotFound', '404');
@@ -79,9 +81,8 @@ class Application
                 echo 'Error: can not call ' . $controller . '#' . $action;
                 //possibly throw a 404 error
             }
-        }
-        //Handle the case then the target is a closure
-        else if (is_array($match) && is_callable($match['target'])) {
+        } elseif (is_array($match) && is_callable($match['target'])) {
+            //Handle the case then the target is a closure
             call_user_func_array($match['target'], $match['params']);
         } else {
             header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
