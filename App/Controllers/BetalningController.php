@@ -9,8 +9,6 @@ use App\Models\Medlem;
 
 class BetalningController extends BaseController
 {
-
-
     public function list()
     {
         $betalningar = new BetalningRepository($this->conn);

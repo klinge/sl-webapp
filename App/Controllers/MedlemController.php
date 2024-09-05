@@ -10,7 +10,6 @@ use App\Models\BetalningRepository;
 
 class MedlemController extends BaseController
 {
-
     public function list()
     {
         $medlemRepo = new MedlemRepository($this->conn);

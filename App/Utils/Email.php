@@ -25,8 +25,8 @@ class Email
         $this->mailer->SMTPAuth = true;
         $this->mailer->Username = $this->app->getConfig("SMTP_USERNAME");
         $this->mailer->Password = $this->app->getConfig("SMTP_PASSWORD");
-        $this->mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $this->mailer->Port = $this->app->getConfig("SMTP_PORT");
+        $this->mailer->Timeout = 20;
         $this->mailer->SMTPDebug = 3;
         /*
         $this->mailer->SMTPOptions = array(
@@ -85,10 +85,11 @@ class Email
             $this->mailer->Body = $template;
 
             $this->mailer->send();
+
+            unset($this->mailer);
             return true;
         } catch (Exception $e) {
             throw new Exception("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
-            return false;
         }
     }
 

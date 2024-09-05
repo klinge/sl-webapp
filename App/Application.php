@@ -52,8 +52,8 @@ class Application
         $this->router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
         $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
         $this->router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
-        $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showChangePassword', 'show-change-password');
-        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#changePassword', 'change-password');
+        $this->router->map('GET', '/auth/bytlosenord/[a:token]', 'AuthController#showResetPassword', 'show-reset-password');
+        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#resetPassword', 'reset-password');
 
         //Route all other urls to 404
         $this->router->map('GET|POST', '*', 'HomeController#PageNotFound', '404');
