@@ -5,6 +5,7 @@ namespace App\Utils;
 use App\Application;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use PHPMailer\PHPMailer\SMTP;
 
 class Email
 {
@@ -27,7 +28,7 @@ class Email
         $this->mailer->Password = $this->app->getConfig("SMTP_PASSWORD");
         $this->mailer->Port = $this->app->getConfig("SMTP_PORT");
         $this->mailer->Timeout = 20;
-        $this->mailer->SMTPDebug = SMTP::DEBUG_OFF; //SMTP::DEBUG_SERVER, SMTP::DEBUG_CONNECTION
+        $this->mailer->SMTPDebug = SMTP::DEBUG_OFF;
     }
 
     public function send(EmailType $type, string $to, string $subject = null, array $data = [])
@@ -63,7 +64,7 @@ class Email
                 throw new \InvalidArgumentException("Unsupported email type: {$type->value}");
         }
         $fromName = $this->app->getConfig("SMTP_FROM_NAME");
-        $fromMail = $this->app->getConfig("SMTP_FROM_MAIL");
+        $fromMail = $this->app->getConfig("SMTP_FROM_EMAIL");
         try {
             $this->mailer->setFrom($fromMail, $fromName);
             $this->mailer->addAddress($to);
