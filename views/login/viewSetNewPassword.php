@@ -7,7 +7,6 @@ $BASE_URL = $viewData['BASE_URL'];
 $page_title = "";
 include_once $APP_DIR . "/layouts/header.php";
 
-echo "BASE_URL är: " . $viewData['BASE_URL'];
 ?>
 
 
