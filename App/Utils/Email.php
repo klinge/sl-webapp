@@ -27,17 +27,7 @@ class Email
         $this->mailer->Password = $this->app->getConfig("SMTP_PASSWORD");
         $this->mailer->Port = $this->app->getConfig("SMTP_PORT");
         $this->mailer->Timeout = 20;
-        $this->mailer->SMTPDebug = 3;
-        /*
-        $this->mailer->SMTPOptions = array(
-            'ssl' => array(
-                'cafile' => '/etc/ssl/certs/ca-certificates.crt',
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            )
-        );
-        */
+        $this->mailer->SMTPDebug = SMTP::DEBUG_OFF; //SMTP::DEBUG_SERVER, SMTP::DEBUG_CONNECTION
     }
 
     public function send(EmailType $type, string $to, string $subject = null, array $data = [])
@@ -72,11 +62,13 @@ class Email
             default:
                 throw new \InvalidArgumentException("Unsupported email type: {$type->value}");
         }
-
+        $fromName = $this->app->getConfig("SMTP_FROM_NAME");
+        $fromMail = $this->app->getConfig("SMTP_FROM_MAIL");
         try {
-            $this->mailer->setFrom($this->app->getConfig("SMTP_FROM_MAIL"), $this->app->getConfig("SMTP_FROM_NAME"));
+            $this->mailer->setFrom($fromMail, $fromName);
             $this->mailer->addAddress($to);
             $replyTo = $this->app->getConfig("SMTP_REPLYTO");
+            var_dump($replyTo);
             if ($replyTo) {
                 $this->mailer->addReplyTo($replyTo);
             }

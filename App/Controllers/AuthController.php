@@ -131,7 +131,7 @@ class AuthController extends BaseController
                     'success',
                     'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'
                 );
-                $this->render('viewLogin');
+                $this->render('login/viewLogin');
                 return;
             } catch (Exception $e) {
                 Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen. (' . $e->getMessage() . ')');
