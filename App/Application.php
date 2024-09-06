@@ -97,7 +97,6 @@ class Application
 
     private function loadConfig()
     {
-
         $this->config = array_map(function ($value) {
             return $value === 'true' ? true : ($value === 'false' ? false : $value);
         }, $_ENV);
@@ -109,9 +108,8 @@ class Application
         return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
     }
 
-    public function getConfig($key)
+    public function getConfig(string $key)
     {
-        var_dump($this->config);
         return $this->config[$key] ?? null;
     }
 
@@ -134,7 +132,7 @@ class Application
         $match = $this->router->match();
         // Handle the route match and execute the appropriate controller
         if ($match === false) {
-            echo "Ingen mappning för denna url";
+            echo "404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!";
             // here you can handle 404
         } else {
             $request = $_SERVER;

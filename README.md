@@ -30,6 +30,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Medlem: Add more fields to Medlem (like last-login, received-mails, etc)
 * Aktier: db, relations to Medlem, controller and views
 * Other: add phpcs and PHPStan och Psalm to Github commit workflow
+* Refactor: add PSR-7 request and response classes
 
 
 

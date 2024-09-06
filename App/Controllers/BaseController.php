@@ -3,19 +3,19 @@
 namespace App\Controllers;
 
 use Datetime;
+use App\Application;
 use App\Utils\Session;
 use App\Utils\Database;
 
 class BaseController
 {
-
     protected $conn;
     protected $request;
     protected $router;
     protected $sessionData;
     protected $app;
 
-    public function __construct($app, $request, $router)
+    public function __construct(Application $app, $request, $router)
     {
         Session::start();
         $this->app = $app;
