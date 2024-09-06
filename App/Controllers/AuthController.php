@@ -44,8 +44,16 @@ class AuthController extends BaseController
             if ($medlem->isAdmin) {
                 Session::set('isAdmin', true);
             }
-            $this->render('home');
-            return true;
+            //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
+            $redirectUrl = Session::get('redirect_url') ?? false;
+            if ($redirectUrl) {
+                Session::remove('redirect_url');
+                header('Location: ' . $redirectUrl);
+                exit;
+            } else {
+                header('Location: ' . $this->app->getBaseUrl());
+                return true;
+            }
         } else {
             Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! FELLÖSEN');
             $this->render('login/viewLogin');

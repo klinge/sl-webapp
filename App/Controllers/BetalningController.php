@@ -11,15 +11,18 @@ class BetalningController extends BaseController
 {
     public function list()
     {
-        $betalningar = new BetalningRepository($this->conn);
-        $result = $betalningar->getAll();
+        $isLoggedIn = $this->requireLogin();
+        if ($isLoggedIn) {
+            $betalningar = new BetalningRepository($this->conn);
+            $result = $betalningar->getAll();
 
-        //Put everyting in the data variable that is used by the view
-        $data = [
-            "title" => "Betalningslista",
-            "items" => $result
-        ];
-        $this->render('viewBetalning', $data);
+            //Put everyting in the data variable that is used by the view
+            $data = [
+                "title" => "Betalningslista",
+                "items" => $result
+            ];
+            $this->render('viewBetalning', $data);
+        }
     }
 
     public function getBetalning(array $params)

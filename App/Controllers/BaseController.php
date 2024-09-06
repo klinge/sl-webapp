@@ -105,19 +105,23 @@ class BaseController
         return $d && $d->format('Y-m-d') === $date ? $date : false;
     }
 
-    protected function requireAuth()
+    protected function requireLogin()
     {
-        Session::start();
-        if (!Session::isLoggedIn()) {
-            return false;
-            //TODO redirect to login page, maybe keeping the url in the session to redirect back to after login
+        if (Session::isLoggedIn()) {
+            return true;
+        } else {
+            Session::setFlashMessage('info', 'Du måste vara inloggad för att kunna visa denna sida.');
+            //Save current url in session to redirect to after login
+            $currentUrl = $this->request['REQUEST_URI'];
+            Session::set('redirect_url', $currentUrl);
+            $this->render('login/viewLogin');
+            exit;
         }
         return true;
     }
 
-    protected function requireAuthAdmin()
+    protected function requireAdmin()
     {
-        Session::start();
         if (!Session::isAdmin()) {
             return false;
             //TODO show error message to user

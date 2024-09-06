@@ -110,6 +110,8 @@ ini_set('display_errors', 'On');
             // Bootstrap alert structure
             if ($_SESSION['flash_message']['type'] === 'error') {
                 echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';
+            } elseif ($_SESSION['flash_message']['type'] === 'info') {
+                echo '<div class="alert alert-info alert-dismissible fade show" role="alert">';
             } else {
                 echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
             }
