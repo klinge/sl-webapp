@@ -230,7 +230,7 @@ class AuthController extends BaseController
         }
     }
 
-    public function resetPassword()
+    public function resetAndSavePassword()
     {
         $email = $_POST['email'];
         $token = $_POST['token'];
@@ -238,8 +238,12 @@ class AuthController extends BaseController
         $password2 = $_POST['password2'];
         //Fail if passwords don't match
         if ($password !== $password2) {
-            Session::setFlashMessage('error', 'Lösenorden stämmer inte överens.');
-            header('Location: ' . $this->createUrl('show-reset-password', ['token' => $token]));
+            Session::setFlashMessage('error', 'Lösenorden stämmer inte överens. Försök igen');
+            $viewData = [
+                'email' => $email,
+                'token' => $token
+            ];
+            $this->render('login/viewSetNewPassword', $viewData);
             return;
         }
         $member = $this->getMemberByEmail($email);
@@ -249,15 +253,18 @@ class AuthController extends BaseController
             header('Location: ' . $this->createUrl('show-request-password'));
             return;
         }
+        // Hash the new password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        // And save it to db
         $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
         $stmt->bindParam(':password', $hashedPassword);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
-        //Lastly remove token
+        // Lastly remove the token
         $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE token = :token");
         $stmt->bindParam(':token', $token);
         $stmt->execute();
+        // And send the user to the login page
         Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
         header('Location: ' . $this->createUrl('show-login'));
         return;
@@ -285,10 +292,10 @@ class AuthController extends BaseController
             return ['valid' => false, 'message' => 'Länken är inte giltig'];
         } else {
             //Check if token is expired
-            $expirationTime = strtotime($result['created_at']) + (60 * 15); // 15 minutes in seconds
+            $expirationTime = strtotime($result['created_at']) + (60 * 30); // 30 minutes in seconds
             if (time() > $expirationTime) {
                 //Also fail if token is expired
-                return ['valid' => false, 'message' => 'Länkens giltighetstid är 1 timma. Den fungerar inte längre. Försök igen'];
+                return ['valid' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
             }
             return ['valid' => true, 'email' => $result['email']];
         }

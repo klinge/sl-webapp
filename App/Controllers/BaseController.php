@@ -40,6 +40,7 @@ class BaseController
         // Merge the session data with the view-specific data
         $viewData = array_merge($this->sessionData, $data);
         $viewData['APP_DIR'] = $this->app->getAppDir();
+        $viewData['BASE_URL'] = $this->app->getBaseUrl();
         require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
     }
 

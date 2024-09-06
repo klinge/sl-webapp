@@ -53,7 +53,7 @@ class Application
         $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
         $this->router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
         $this->router->map('GET', '/auth/bytlosenord/[a:token]', 'AuthController#showResetPassword', 'show-reset-password');
-        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#resetPassword', 'reset-password');
+        $this->router->map('POST', '/auth/sparalosenord', 'AuthController#resetAndSavePassword', 'reset-password');
 
         //Route all other urls to 404
         $this->router->map('GET|POST', '*', 'HomeController#PageNotFound', '404');
@@ -106,6 +106,11 @@ class Application
     public function getAppDir()
     {
         return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
+    }
+
+    public function getBaseUrl()
+    {
+        return $this->config['APP_DIR'];
     }
 
     public function getConfig(string $key)
