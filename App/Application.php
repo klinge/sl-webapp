@@ -51,7 +51,9 @@ class Application
         $this->router->map('POST', '/register', 'AuthController#register', 'register');
         $this->router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
         $this->router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
-        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#handleRequestPwd', 'handle-request-password');
+        $this->router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
+        $this->router->map('GET', '/auth/bytlosenord/[a:token]', 'AuthController#showResetPassword', 'show-reset-password');
+        $this->router->map('POST', '/auth/sparalosenord', 'AuthController#resetAndSavePassword', 'reset-password');
 
         //Route all other urls to 404
         $this->router->map('GET|POST', '*', 'HomeController#PageNotFound', '404');
@@ -79,9 +81,8 @@ class Application
                 echo 'Error: can not call ' . $controller . '#' . $action;
                 //possibly throw a 404 error
             }
-        }
-        //Handle the case then the target is a closure
-        else if (is_array($match) && is_callable($match['target'])) {
+        } elseif (is_array($match) && is_callable($match['target'])) {
+            //Handle the case then the target is a closure
             call_user_func_array($match['target'], $match['params']);
         } else {
             header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
@@ -96,7 +97,6 @@ class Application
 
     private function loadConfig()
     {
-
         $this->config = array_map(function ($value) {
             return $value === 'true' ? true : ($value === 'false' ? false : $value);
         }, $_ENV);
@@ -108,9 +108,13 @@ class Application
         return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
     }
 
-    public function getConfig($key)
+    public function getBaseUrl()
     {
-        var_dump($this->config);
+        return $this->config['APP_DIR'];
+    }
+
+    public function getConfig(string $key)
+    {
         return $this->config[$key] ?? null;
     }
 
@@ -133,7 +137,7 @@ class Application
         $match = $this->router->match();
         // Handle the route match and execute the appropriate controller
         if ($match === false) {
-            echo "Ingen mappning för denna url";
+            echo "404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!";
             // here you can handle 404
         } else {
             $request = $_SERVER;

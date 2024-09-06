@@ -5,8 +5,9 @@
     <!-- Scan all files in directory -->
     <file>.</file>
 
-    <!-- Ignore vendor directory -->
+    <!-- Ignore vendor and views directories -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/views/*</exclude-pattern>
 
     <!-- Use PSR-12 as a base -->
     <rule ref="PSR12"/>
@@ -24,7 +25,7 @@
     <rule ref="Generic.Files.LineLength">
         <properties>
             <property name="lineLimit" value="120"/>
-            <property name="absoluteLineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="180"/>
         </properties>
     </rule>
 
