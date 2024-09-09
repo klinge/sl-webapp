@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Models\Segling;
+use App\Models\SeglingRepository;
 use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Utils\Session;
+use Exception;
 
 class SeglingController extends BaseController
 {
@@ -13,8 +15,8 @@ class SeglingController extends BaseController
     {
         $isLoggedIn = $this->requireLogin();
         if ($isLoggedIn) {
-            $segling = new Segling($this->conn);
-            $result = $segling->getAll();
+            $seglingar = new SeglingRepository($this->conn);
+            $result = $seglingar->getAllWithDeltagare();
 
             //Put everyting in the data variable that is used by the view
             $data = [
@@ -29,14 +31,15 @@ class SeglingController extends BaseController
     {
         $id = $params['id'];
         $formAction = $this->router->generate('segling-save', ['id' => $id]);
-        //Fetch member data
-        $segling = new Segling($this->conn, $id);
-
-        //Check if segling exists otherwise throw a 404
-        if (!isset($segling->id)) {
+        //Fetch Segling
+        try {
+            $segling = new Segling($this->conn, $id);
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Not Found");
             exit();
         }
+        $segling->deltagare = $segling->getDeltagare();
+
         //Fetch all available roles
         $roll = new Roll($this->conn);
         $roller = $roll->getAll();

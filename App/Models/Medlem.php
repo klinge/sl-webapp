@@ -181,8 +181,8 @@ class Medlem
     }
 
 
-    //find Seglingar a Medlem has participated in.. 
-    function getSeglingar()
+    //find Seglingar a Medlem has participated in..
+    public function getSeglingar()
     {
         $query = 'SELECT smr.medlem_id, r.roll_namn, s.skeppslag, s.startdatum
             FROM Segling_Medlem_Roll smr
@@ -234,8 +234,8 @@ class Medlem
             $stmt->execute();
         }
     }
-    
-    function updateMedlemRoles($newRoleIds)
+
+    public function updateMedlemRoles($newRoleIds)
     {
         //first remove roles from that no longer exist
         $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
@@ -247,14 +247,14 @@ class Medlem
         //then add new roles
         foreach ($newRoleIds as $roleId) {
             if (!in_array($roleId, array_column($this->roller, 'roll_id'))) {
-                $newRole = array('roll_id' => $roleId);
+                $newRole = ['roll_id' => $roleId];
                 $this->roller[] = $newRole;
             }
         }
     }
 
     //Method to check if a member has a given role
-    function hasRole($searchRole)
+    public function hasRole($searchRole)
     {
         foreach ($this->roller as $role) {
             if (isset($role['roll_id']) && $role['roll_id'] === $searchRole) {

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use PDO;
+use Exception;
 
 class Segling
 {
@@ -20,31 +21,24 @@ class Segling
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db, $id = null)
+    public function __construct($db, ?int $id = null, ?string $withdeltagare = null)
     {
         $this->conn = $db;
 
         if (isset($id)) {
-            $this->getOne($id);
+            if ($withdeltagare == 'withdeltagare') {
+                $result = $this->getSeglingWithDeltagare($id);
+            } else {
+                $result = $this->getSegling($id);
+            }
+
+            if (!$result) {
+                throw new Exception("Segling med id: " . $id . "hittades inte");
+            }
         }
     }
 
-    public function getAll()
-    {
-        $seglingar = [];
-        $query = "SELECT * FROM " . $this->table_name . " ORDER BY startdatum ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        //Create a segling object for each row in the database, this also fetches deltagare
-        foreach ($result as $row) {
-            $segling = new Segling($this->conn, $row['id']);
-            $seglingar[] = $segling;
-        }
-        return $seglingar;
-    }
-
-    function getOne($id)
+    protected function getSegling(int $id): bool
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
 
@@ -53,8 +47,8 @@ class Segling
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        //if we got a result set object values
-        if($row !== false) {
+        //if we got a result set object values else return false
+        if ($row !== false) {
             $this->id = $id;
             $this->start_dat = $row['startdatum'];
             $this->slut_dat = $row['slutdatum'];
@@ -62,22 +56,35 @@ class Segling
             $this->kommentar = $row['kommentar'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
-
-            //Get roller from junction table
-            $this->deltagare = $this->getDeltagare();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private function getDeltagare()
+    protected function getSeglingWithDeltagare(int $id): bool
     {
+        //Fetch the Segling details and populate the object
+        $result = $this->getSegling($id);
+        //Get roller from junction table
+        if ($result) {
+            $this->deltagare = $this->getDeltagare();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getDeltagare()
+    {
+        //Left join on Roll to get results even if a Medlem has no Roll for a Segling
         $query = "SELECT smr.medlem_id, m.fornamn, m.efternamn, smr.roll_id, r.roll_namn
                     FROM Segling_Medlem_Roll smr
-                    INNER JOIN Medlem m ON smr.medlem_id = m.id
-                    INNER JOIN Roll r ON smr.roll_id = r.id
-                    WHERE smr.segling_id = ?";
-
+                    JOIN Medlem m ON smr.medlem_id = m.id
+                    LEFT JOIN Roll r ON smr.roll_id = r.id
+                    WHERE smr.segling_id = :id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
+        $stmt->bindParam(':id', $this->id);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $results;
@@ -100,6 +107,7 @@ class Segling
         $stmt->bindParam(':id', $this->id);
         $stmt->execute();
     }
+
     public function saveDeltagare()
     {
         $query = "DELETE FROM Segling_Medlem_Roll WHERE segling_id = ?; ";
@@ -134,7 +142,7 @@ class Segling
 
         $this->id = $this->conn->lastInsertId();
         $this->saveDeltagare();
-        $this->getOne($this->id);
+        $this->getSegling($this->id);
     }
 
     public function getDeltagareByRoleName($targetRole)

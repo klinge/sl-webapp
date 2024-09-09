@@ -32,67 +32,59 @@ $roller = $viewData['roles'];
             </div>
         </div>
 
-        <!-- TODO Implement handling "selected" based on who participates in $segling->deltagare -->
         <div class="row">
-            <div class="col-md-2 mb-3">
-                <label for="skeppare" class="form-label">Skeppare</label>
-                <select class="form-select" id="skeppare" name="skeppare" aria-label="Skeppare select box">
-                    <option value="null">Ingen</option>
-                    <?php foreach ($viewData['allaSkeppare'] as $person) : ?>
-                        <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-            <div class="col-md-2 mb-3">
-                <label for="batsman" class="form-label">Båtsman</label>
-                <select class="form-select" id="batsman" name="batsman" aria-label="Båtsman select box">
-                    <option value="null">Ingen</option>
-                    <?php foreach ($viewData['allaBatsman'] as $person) : ?>
-                        <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-            <div class="col-md-2 mb-3">
-                <label for="xbatsman" class="form-label">Extra båtsman</label>
-                <select class="form-select" id="xbatsman" name="xbatsman" aria-label="Extrabås select box">
-                    <option value="null">Ingen</option>
-                    <?php foreach ($viewData['allaBatsman'] as $person) : ?>
-                        <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-            <div class="col-md-2 mb-3">
-                <label for="kock" class="form-label">Kock</label>
-                <select class="form-select" id="kock" name="kock" aria-label="Kock select box">
-                    <option value="null">Ingen</option>
-                    <?php foreach ($viewData['allaKockar'] as $person) : ?>
-                        <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-            <div class="col-md-2 mb-3">
-                <label for="xkock" class="form-label">Extra kock</label>
-                <select class="form-select" id="xkock" name="xkock" aria-label="Extrakock select box">
-                    <option value="null">Ingen</option>
-                    <?php foreach ($viewData['allaKockar'] as $person) : ?>
-                        <option value="<?= $person['id'] ?>"> <?= $person['fornamn'] ?> <?= $person['efternamn'] ?></option>
-                    <?php endforeach ?>
-                </select>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <p>Deltagare</p>
-                <table class="table table-striped">
-                    <?php foreach ($segling->deltagare as $deltagare) : ?>
+            <div class="col-md-5 table-responsive">
+                <h5>Nyckelbesättning</h5>
+                <table id="crewTable" class="table table-sm table-striped table-hover">
+                    <thead>
                         <tr>
-                            <td><?= $deltagare['roll_namn'] ?></td>
-                            <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
+                            <th>Roll</th>
+                            <th>Namn</th>
+                            <th>Åtgärder</th>
                         </tr>
-                    <?php endforeach ?>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($segling->deltagare as $deltagare) : ?>
+                            <?php if (isset($deltagare['roll_namn'])) : ?>
+                                <tr>
+                                    <td><?= $deltagare['roll_namn'] ?></td>
+                                    <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" data-id="<?= $deltagare['medlem_id'] ?>" title="Ta bort"><i class="bi bi-x-circle"></i></button>
+                                    </td>
+                                </tr>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </tbody>
                 </table>
             </div>
+            <div class="col-md-4 table-responsive">
+                <h5>Övriga seglande medlemmar</h5>
+                <table id="participantsTable" class="table table-sm table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Namn</th>
+                            <th>Åtgärder</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($segling->deltagare as $deltagare) : ?>
+                            <?php if (empty($deltagare['roll_namn'])) : ?>
+                                <tr>
+                                    <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-secondary" data-id="<?= $deltagare['medlem_id'] ?>" title="Ta bort"><i class="bi bi-x-circle"></i></button>
+                                    </td>
+                                </tr>
+                            <?php endif ?>
+                        <?php endforeach ?>
+                    </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                Lägg till deltagare
+            </button>
         </div>
 
         <div class="row">
@@ -119,5 +111,6 @@ $roller = $viewData['roles'];
 </div>
 
 <?php // footer
+include_once $APP_DIR . "/views/modals/seglingAddMedlemModal.php";
 include_once $APP_DIR . "/layouts/footer.php";
 ?>

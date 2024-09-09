@@ -27,25 +27,21 @@ class MedlemRepository
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $members =  $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         foreach ($members as $member) {
-            try
-            {
+            try {
                 $medlem = new Medlem($this->conn, $member['id']);
                 $medlemmar[] = $medlem;
+            } catch (Exception $e) {
+                //Do nothing right now..
             }
-            catch (Exception $e)
-            {
-                //Do nothing right now.. 
-            }
-            
         }
         return $medlemmar;
     }
 
-    // Query Medlem, Roll, and Medlem_Roll tables
+    // Find all Medlemmar in a role by querying Medlem, Roll, and Medlem_Roll tables
     // to find members with a specified roll_namn
-    public function getMembersByRollName($rollName)
+    public function getMembersByRollName(string $rollName)
     {
         $query = "SELECT m.id,m.fornamn, m.efternamn, r.roll_namn
             FROM  Medlem m
@@ -58,9 +54,25 @@ class MedlemRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Query Medlem, Roll, and Medlem_Roll tables
+    // to find members with a specified roll_namn
+    public function getMembersByRollid(int $rollId)
+    {
+        $query = "SELECT m.id,m.fornamn, m.efternamn, r.id AS roll_id, r.roll_namn
+            FROM  Medlem m
+            INNER JOIN Medlem_Roll mr ON mr.medlem_id = m.id
+            INNER JOIN Roll r ON r.id = mr.roll_id
+            WHERE r.id = :id
+            ORDER BY m.fornamn ASC;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $rollId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     //NOT USED?
     //Returns an array with member data and roles
-    //Use getAll() instead as it returns proper member objects including roles.. 
+    //Use getAll() instead as it returns proper member objects including roles..
     public function getAllWithRoles()
     {
         $query = "SELECT m.*, GROUP_CONCAT(r.roll_namn, ', ') AS roller
@@ -72,5 +84,4 @@ class MedlemRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }

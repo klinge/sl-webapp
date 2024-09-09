@@ -29,6 +29,7 @@ class Application
         $this->router->map('GET', '/', 'HomeController#index', 'home');
 
         $this->router->map('GET', '/medlem', 'MedlemController#list', 'medlem-list');
+        $this->router->map('GET', '/medlem/json', 'MedlemController#listJson', 'medlem-list-json');
         $this->router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
         $this->router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
         $this->router->map('GET', '/medlem/new', 'MedlemController#new', 'medlem-new');
@@ -44,6 +45,9 @@ class Application
         $this->router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
         $this->router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
         $this->router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save');
+
+        $this->router->map('GET', '/roller', 'RollController#list', 'roll-list');
+        $this->router->map('GET', '/roller/[i:id]/medlem', 'RollController#membersInRole', 'roll-medlemmar');
 
         $this->router->map('GET', '/login', 'AuthController#showLogin', 'show-login');
         $this->router->map('POST', '/login', 'AuthController#login', 'login');
