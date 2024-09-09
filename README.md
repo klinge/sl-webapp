@@ -31,6 +31,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Aktier: db, relations to Medlem, controller and views
 * Other: add phpcs and PHPStan och Psalm to Github commit workflow
 * Refactor: add PSR-7 request and response classes
+* Auth: replace own code with a proper Auth component. Maybe Comet Auth. Integrate with Medlem class?
 
 
 
