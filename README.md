@@ -4,12 +4,12 @@ Members and activities database for a sailing club, with an accompanying web-gui
 
 ## TODO (v0.9): 
 
-* Auth: add controller->requireAuth() to access all pages
-* Auth: direct admin and non-admin to different pages after login
 * Segling: Fix database for members on Seglingar
 * Segling: Fix viewSeglingEdit to allow adding and deleting participants on a segling
 * Segling: Create new Segling
 * Segling: delete a Segling
+* Auth: add controller->requireAuth() to access all pages
+* Auth: direct admin and non-admin to different pages after login
 * Other: make a proper 404 page
 * Other: add mail templetes for password reset and new user registration (https://github.com/ActiveCampaign/postmark-templates/tree/main)
 * Refactor: refactor the controller->render()-code to use a view-class
