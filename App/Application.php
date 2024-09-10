@@ -45,6 +45,8 @@ class Application
         $this->router->map('GET', '/segling', 'SeglingController#list', 'segling-list');
         $this->router->map('GET', '/segling/[i:id]', 'SeglingController#edit', 'segling-edit');
         $this->router->map('POST', '/segling/[i:id]', 'SeglingController#save', 'segling-save');
+        $this->router->map('POST', '/segling/medlem', 'SeglingController#saveMedlem', 'segling-medlem-save');
+        $this->router->map('POST', '/segling/medlem/delete', 'SeglingController#deleteMedlem', 'segling-medlem-delete');
 
         $this->router->map('GET', '/roller', 'RollController#list', 'roll-list');
         $this->router->map('GET', '/roller/[i:id]/medlem', 'RollController#membersInRole', 'roll-medlemmar');

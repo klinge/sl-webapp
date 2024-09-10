@@ -51,7 +51,11 @@ $roller = $viewData['roles'];
                                     <td><?= $deltagare['roll_namn'] ?></td>
                                     <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
                                     <td>
-                                        <button class="btn btn-sm btn-secondary" data-id="<?= $deltagare['medlem_id'] ?>" title="Ta bort"><i class="bi bi-x-circle"></i></button>
+                                        <button class="btn btn-sm btn-secondary delete-medlem"
+                                            data-segling-id="<?= $segling->id ?>" data-medlem-id="<?= $deltagare['medlem_id'] ?>"
+                                            title="Ta bort">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endif ?>
@@ -74,7 +78,11 @@ $roller = $viewData['roles'];
                                 <tr>
                                     <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
                                     <td>
-                                        <button class="btn btn-sm btn-secondary" data-id="<?= $deltagare['medlem_id'] ?>" title="Ta bort"><i class="bi bi-x-circle"></i></button>
+                                        <button class="btn btn-sm btn-secondary delete-medlem"
+                                            data-segling-id="<?= $segling->id ?>" data-medlem-id="<?= $deltagare['medlem_id'] ?>"
+                                            title="Ta bort">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endif ?>
@@ -109,6 +117,38 @@ $roller = $viewData['roles'];
         <a class="button btn btn-secondary" href="/sl-webapp/segling">Tillbaka</a>
     </form>
 </div>
+
+<script>
+    document.querySelectorAll('.delete-medlem').forEach(button => {
+        button.addEventListener('click', function() {
+            const seglingId = this.dataset.seglingId;
+            const medlemId = this.dataset.medlemId;
+
+            if (confirm('Är du säker på att du vill ta bort denna deltagare från seglingen?')) {
+                fetch('/sl-webapp/segling/medlem/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            segling_id: seglingId,
+                            medlem_id: medlemId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the row from the table or refresh the participant list
+                            this.closest('tr').remove();
+                        } else {
+                            alert('Ett fel uppstod vid borttagning av deltagaren.');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+    });
+</script>
 
 <?php // footer
 include_once $APP_DIR . "/views/modals/seglingAddMedlemModal.php";
