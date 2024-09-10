@@ -41,6 +41,7 @@ $roller = $viewData['roles'];
                         <tr>
                             <th>Roll</th>
                             <th>Namn</th>
+                            <th>Medlemsavg</th>
                             <th>Åtgärder</th>
                         </tr>
                     </thead>
@@ -49,7 +50,22 @@ $roller = $viewData['roles'];
                             <?php if (isset($deltagare['roll_namn'])) : ?>
                                 <tr>
                                     <td><?= $deltagare['roll_namn'] ?></td>
-                                    <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
+                                    <td>
+                                        <a class="link-primary" href="/sl-webapp/medlem/<?php echo $deltagare['medlem_id'] ?>">
+                                            <?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <?php if ($deltagare['har_betalt']) : ?>
+                                            <button class="btn btn-sm btn-success">
+                                                <i class="bi bi-file-check"></i>
+                                            </button>
+                                        <?php else : ?>
+                                            <button class="btn btn-sm btn-warning">
+                                                <i class="bi bi-file-x"></i>
+                                            </button>
+                                        <?php endif ?>
+                                    </td>
                                     <td>
                                         <button class="btn btn-sm btn-secondary delete-medlem"
                                             data-segling-id="<?= $segling->id ?>" data-medlem-id="<?= $deltagare['medlem_id'] ?>"
@@ -69,6 +85,7 @@ $roller = $viewData['roles'];
                     <thead>
                         <tr>
                             <th>Namn</th>
+                            <th>Medlemsavg</th>
                             <th>Åtgärder</th>
                         </tr>
                     </thead>
@@ -76,7 +93,22 @@ $roller = $viewData['roles'];
                         <?php foreach ($segling->deltagare as $deltagare) : ?>
                             <?php if (empty($deltagare['roll_namn'])) : ?>
                                 <tr>
-                                    <td><?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?></td>
+                                    <td>
+                                        <a class="link-primary" href="/sl-webapp/medlem/<?php echo $deltagare['medlem_id'] ?>">
+                                            <?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <?php if ($deltagare['har_betalt']) : ?>
+                                            <button class="btn btn-sm btn-success">
+                                                <i class="bi bi-file-check"></i>
+                                            </button>
+                                        <?php else : ?>
+                                            <button class="btn btn-sm btn-warning">
+                                                <i class="bi bi-file-x"></i>
+                                            </button>
+                                        <?php endif ?>
+                                    </td>
                                     <td>
                                         <button class="btn btn-sm btn-secondary delete-medlem"
                                             data-segling-id="<?= $segling->id ?>" data-medlem-id="<?= $deltagare['medlem_id'] ?>"
@@ -90,9 +122,13 @@ $roller = $viewData['roles'];
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
-                Lägg till deltagare
-            </button>
+        </div>
+        <div class="row">
+            <div class="col-md-2 mb-3">
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                    Lägg till deltagare
+                </button>
+            </div>
         </div>
 
         <div class="row">
