@@ -22,7 +22,7 @@ class BetalningRepository
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $payments =  $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         foreach ($payments as $payment) {
             $betalning = new Betalning($this->conn, $payment);
             $betalningar[] = $betalning;
@@ -36,10 +36,10 @@ class BetalningRepository
 
         $query = "SELECT * from Betalning WHERE medlem_id = ? ORDER BY datum DESC";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $medlemId, \PDO::PARAM_INT);
+        $stmt->bindParam(1, $medlemId, PDO::PARAM_INT);
         $stmt->execute();
-        $payments =  $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
+        $payments =  $stmt->fetchAll(PDO::FETCH_ASSOC);
+
         foreach ($payments as $payment) {
             $betalning = new Betalning($this->conn, $payment);
             $betalningar[] = $betalning;
@@ -47,4 +47,17 @@ class BetalningRepository
         return $betalningar;
     }
 
+    public function memberHasPayed(int $medlemId, int $year): bool
+    {
+        $query = "SELECT * from Betalning WHERE medlem_id = :id AND avser_ar = :ar";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $medlemId, PDO::PARAM_INT);
+        $stmt->bindParam(':ar', $year, PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (count($result) > 0) {
+            return true;
+        }
+        return false;
+    }
 }

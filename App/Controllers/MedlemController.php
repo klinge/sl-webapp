@@ -24,6 +24,14 @@ class MedlemController extends BaseController
         $this->render('viewMedlem', $data);
     }
 
+    public function listJson()
+    {
+        $medlemRepo = new MedlemRepository($this->conn);
+        $result = $medlemRepo->getAll();
+        $this->jsonResponse($result);
+        exit;
+    }
+
     public function edit(array $params)
     {
         $id = $params['id'];

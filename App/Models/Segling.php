@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use PDO;
+use Exception;
+use PDOException;
 
 class Segling
 {
@@ -20,31 +22,24 @@ class Segling
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db, $id = null)
+    public function __construct($db, ?int $id = null, ?string $withdeltagare = null)
     {
         $this->conn = $db;
 
         if (isset($id)) {
-            $this->getOne($id);
+            if ($withdeltagare == 'withdeltagare') {
+                $result = $this->getSeglingWithDeltagare($id);
+            } else {
+                $result = $this->getSegling($id);
+            }
+
+            if (!$result) {
+                throw new Exception("Segling med id: " . $id . "hittades inte");
+            }
         }
     }
 
-    public function getAll()
-    {
-        $seglingar = [];
-        $query = "SELECT * FROM " . $this->table_name . " ORDER BY startdatum ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        //Create a segling object for each row in the database, this also fetches deltagare
-        foreach ($result as $row) {
-            $segling = new Segling($this->conn, $row['id']);
-            $seglingar[] = $segling;
-        }
-        return $seglingar;
-    }
-
-    function getOne($id)
+    protected function getSegling(int $id): bool
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
 
@@ -53,8 +48,8 @@ class Segling
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        //if we got a result set object values
-        if($row !== false) {
+        //if we got a result set object values else return false
+        if ($row !== false) {
             $this->id = $id;
             $this->start_dat = $row['startdatum'];
             $this->slut_dat = $row['slutdatum'];
@@ -62,28 +57,26 @@ class Segling
             $this->kommentar = $row['kommentar'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
-
-            //Get roller from junction table
-            $this->deltagare = $this->getDeltagare();
+            return true;
+        } else {
+            return false;
         }
     }
 
-    private function getDeltagare()
+    protected function getSeglingWithDeltagare(int $id): bool
     {
-        $query = "SELECT smr.medlem_id, m.fornamn, m.efternamn, smr.roll_id, r.roll_namn
-                    FROM Segling_Medlem_Roll smr
-                    INNER JOIN Medlem m ON smr.medlem_id = m.id
-                    INNER JOIN Roll r ON smr.roll_id = r.id
-                    WHERE smr.segling_id = ?";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $results;
+        //Fetch the Segling details and populate the object
+        $result = $this->getSegling($id);
+        //Get roller from junction table
+        if ($result) {
+            $this->deltagare = $this->getDeltagare();
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public function save()
+    public function save(): bool
     {
         $query = "UPDATE $this->table_name SET 
         startdatum = :startdatum, 
@@ -93,51 +86,81 @@ class Segling
         WHERE id = :id;";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':startdatum', $this->start_dat);
-        $stmt->bindParam(':slutdatum', $this->slut_dat);
-        $stmt->bindParam(':skeppslag', $this->skeppslag);
-        $stmt->bindParam(':kommentar', $this->kommentar);
+        $stmt->bindParam(':startdatum', $this->start_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':slutdatum', $this->slut_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':skeppslag', $this->skeppslag, PDO::PARAM_STR);
+        $stmt->bindValue(':kommentar', $this->kommentar ?: null, PDO::PARAM_STR);
         $stmt->bindParam(':id', $this->id);
         $stmt->execute();
-    }
-    public function saveDeltagare()
-    {
-        $query = "DELETE FROM Segling_Medlem_Roll WHERE segling_id = ?; ";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
 
-        foreach ($this->deltagare as $pers) {
-            $query = 'INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id) VALUES (?, ?, ?);';
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(1, $this->id);
-            $stmt->bindParam(2, $pers["medlem_id"]);
-            $stmt->bindParam(3, $pers["roll_id"]);
-            $stmt->execute();
+        //If all is okay exactly one row should have been updated
+        if ($stmt->rowCount() == 1) {
+            return true;
+        } else {
+            return false;
         }
     }
-    public function delete()
-    {
-        $query = "DELETE FROM Segling WHERE segling_id = ?; ";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
-    }
-    public function create()
-    {
-        $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag) VALUES (?, ?, ?);';
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->start_dat);
-        $stmt->bindParam(2, $this->slut_dat);
-        $stmt->bindParam(3, $this->skeppslag);
-        $stmt->execute();
 
-        $this->id = $this->conn->lastInsertId();
-        $this->saveDeltagare();
-        $this->getOne($this->id);
+    public function delete(): bool
+    {
+        $query = "DELETE FROM Segling WHERE id = ?; ";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $this->id, PDO::PARAM_INT);
+        $stmt->execute();
+        //If all is okay exactly one row should have been deleted
+        if ($stmt->rowCount() == 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    public function getDeltagareByRoleName($targetRole)
+    public function create(): bool|int
+    {
+        $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag, kommentar) VALUES (:startdat, :slutdat, :skeppslag, :kommentar);';
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':startdat', $this->start_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':slutdat', $this->slut_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':skeppslag', $this->skeppslag, PDO::PARAM_STR);
+        $stmt->bindValue(':kommentar', $this->kommentar ?: null, PDO::PARAM_STR);
+        $stmt->execute();
+
+        //If all is okay exactly one row should have been inserted
+        if ($stmt->rowCount() == 1) {
+            $this->id = $this->conn->lastInsertId();
+            return $this->id;
+            // You can use $lastInsertId if you need the ID of the newly inserted row
+        } else {
+            return false;
+        }
+    }
+
+    /*
+    * Functions for handling deltagare on a Segling
+    */
+
+    public function getDeltagare(): array
+    {
+        //Left join on Roll to get results even if a Medlem has no Roll for a Segling
+        $query = "SELECT smr.medlem_id, m.fornamn, m.efternamn, smr.roll_id, r.roll_namn
+                    FROM Segling_Medlem_Roll smr
+                    JOIN Medlem m ON smr.medlem_id = m.id
+                    LEFT JOIN Roll r ON smr.roll_id = r.id
+                    WHERE smr.segling_id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $this->id);
+        $stmt->execute();
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $results;
+    }
+    /*
+    * Lists all deltagare on a Segling with a specific Role
+    * Returns an array of arrays with id, fornamn, efternamn for persons that match the given role
+    *
+    * @param string $targetRole
+    * @return array
+    */
+    public function getDeltagareByRoleName(string $targetRole): array
     {
         $results = [];
 

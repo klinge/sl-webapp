@@ -7,7 +7,6 @@ use Exception;
 
 class Betalning
 {
-
     // database connection and table name
     private $conn;
     private $table_name = "Betalning";
@@ -62,14 +61,14 @@ class Betalning
     {
         try {
             $query = "INSERT INTO " . $this->table_name . " (medlem_id, belopp, datum, avser_ar, kommentar) VALUES (?, ?, ?, ?, ?)";
-    
+
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(1, $this->medlem_id);
             $stmt->bindParam(2, $this->belopp);
             $stmt->bindParam(3, $this->datum);
             $stmt->bindParam(4, $this->avser_ar);
             $stmt->bindValue(5, $this->kommentar, PDO::PARAM_STR);
-    
+
             if ($stmt->execute()) {
                 $newBetalningId = $this->conn->lastInsertId();
                 return ['success' => true, 'message' => 'Betalning created successfully', 'id' => $newBetalningId];
@@ -96,5 +95,4 @@ class Betalning
             return ['success' => false, 'message' => 'Error deleting Betalning: ' . $error[2]];
         }
     }
-    
 }

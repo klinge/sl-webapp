@@ -69,12 +69,6 @@ CREATE TABLE Segling (
     "startdatum" DATE NOT NULL,
     "slutdatum" DATE NOT NULL, 
     "skeppslag" VARCHAR(100) NOT NULL,
-    "skeppar_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
-    "styrman_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
-    "batsman_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
-    "batsman_extra_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
-    "kock_id" INTEGER REFERENCES Medlem(id) ON DELETE SET NULL,
-    "kock_extra_id" INTEGER REFERENCES Medlem(id)ON DELETE SET NULL,
     "kommentar" VARCHAR(500),
     "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -89,6 +83,12 @@ CREATE TABLE Segling_Medlem_Roll (
     "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create indexes for faster queries
+CREATE INDEX idx_smr_segling_id ON Segling_Medlem_Roll(segling_id);
+CREATE INDEX idx_smr_medlem_id ON Segling_Medlem_Roll(medlem_id);
+CREATE INDEX idx_smr_roll_id ON Segling_Medlem_Roll(roll_id);
+
+
 CREATE TABLE AuthToken (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email VARCHAR(255) NOT NULL,
@@ -97,11 +97,6 @@ CREATE TABLE AuthToken (
     password_hash VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
---INDEXES ON FOREIGN KEYS
-CREATE INDEX idx_skeppar_id ON Segling(skeppar_id);
-CREATE INDEX idx_batsman_id ON Segling(batsman_id);
-CREATE INDEX idx_kock_id ON Segling(kock_id);
 
 --TRIGGERS TO AUTO-UPDATE updated_at
 CREATE TRIGGER medlem_after_update 
@@ -132,21 +127,25 @@ BEGIN
   UPDATE Roll SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
+--
 --INSERT SOME TEST DATA
+--
 
 INSERT INTO Medlem (fodelsedatum, fornamn, efternamn, email, mobil, godkant_gdpr, pref_kommunikation, password, isAdmin) 
 VALUES 
   ('1965-04-19', 'Johan', 'Klinge', 'johan@dev.null', '070-123456', '1', '1', '$2y$10$cPJspNy1ar8ARNYlgUehvuJ6Z1P.Jq.iqGjz97k7aUwW4d6zVkN4S', '1'),
   ('1212-12-12', 'Måns', 'Klinge', 'mans@dev.null', '', '0', '1', '', '0'),
   ('1212-12-12', 'Emma', 'Klinge', 'emma@dev.null', '', '1', '0', '', '0'),
-  ('1212-12-12', 'Anders', 'Jansson', 'anders@dev.null', '074-654321', '1', '1', '$2y$10$WJrBbzgtnfwBXwlTznc2yegfDXWxHw7ReWmyVQK9DO0W4o4IEoHlS', '1');
+  ('1212-12-12', 'Anders', 'Jansson', 'anders@dev.null', '074-654321', '1', '1', '$2y$10$WJrBbzgtnfwBXwlTznc2yegfDXWxHw7ReWmyVQK9DO0W4o4IEoHlS', '1'),
+  ('1212-12-12', 'Medlem', 'Medlemsson', 'medlem@dev.null', '', '1', '1', '', '0');
 
 INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) 
 VALUES 
     (1, 300, '2024-06-30', 2024, "Här är en kommentar"),
     (1, 300, '2024-12-24', 2023, "Försenad inbetalning för 2023"),
     (2, 300, '2024-05-01', 2024, ""),
-    (4, 400, '2024-01-21', 2024, "Medlemsavgift och 100 kr donation");
+    (4, 400, '2024-01-21', 2024, "Medlemsavgift och 100 kr donation"),
+    (5, 300, '2024-09-09', 2024, "Medlemsavgift");
 
 INSERT INTO Roll (roll_namn, kommentar) 
 VALUES 
@@ -167,17 +166,18 @@ VALUES
     (4, 1),
     (4, 4);
 
-INSERT INTO Segling (startdatum, slutdatum, skeppslag, skeppar_id, batsman_id, kock_id, kommentar) 
+INSERT INTO Segling (startdatum, slutdatum, skeppslag, kommentar) 
 VALUES 
-    ('2024-05-01', '2024-05-03', 'Grundkännarna', 4, 1, NULL, "Jag har en kommentar"),
-    ('2024-06-21', '2024-06-25', 'Slöseglarna', 4, 2, 3, NULL),
-    ('2024-05-15', '2024-05-18', 'Medvindarna', 3, 1, 2, NULL);
+    ('2024-05-01', '2024-05-03', 'Grundkännarna', "Jag har en kommentar"),
+    ('2024-06-21', '2024-06-25', 'Slöseglarna', NULL),
+    ('2024-05-15', '2024-05-18', 'Medvindarna', NULL);
 
 INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id)
 VALUES
     (1, 1, 1),
     (1, 2, 2),
     (1, 3, 3),
+    (1, 5, null),
     (2, 1, 1), 
     (2, 2, 2),
     (2, 3, 4),

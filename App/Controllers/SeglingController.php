@@ -2,10 +2,16 @@
 
 namespace App\Controllers;
 
+use App\Models\BetalningRepository;
 use App\Models\Segling;
+use App\Models\SeglingRepository;
 use App\Models\MedlemRepository;
 use App\Models\Roll;
+use App\Utils\Sanitizer;
 use App\Utils\Session;
+use Exception;
+use PDO;
+use PDOException;
 
 class SeglingController extends BaseController
 {
@@ -13,12 +19,13 @@ class SeglingController extends BaseController
     {
         $isLoggedIn = $this->requireLogin();
         if ($isLoggedIn) {
-            $segling = new Segling($this->conn);
-            $result = $segling->getAll();
+            $seglingar = new SeglingRepository($this->conn);
+            $result = $seglingar->getAllWithDeltagare();
 
             //Put everyting in the data variable that is used by the view
             $data = [
                 "title" => "Bokningslista",
+                "newAction" => $this->router->generate('segling-show-create'),
                 "items" => $result
             ];
             $this->render('viewSegling', $data);
@@ -29,14 +36,30 @@ class SeglingController extends BaseController
     {
         $id = $params['id'];
         $formAction = $this->router->generate('segling-save', ['id' => $id]);
-        //Fetch member data
-        $segling = new Segling($this->conn, $id);
-
-        //Check if segling exists otherwise throw a 404
-        if (!isset($segling->id)) {
+        //Fetch Segling
+        try {
+            $segling = new Segling($this->conn, $id);
+        } catch (Exception $e) {
             header("HTTP/1.1 404 Not Found");
             exit();
         }
+        //Get all deltagare for this segling
+        $segling->deltagare = $segling->getDeltagare();
+
+        //Fetch payment status for deltagare and add to the $deltagare array
+        $year = substr($segling->start_dat, 0, 4);
+        $deltagareWithBetalning = [];
+        $betalningsRepo = new BetalningRepository($this->conn);
+
+        foreach ($segling->deltagare as $deltagare) {
+            $hasPayed = $betalningsRepo->memberHasPayed($deltagare['medlem_id'], $year);
+            $deltagare['har_betalt'] = $hasPayed;
+            $deltagareWithBetalning[] = $deltagare;
+        }
+
+        //Save the deltagare and betalning info in the $segling object
+        $segling->deltagare = $deltagareWithBetalning;
+
         //Fetch all available roles
         $roll = new Roll($this->conn);
         $roller = $roll->getAll();
@@ -53,7 +76,8 @@ class SeglingController extends BaseController
             "roles" => $roller,
             "allaSkeppare" => $allaSkeppare,
             "allaBatsman" => $allaBatsman,
-            "allaKockar" => $allaKockar
+            "allaKockar" => $allaKockar,
+            "formUrl" => $formAction
         ];
         $this->render('viewSeglingEdit', $data);
     }
@@ -62,26 +86,166 @@ class SeglingController extends BaseController
     {
         $id = $params['id'];
         $segling = new Segling($this->conn, $id);
-        var_dump($_POST);
-        exit;
-        //TODO complete logic for saving a segling
 
         //TODO add logic to save
         $segling->start_dat = $this->sanitizeInput($_POST['startdat']);
-        $segling->start_dat = $this->sanitizeInput($_POST['slutdat']);
+        $segling->slut_dat = $this->sanitizeInput($_POST['slutdat']);
         $segling->skeppslag = $this->sanitizeInput($_POST['skeppslag']);
         if (isset($_POST['kommentar'])) {
             $segling->kommentar = $this->sanitizeInput($_POST['kommentar']);
         }
-        $segling->save();
+        if ($segling->save()) {
+            // Set the URL and redirect
+            Session::setFlashMessage('success', 'Segling uppdaterad!');
+            $redirectUrl = $this->router->generate('segling-list');
+            header('Location: ' . $redirectUrl);
+            exit;
+        } else {
+            $return = ['success' => false, 'message' => 'Kunde inte uppdatera seglingen. Försök igen.'];
+            $this->jsonResponse($return);
+            exit;
+        }
+    }
 
-        //TODO add error handling
-        Session::setFlashMessage('success', 'Segling uppdaterad!');
+    public function delete(array $params)
+    {
+        $id = $params['id'];
+        $segling = new Segling($this->conn, $id);
+        if ($segling->delete()) {
+            Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
+            exit;
+        } else {
+            Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
+            exit;
+        }
+    }
 
+    public function showCreate()
+    {
+        $formAction = $this->router->generate('segling-create');
+        $data = [
+            "title" => "Skapa ny segling",
+            "formUrl" => $formAction
+        ];
+        $this->render('viewSeglingNew', $data);
+    }
 
-        // Set the URL and redirect
-        $redirectUrl = $this->router->generate('segling-list');
-        header('Location: ' . $redirectUrl);
+    public function create()
+    {
+        $sanitizer = new Sanitizer();
+        $rules = [
+            'startdat' => ['date', 'Y-m-d'],
+            'slutdat' => ['date', 'Y-m-d'],
+            'skeppslag' => 'string',
+            'kommentar' => 'string',
+        ];
+        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+
+        //Check if requires indata is there, fail otherwise
+        if (empty($cleanValues['startdat']) || empty($cleanValues['slutdat']) || empty($cleanValues['skeppslag'])) {
+            $return = ['success' => false, 'message' => 'Indata saknades. Kunde inte spara seglingen. Försök igen.'];
+            $this->showCreate();
+            exit;
+        }
+        $segling = new Segling($this->conn);
+        $segling->start_dat = $cleanValues['startdat'];
+        $segling->slut_dat = $cleanValues['slutdat'];
+        $segling->skeppslag = $cleanValues['skeppslag'];
+        $segling->kommentar = $cleanValues['kommentar'];
+        $result = $segling->create();
+
+        if ($result) {
+            Session::setFlashMessage('success', 'Seglingen är nu skapad!');
+            $redirectUrl = $this->router->generate('segling-edit', ['id' => $result]);
+            header('Location: ' . $redirectUrl);
+            exit;
+        } else {
+            $return = ['success' => false, 'message' => 'Kunde inte spara till databas. Försök igen.'];
+            $this->showCreate();
+            exit;
+        }
+    }
+    //
+    //FUNCTIONS THAT HANDLES MEMBERS ON A Segling
+    //
+    public function saveMedlem()
+    {
+        //validate input
+        if (!isset($_POST['segling_id']) || !isset($_POST['segling_person'])) {
+            $return = ['success' => false, 'message' => "Missing input"];
+            $this->jsonResponse($return);
+            exit;
+        }
+        //check if Medlem is already on the segling
+        $query = "SELECT * FROM Segling_Medlem_Roll WHERE segling_id = :segling_id AND medlem_id = :medlem_id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':segling_id', $_POST['segling_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':medlem_id', $_POST['segling_person'], PDO::PARAM_INT);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        //if we got a result then the Medlem is already added to the Segling so return an error
+        if (count($result) > 0) {
+            $return = ['success' => false, 'message' => "Medlemmen är redan tillagd på seglingen."];
+            $this->jsonResponse($return);
+            exit;
+        }
+
+        //If not, insert the row, don't forget if roll was set or not..
+        //First check if the role field was set or not, value 999 means that no role was selected
+        $hasRole = ($_POST['segling_roll'] == 999) ? false : true;
+        if ($hasRole) {
+            $query = "INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id) VALUES (:segling_id, :medlem_id, :roll_id)";
+        } else {
+            $query = "INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id) VALUES (:segling_id, :medlem_id)";
+        }
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':segling_id', $_POST['segling_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':medlem_id', $_POST['segling_person'], PDO::PARAM_INT);
+        if ($hasRole) {
+            $stmt->bindParam(':roll_id', $_POST['segling_roll'], PDO::PARAM_INT);
+        }
+        //Then try to update anc catch PDO exceptions..
+        try {
+            $stmt->execute();
+        } catch (PDOException $e) {
+            $return = ['success' => false, 'message' => "PDO error: " + $e->getMessage()];
+            $this->jsonResponse($return);
+            exit;
+        }
+
+        if ($stmt->rowCount() == 1) {
+            $return = ['success' => true, 'message' => "Inserted row with id: " . $this->conn->lastInsertId()];
+        } else {
+            $return = ['success' => false, 'message' => "Failed to insert row"];
+        }
+        $this->jsonResponse($return);
         exit;
+    }
+
+    public function deleteMedlemFromSegling()
+    {
+        $jsonData = file_get_contents('php://input');
+        $data = json_decode($jsonData, true);
+
+        $seglingId = $data['segling_id'] ?? null;
+        $medlemId = $data['medlem_id'] ?? null;
+
+        if ($seglingId && $medlemId) {
+            // Perform the deletion operation
+            $query = "DELETE FROM Segling_Medlem_Roll WHERE segling_id = :segling_id AND medlem_id = :medlem_id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':segling_id', $seglingId, PDO::PARAM_INT);
+            $stmt->bindParam(':medlem_id', $medlemId, PDO::PARAM_INT);
+            $result = $stmt->execute();
+
+            if ($result) {
+                echo json_encode(['success' => true]);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Deletion failed']);
+            }
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Invalid data']);
+        }
     }
 }
