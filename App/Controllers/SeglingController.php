@@ -7,6 +7,7 @@ use App\Models\Segling;
 use App\Models\SeglingRepository;
 use App\Models\MedlemRepository;
 use App\Models\Roll;
+use App\Utils\Sanitizer;
 use App\Utils\Session;
 use Exception;
 use PDO;
@@ -24,6 +25,7 @@ class SeglingController extends BaseController
             //Put everyting in the data variable that is used by the view
             $data = [
                 "title" => "Bokningslista",
+                "newAction" => $this->router->generate('segling-show-create'),
                 "items" => $result
             ];
             $this->render('viewSegling', $data);
@@ -114,6 +116,52 @@ class SeglingController extends BaseController
             exit;
         } else {
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
+            exit;
+        }
+    }
+
+    public function showCreate()
+    {
+        $formAction = $this->router->generate('segling-create');
+        $data = [
+            "title" => "Skapa ny segling",
+            "formUrl" => $formAction
+        ];
+        $this->render('viewSeglingNew', $data);
+    }
+
+    public function create()
+    {
+        $sanitizer = new Sanitizer();
+        $rules = [
+            'startdat' => ['date', 'Y-m-d'],
+            'slutdat' => ['date', 'Y-m-d'],
+            'skeppslag' => 'string',
+            'kommentar' => 'string',
+        ];
+        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+
+        //Check if requires indata is there, fail otherwise
+        if (empty($cleanValues['startdat']) || empty($cleanValues['slutdat']) || empty($cleanValues['skeppslag'])) {
+            $return = ['success' => false, 'message' => 'Indata saknades. Kunde inte spara seglingen. Försök igen.'];
+            $this->showCreate();
+            exit;
+        }
+        $segling = new Segling($this->conn);
+        $segling->start_dat = $cleanValues['startdat'];
+        $segling->slut_dat = $cleanValues['slutdat'];
+        $segling->skeppslag = $cleanValues['skeppslag'];
+        $segling->kommentar = $cleanValues['kommentar'];
+        $result = $segling->create();
+
+        if ($result) {
+            Session::setFlashMessage('success', 'Seglingen är nu skapad!');
+            $redirectUrl = $this->router->generate('segling-edit', ['id' => $result]);
+            header('Location: ' . $redirectUrl);
+            exit;
+        } else {
+            $return = ['success' => false, 'message' => 'Kunde inte spara till databas. Försök igen.'];
+            $this->showCreate();
             exit;
         }
     }

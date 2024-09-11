@@ -15,6 +15,12 @@ $num = sizeof($seglingar);
 
 ?>
 
+<div class="d-flex justify-content-end">
+    <a href="<?= $viewData['newAction'] ?>" class="btn btn-primary btn-lg" alt="Lägg till medlem">
+        Ny segling
+    </a>
+</div>
+
 <table class='table table-bordered table-striped table-hover' id="sailingTable">
     <thead>
         <tr>

@@ -89,8 +89,7 @@ class Segling
         $stmt->bindParam(':startdatum', $this->start_dat, PDO::PARAM_STR);
         $stmt->bindParam(':slutdatum', $this->slut_dat, PDO::PARAM_STR);
         $stmt->bindParam(':skeppslag', $this->skeppslag, PDO::PARAM_STR);
-        $kommentar = empty($this->kommentar) ? null : $this->kommentar;
-        $stmt->bindParam(':kommentar', $kommentar, PDO::PARAM_STR);
+        $stmt->bindValue(':kommentar', $this->kommentar ?: null, PDO::PARAM_STR);
         $stmt->bindParam(':id', $this->id);
         $stmt->execute();
 
@@ -116,17 +115,24 @@ class Segling
         }
     }
 
-    public function create()
+    public function create(): bool|int
     {
-        $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag) VALUES (?, ?, ?);';
+        $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag, kommentar) VALUES (:startdat, :slutdat, :skeppslag, :kommentar);';
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->start_dat);
-        $stmt->bindParam(2, $this->slut_dat);
-        $stmt->bindParam(3, $this->skeppslag);
+        $stmt->bindParam(':startdat', $this->start_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':slutdat', $this->slut_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':skeppslag', $this->skeppslag, PDO::PARAM_STR);
+        $stmt->bindValue(':kommentar', $this->kommentar ?: null, PDO::PARAM_STR);
         $stmt->execute();
 
-        $this->id = $this->conn->lastInsertId();
-        $this->getSegling($this->id);
+        //If all is okay exactly one row should have been inserted
+        if ($stmt->rowCount() == 1) {
+            $this->id = $this->conn->lastInsertId();
+            return $this->id;
+            // You can use $lastInsertId if you need the ID of the newly inserted row
+        } else {
+            return false;
+        }
     }
 
     /*
