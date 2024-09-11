@@ -14,7 +14,7 @@ $roller = $viewData['roles'];
 ?>
 
 <div class="container">
-    <form class="border border-primary rounded p-3" action="<?= $formAction ?>" method="POST">
+    <form class="border border-primary rounded p-3" action="<?= $viewData['formUrl'] ?>" method="POST">
         <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
 
         <div class="row">
@@ -58,11 +58,11 @@ $roller = $viewData['roles'];
                                     <td>
                                         <?php if ($deltagare['har_betalt']) : ?>
                                             <button class="btn btn-sm btn-success">
-                                                <i class="bi bi-file-check"></i>
+                                                <i class="fs-5 bi bi-file-check"></i>
                                             </button>
                                         <?php else : ?>
                                             <button class="btn btn-sm btn-warning">
-                                                <i class="bi bi-file-x"></i>
+                                                <i class="fs-5 bi bi-file-x"></i>
                                             </button>
                                         <?php endif ?>
                                     </td>
@@ -70,7 +70,7 @@ $roller = $viewData['roles'];
                                         <button class="btn btn-sm btn-secondary delete-medlem"
                                             data-segling-id="<?= $segling->id ?>" data-medlem-id="<?= $deltagare['medlem_id'] ?>"
                                             title="Ta bort">
-                                            <i class="bi bi-x-circle"></i>
+                                            <i class="fs-5 bi bi-x-circle"></i>
                                         </button>
                                     </td>
                                 </tr>
@@ -101,11 +101,11 @@ $roller = $viewData['roles'];
                                     <td>
                                         <?php if ($deltagare['har_betalt']) : ?>
                                             <button class="btn btn-sm btn-success">
-                                                <i class="bi bi-file-check"></i>
+                                                <i class="fs-5 bi bi-file-check"></i>
                                             </button>
                                         <?php else : ?>
                                             <button class="btn btn-sm btn-warning">
-                                                <i class="bi bi-file-x"></i>
+                                                <i class="fs-5 bi bi-file-x"></i>
                                             </button>
                                         <?php endif ?>
                                     </td>
@@ -113,7 +113,7 @@ $roller = $viewData['roles'];
                                         <button class="btn btn-sm btn-secondary delete-medlem"
                                             data-segling-id="<?= $segling->id ?>" data-medlem-id="<?= $deltagare['medlem_id'] ?>"
                                             title="Ta bort">
-                                            <i class="bi bi-x-circle"></i>
+                                            <i class="fs-5 bi bi-x-circle"></i>
                                         </button>
                                     </td>
                                 </tr>

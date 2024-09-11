@@ -74,7 +74,8 @@ class SeglingController extends BaseController
             "roles" => $roller,
             "allaSkeppare" => $allaSkeppare,
             "allaBatsman" => $allaBatsman,
-            "allaKockar" => $allaKockar
+            "allaKockar" => $allaKockar,
+            "formUrl" => $formAction
         ];
         $this->render('viewSeglingEdit', $data);
     }
@@ -83,9 +84,6 @@ class SeglingController extends BaseController
     {
         $id = $params['id'];
         $segling = new Segling($this->conn, $id);
-        var_dump($_POST);
-        exit;
-        //TODO complete logic for saving a segling
 
         //TODO add logic to save
         $segling->start_dat = $this->sanitizeInput($_POST['startdat']);
@@ -94,15 +92,17 @@ class SeglingController extends BaseController
         if (isset($_POST['kommentar'])) {
             $segling->kommentar = $this->sanitizeInput($_POST['kommentar']);
         }
-        $segling->save();
-
-        //TODO add error handling
-        Session::setFlashMessage('success', 'Segling uppdaterad!');
-
-        // Set the URL and redirect
-        $redirectUrl = $this->router->generate('segling-list');
-        header('Location: ' . $redirectUrl);
-        exit;
+        if ($segling->save()) {
+            // Set the URL and redirect
+            Session::setFlashMessage('success', 'Segling uppdaterad!');
+            $redirectUrl = $this->router->generate('segling-list');
+            header('Location: ' . $redirectUrl);
+            exit;
+        } else {
+            $return = ['success' => false, 'message' => 'Kunde inte uppdatera seglingen. Försök igen.'];
+            $this->jsonResponse($return);
+            exit;
+        }
     }
     //
     //FUNCTIONS THAT HANDLES MEMBERS ON A Segling

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use PDO;
 use Exception;
+use PDOException;
 
 class Segling
 {
@@ -100,30 +101,22 @@ class Segling
         WHERE id = :id;";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':startdatum', $this->start_dat);
-        $stmt->bindParam(':slutdatum', $this->slut_dat);
-        $stmt->bindParam(':skeppslag', $this->skeppslag);
-        $stmt->bindParam(':kommentar', $this->kommentar);
+        $stmt->bindParam(':startdatum', $this->start_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':slutdatum', $this->slut_dat, PDO::PARAM_STR);
+        $stmt->bindParam(':skeppslag', $this->skeppslag, PDO::PARAM_STR);
+        $kommentar = empty($this->kommentar) ? null : $this->kommentar;
+        $stmt->bindParam(':kommentar', $kommentar, PDO::PARAM_STR);
         $stmt->bindParam(':id', $this->id);
         $stmt->execute();
-    }
 
-    public function saveDeltagare()
-    {
-        $query = "DELETE FROM Segling_Medlem_Roll WHERE segling_id = ?; ";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
-
-        foreach ($this->deltagare as $pers) {
-            $query = 'INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id) VALUES (?, ?, ?);';
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(1, $this->id);
-            $stmt->bindParam(2, $pers["medlem_id"]);
-            $stmt->bindParam(3, $pers["roll_id"]);
-            $stmt->execute();
+        //If all is okay exactly one row should have been updated
+        if ($stmt->rowCount() == 1) {
+            return true;
+        } else {
+            return false;
         }
     }
+
     public function delete()
     {
         $query = "DELETE FROM Segling WHERE segling_id = ?; ";
@@ -131,6 +124,7 @@ class Segling
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
     }
+
     public function create()
     {
         $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag) VALUES (?, ?, ?);';
@@ -141,7 +135,6 @@ class Segling
         $stmt->execute();
 
         $this->id = $this->conn->lastInsertId();
-        $this->saveDeltagare();
         $this->getSegling($this->id);
     }
 

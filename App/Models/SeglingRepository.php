@@ -16,17 +16,24 @@ class SeglingRepository
         $this->conn = $db;
     }
 
-
-    // Fetches all seglingar by querying Segling table in DB
-    // Return: array of Segling objects
+    /**
+     * Fetches all seglingar by querying Segling table in DB
+     * The function takes no parameters and returns an array of all Segling objects
+     *
+     * @return: array
+     */
     public function getAll(): array
     {
         $withdeltagare = false;
         return $this->fetchAllSeglingar($withdeltagare);
     }
 
-    // Fetches all seglingar by querying Segling table in DB
-    // Return: array of Segling objects
+    /**
+     * Fetches all seglingar by querying Segling table in DB
+     * The function takes no parameters and returns an array of all Segling objects including deltagare
+     *
+     * @return: array
+     */
     public function getAllWithDeltagare(): array
     {
         $withdeltagare = true;
@@ -51,5 +58,22 @@ class SeglingRepository
             }
         }
         return $seglingar;
+    }
+    public function getDeltagareByRoleName($targetRole)
+    {
+        $results = [];
+
+        // Loop through each inner array and fetch id, fornamn, efternamn for matching persons
+        foreach ($this->deltagare as $crewMember) {
+            if ($crewMember['roll_namn'] === $targetRole) {
+                $newDeltagare = [
+                    'id' => $crewMember['medlem_id'],
+                    'fornamn' => $crewMember['fornamn'],
+                    'efternamn' => $crewMember['efternamn']
+                ];
+                $results[] = $newDeltagare;
+            }
+        }
+        return $results;
     }
 }
