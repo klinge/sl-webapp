@@ -20,11 +20,11 @@ $roller = $viewData['roles'];
         <div class="row">
             <div class="col-md-2 mb-3">
                 <label for="startdat" class="form-label">Startdatum</label>
-                <input type="text" class="form-control" id="startdat" name="startdat" placeholder="Ange förnamn" value="<?= $segling->start_dat ?>">
+                <input type="text" class="form-control" id="startdat" name="startdat" placeholder="Ange startdatum" value="<?= $segling->start_dat ?>">
             </div>
             <div class="col-md-2 mb-3">
                 <label for="slutdat" class="form-label">Slutdatum</label>
-                <input type="text" class="form-control" id="slutdat" name="slutdat" placeholder="Ange efternamn" value="<?= $segling->slut_dat ?>">
+                <input type="text" class="form-control" id="slutdat" name="slutdat" placeholder="Ange slutdatum" value="<?= $segling->slut_dat ?>">
             </div>
             <div class="col-md-4 mb-3">
                 <label for="skeppslag" class="form-label">Skeppslag</label>
@@ -150,6 +150,7 @@ $roller = $viewData['roles'];
         </div>
 
         <button type="submit" class="btn btn-primary">Uppdatera</button>
+        <a class="button btn btn-warning" onclick="deleteSegling(<?php echo $segling->id ?>)">Ta bort</a>
         <a class="button btn btn-secondary" href="/sl-webapp/segling">Tillbaka</a>
     </form>
 </div>
@@ -184,6 +185,18 @@ $roller = $viewData['roles'];
             }
         });
     });
+
+    function deleteSegling(seglingId) {
+        if (confirm('Are you sure you want to delete this segling?')) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/sl-webapp/segling/delete/' + seglingId, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+                window.location = '/sl-webapp/segling';
+            };
+            xhr.send();
+        }
+    }
 </script>
 
 <?php // footer

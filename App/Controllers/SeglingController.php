@@ -104,6 +104,19 @@ class SeglingController extends BaseController
             exit;
         }
     }
+
+    public function delete(array $params)
+    {
+        $id = $params['id'];
+        $segling = new Segling($this->conn, $id);
+        if ($segling->delete()) {
+            Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
+            exit;
+        } else {
+            Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
+            exit;
+        }
+    }
     //
     //FUNCTIONS THAT HANDLES MEMBERS ON A Segling
     //
