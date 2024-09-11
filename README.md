@@ -3,7 +3,6 @@ Members and activities database for a sailing club, with an accompanying web-gui
 
 
 ## TODO (v0.9): 
-* Segling: Create new Segling
 * Auth: add controller->requireAuth() to access all admin pages
 * Auth: direct admin and non-admin to different pages after login
 * Other: make a proper 404 page
@@ -18,6 +17,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Segling: Fix database for members on Seglingar
 * DONE Segling: Fix viewSeglingEdit to allow adding and deleting participants on a segling
 * DONE Segling: delete a Segling
+* DONE Segling: Create new Segling
 * DONE Auth: add a reset password flow
 * DONE Auth: remove SMTP credentials from AuthController
 * DONE Refactor: make a Mail class
