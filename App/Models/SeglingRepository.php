@@ -59,21 +59,4 @@ class SeglingRepository
         }
         return $seglingar;
     }
-    public function getDeltagareByRoleName($targetRole)
-    {
-        $results = [];
-
-        // Loop through each inner array and fetch id, fornamn, efternamn for matching persons
-        foreach ($this->deltagare as $crewMember) {
-            if ($crewMember['roll_namn'] === $targetRole) {
-                $newDeltagare = [
-                    'id' => $crewMember['medlem_id'],
-                    'fornamn' => $crewMember['fornamn'],
-                    'efternamn' => $crewMember['efternamn']
-                ];
-                $results[] = $newDeltagare;
-            }
-        }
-        return $results;
-    }
 }
