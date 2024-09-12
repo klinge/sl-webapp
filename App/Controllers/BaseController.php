@@ -6,6 +6,7 @@ use Datetime;
 use App\Application;
 use App\Utils\Session;
 use App\Utils\Database;
+use PDO;
 use PDOException;
 
 class BaseController
@@ -20,13 +21,13 @@ class BaseController
     {
         Session::start();
         $this->app = $app;
-        $this->initializeSessionData();
-        $this->request = $request;
-        $this->conn = $this->getDatabaseConn();
         $this->router = $router;
+        $this->request = $request;
+        $this->initializeSessionData();
+        $this->conn = $this->getDatabaseConn();
     }
 
-    protected function initializeSessionData()
+    protected function initializeSessionData(): void
     {
         $this->sessionData = [
             'isLoggedIn' => Session::isLoggedIn(),
@@ -36,7 +37,7 @@ class BaseController
         ];
     }
 
-    protected function render(string $viewName, array $data = [])
+    protected function render(string $viewName, array $data = []): void
     {
         // Merge the session data with the view-specific data
         $viewData = array_merge($this->sessionData, $data);
@@ -45,18 +46,18 @@ class BaseController
         require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
     }
 
-    private function getDatabaseConn()
+    private function getDatabaseConn(): PDO|false
     {
         try {
             return Database::getInstance($this->app)->getConnection();
         } catch (PDOException $e) {
             Session::setFlashMessage('error', 'Tekniskt fel. Kunde inte öppna databas. Fel: ' . $e->getMessage());
-            $redirectUrl = $this->router->generate('home');
-            header('Location: ' . $redirectUrl);
+            header("Location: " . $this->createUrl('home'));
+            return false;
         }
     }
 
-    protected function jsonResponse(array $data)
+    protected function jsonResponse(array $data): string|false
     {
         // Set the content type to JSON
         header('Content-Type: application/json');
@@ -69,13 +70,12 @@ class BaseController
             // Handle encoding errors gracefully
             $jsonData = json_encode(['success' => false, 'message' => 'Error encoding data']);
         }
-
         // Send the JSON response
         echo $jsonData;
         exit;
     }
 
-    protected function createUrl(string $routeName, array $params = [])
+    protected function createUrl(string $routeName, array $params = []): string
     {
         return $this->router->generate($routeName, $params);
     }
@@ -104,13 +104,13 @@ class BaseController
         }
     }
 
-    protected function validateDate($date)
+    protected function validateDate($date): bool
     {
         $d = DateTime::createFromFormat('Y-m-d', $date);
         return $d && $d->format('Y-m-d') === $date ? $date : false;
     }
 
-    protected function requireLogin()
+    protected function requireLogin(): bool
     {
         if (Session::isLoggedIn()) {
             return true;
@@ -122,10 +122,9 @@ class BaseController
             $this->render('login/viewLogin');
             exit;
         }
-        return true;
     }
 
-    protected function requireAdmin()
+    protected function requireAdmin(): bool
     {
         if (!Session::isAdmin()) {
             return false;

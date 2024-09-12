@@ -15,6 +15,7 @@ class Database
     private function __construct(Application $app)
     {
         $this->dbfile = $app->getConfig('DB_PATH');
+        //$this->dbfile = "slask";
         $this->connect();
     }
 

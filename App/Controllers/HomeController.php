@@ -2,7 +2,7 @@
 
 namespace App\Controllers;
 
-class HomeController extends BaseController
+class HomeController
 {
     public function index()
     {
@@ -12,5 +12,10 @@ class HomeController extends BaseController
     public function pageNotFound()
     {
         $this->render('404');
+    }
+
+    protected function render(string $viewName): void
+    {
+        require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
     }
 }
