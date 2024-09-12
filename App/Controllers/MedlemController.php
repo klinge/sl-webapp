@@ -7,9 +7,28 @@ use App\Models\Medlem;
 use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Models\BetalningRepository;
+use App\Utils\Sanitizer;
 
 class MedlemController extends BaseController
 {
+    //Sanitizing rules for sanitizing user input for Medlem data
+    private $sanitizerRules = [
+        'id' => 'int',
+        'fodelsedatum' => ['date', 'Y-m-d'],
+        'fornamn' => 'string',
+        'efternamn' => 'string',
+        'email' => 'email',
+        'mobil' => 'string',
+        'telefon' => 'string',
+        'adress' => 'string',
+        'postnummer' => 'string',
+        'postort' => 'string',
+        'kommentar' => 'string',
+        'godkant_gdpr' => 'string',
+        'pref_kommunikation' => 'string',
+        'isAdmin' => 'string',
+    ];
+
     public function list()
     {
         $medlemRepo = new MedlemRepository($this->conn);
@@ -73,8 +92,12 @@ class MedlemController extends BaseController
         $id = $params['id'];
         $medlem = new Medlem($this->conn, $id);
 
+        //Sanitize user input
+        $sanitizer = new Sanitizer();
+        $cleanValues = $sanitizer->sanitize($_POST, $this->sanitizerRules);
+
         //Start by validating fodelsedatum and fail early if not valid
-        if (!$this->validateDate($_POST['fodelsedatum'])) {
+        if (empty($cleanValues['fodelsedatum'])) {
             $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Felaktigt fodelsedatum!'];
             $redirectUrl = $this->router->generate('medlem-edit', ['id' => $id]);
             header('Location: ' . $redirectUrl);
@@ -82,14 +105,12 @@ class MedlemController extends BaseController
         }
 
         //Loop over everything in POST and set values on the Medlem object
-
-        //Loop over everything in POST and set values on the Medlem object
-        foreach ($_POST as $key => $value) {
+        foreach ($cleanValues as $key => $value) {
             //Special handling for roller that is an array of ids
             if ($key === 'roller') {
                 $medlem->updateMedlemRoles($value);
             } elseif (property_exists($medlem, $key)) {
-                $medlem->$key = $this->sanitizeInput($value); // Assign value to corresponding property
+                $medlem->$key = $value; // Assign value to corresponding property
             }
         }
 
@@ -142,12 +163,15 @@ class MedlemController extends BaseController
     {
         $medlem = new Medlem($this->conn);
 
-        foreach ($_POST as $key => $value) {
+        $s = new Sanitizer();
+        $cleanValues = $s->sanitize($_POST, $this->sanitizerRules);
+
+        foreach ($cleanValues as $key => $value) {
             //Special handling for roller that is an array of ids
             if ($key === 'roller') {
                 $medlem->updateMedlemRoles($value);
             } elseif (property_exists($medlem, $key)) {
-                $_POST[$key] = $this->sanitizeInput($value);
+                $_POST[$key] = $value;
                 $medlem->$key = $value; // Assign value to corresponding property
             }
         }
@@ -167,7 +191,7 @@ class MedlemController extends BaseController
             $medlem->create();
             $_SESSION['flash_message'] = [
                 'type' => 'success',
-                'message' => 'Medlem ". $medlem-fornamn . " " . $medlem->efternamn . " skapad!'
+                'message' => 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
             ];
         } catch (Exception $e) {
             $_SESSION['flash_message'] = [

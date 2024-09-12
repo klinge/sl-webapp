@@ -6,6 +6,7 @@ use Exception;
 use App\Models\Betalning;
 use App\Models\BetalningRepository;
 use App\Models\Medlem;
+use App\Utils\Sanitizer;
 
 class BetalningController extends BaseController
 {
@@ -68,16 +69,22 @@ class BetalningController extends BaseController
             $this->jsonResponse(['success' => false, 'message' => 'Belopp, datum, and avser_ar are required fields.']);
         }
 
-        // Validate and sanitize input
-        $betalning->medlem_id = filter_input(INPUT_POST, 'medlem_id', FILTER_VALIDATE_INT);
-        $betalning->datum = $this->validateDate($_POST['datum'] ?? '');
-        $betalning->belopp = filter_input(INPUT_POST, 'belopp', FILTER_VALIDATE_FLOAT);
-        $betalning->avser_ar = filter_input(INPUT_POST, 'avser_ar', FILTER_VALIDATE_INT);
-        if (isset($_POST['kommentar'])) {
-            $betalning->kommentar = $this->sanitizeInput($_POST['kommentar']);
-        } else {
-            $betalning->kommentar = "";
-        }
+        //Sanitize user input
+        $sanitizer = new Sanitizer();
+        $rules = [
+            'medlem_id' => 'string',
+            'datum' => ['date', 'Y-m-d'],
+            'avser_ar' => ['date', 'Y'],
+            'belopp' => 'float',
+            'kommentar' => 'string',
+        ];
+        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+
+        $betalning->medlem_id = $cleanValues['medlem_id'];
+        $betalning->datum = $cleanValues['datum'];
+        $betalning->belopp = $cleanValues['belopp'];
+        $betalning->avser_ar = $cleanValues['avser_ar'];
+        $betalning->kommentar = $cleanValues['kommentar'] ?: null;
 
         $input_ok = $betalning->medlem_id && $betalning->datum && $betalning->belopp && $betalning->avser_ar;
 

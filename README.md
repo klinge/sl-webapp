@@ -8,7 +8,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Other: make a proper 404 page
 * Other: add mail templetes for password reset and new user registration (https://github.com/ActiveCampaign/postmark-templates/tree/main)
 * Refactor: refactor the controller->render()-code to use a view-class
-* Refactor: handle dates in the Segling class as proper dates and not strings
+* Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
 * Refactor: ensure consistent naming for CRUD operations..
 
 ## DONE for v0.9: 
