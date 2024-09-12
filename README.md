@@ -8,8 +8,6 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Other: make a proper 404 page
 * Other: add mail templetes for password reset and new user registration (https://github.com/ActiveCampaign/postmark-templates/tree/main)
 * Refactor: refactor the controller->render()-code to use a view-class
-* Refactor: database class
-* Refactor: write a sanitization class to handle user input
 * Refactor: handle dates in the Segling class as proper dates and not strings
 * Refactor: ensure consistent naming for CRUD operations..
 
@@ -25,6 +23,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Refactor: create an Application class and use dotenv for global config
 * DONE Refactor: introduce namespaces in entire application and move to a proper directory structure
 * DONE Refactor: remove PHP CodeSniff errors
+* DONE Refactor: database class
+* DONE Refactor: write a sanitization class to handle user input
 * DONE Auth: add a register user form - only allow existing members to register #1
 
 ## Longer term TODO (v1.0): 

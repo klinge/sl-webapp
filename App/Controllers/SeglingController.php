@@ -87,13 +87,22 @@ class SeglingController extends BaseController
         $id = $params['id'];
         $segling = new Segling($this->conn, $id);
 
-        //TODO add logic to save
-        $segling->start_dat = $this->sanitizeInput($_POST['startdat']);
-        $segling->slut_dat = $this->sanitizeInput($_POST['slutdat']);
-        $segling->skeppslag = $this->sanitizeInput($_POST['skeppslag']);
-        if (isset($_POST['kommentar'])) {
-            $segling->kommentar = $this->sanitizeInput($_POST['kommentar']);
-        }
+        //Sanitize user input
+        $sanitizer = new Sanitizer();
+        $rules = [
+            'startdat' => ['date', 'Y-m-d'],
+            'slutdat' => ['date', 'Y-m-d'],
+            'skeppslag' => 'string',
+            'kommentar' => 'string',
+        ];
+        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+
+        //Store sanitized values
+        $segling->start_dat = $cleanValues['startdat'];
+        $segling->slut_dat = $cleanValues['slutdat'];
+        $segling->skeppslag = $cleanValues['skeppslag'];
+        $segling->kommentar = $cleanValues['kommentar'] ?: null;
+
         if ($segling->save()) {
             // Set the URL and redirect
             Session::setFlashMessage('success', 'Segling uppdaterad!');

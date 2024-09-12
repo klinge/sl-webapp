@@ -7,7 +7,7 @@ namespace App\Utils;
 * It provides methods to sanitize and validate user input based on specified rules.
 */
 
-abstract class Sanitizer
+class Sanitizer
 {
     //Tells the function what rule to use for sanitizing
     private $sanitizing_rules = [
@@ -44,14 +44,14 @@ abstract class Sanitizer
         $value = trim($value);
 
         $ruleName = is_array($rule) ? $rule[0] : $rule;
-        if (!isset($this->rules[$ruleName])) {
+        if (!isset($this->sanitizing_rules[$ruleName])) {
             throw new \InvalidArgumentException("Sanitization rule '$ruleName' does not exist.");
         }
         $method = $this->sanitizing_rules[$ruleName];
 
         if (is_string($method)) {
             return $this->$method($value, $rule[1] ?? null);
-        } elseif (isset($this->rules[$rule])) {
+        } elseif (isset($this->sanitizing_rules[$rule])) {
             return filter_var($value, $this->sanitizing_rules[$rule]);
         } else {
             throw new \InvalidArgumentException("Unknown sanitization rule: $rule");
