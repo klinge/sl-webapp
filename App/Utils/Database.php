@@ -4,33 +4,52 @@ namespace App\Utils;
 
 use PDO;
 use PDOException;
+use App\Application;
 
-class Database{
-   
-    // specify your own database credentials
-    private $dbfile = "/var/www/html/sl-webapp/db/sldb.sqlite";
-    public $conn;
-   
-    // get the database connection
-    public function getConnection(){
-   
-        $this->conn = null;
-   
-        try{
+class Database
+{
+    private static $instance = null;
+    private $conn;
+    private $dbfile;
+
+    private function __construct(Application $app)
+    {
+        $this->dbfile = $app->getConfig('DB_PATH');
+        $this->connect();
+    }
+
+    public static function getInstance(Application $app): Database
+    {
+        if (self::$instance === null) {
+            self::$instance = new self($app);
+        }
+        return self::$instance;
+    }
+
+    private function connect()
+    {
+        try {
             $this->conn = new PDO("sqlite:" . $this->dbfile);
-            
-            // Enable foreign key constraints
             $this->conn->exec("PRAGMA foreign_keys = ON;");
-
-            // Set attributes for error handling, exceptions and fetch mode
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-            return $this->conn;
-        }
-        catch(PDOException $exception){
-            echo "Connection error: " . $exception->getMessage();
+        } catch (PDOException $exception) {
+            throw new PDOException($exception->getMessage(), (int) $exception->getCode());
         }
     }
+
+    public function getConnection()
+    {
+        return $this->conn;
+    }
+
+    private function __clone()
+    {
+        // Prevent cloning of the instance
+    }
+
+    public function __wakeup()
+    {
+        // Prevent unserializing of the instance
+    }
 }
-?>

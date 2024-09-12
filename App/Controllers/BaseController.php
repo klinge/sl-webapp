@@ -6,6 +6,7 @@ use Datetime;
 use App\Application;
 use App\Utils\Session;
 use App\Utils\Database;
+use PDOException;
 
 class BaseController
 {
@@ -46,9 +47,13 @@ class BaseController
 
     private function getDatabaseConn()
     {
-        // get database connection
-        $database = new Database();
-        return $database->getConnection();
+        try {
+            return Database::getInstance($this->app)->getConnection();
+        } catch (PDOException $e) {
+            Session::setFlashMessage('error', 'Tekniskt fel. Kunde inte öppna databas. Fel: ' . $e->getMessage());
+            $redirectUrl = $this->router->generate('home');
+            header('Location: ' . $redirectUrl);
+        }
     }
 
     protected function jsonResponse(array $data)

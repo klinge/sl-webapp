@@ -2,9 +2,15 @@
 
 namespace App\Utils;
 
-class Sanitizer
+/*
+* This class is responsible for sanitizing and validating user input
+* It provides methods to sanitize and validate user input based on specified rules.
+*/
+
+abstract class Sanitizer
 {
-    private $rules = [
+    //Tells the function what rule to use for sanitizing
+    private $sanitizing_rules = [
         'string' => 'sanitizeString', //FILTER_SANITIZE_STRING us deprecated so use htmlspecialchars() instead
         'email' => FILTER_SANITIZE_EMAIL,
         'int' => FILTER_SANITIZE_NUMBER_INT,
@@ -13,6 +19,13 @@ class Sanitizer
         'date' => 'sanitizeDate',
     ];
 
+    /*
+    * Sanitize user inputs based on specified rules.
+    * @param array $input The input data to be sanitized.
+    * @param array $fieldRules An array specifying the rules for each field.
+    * @return array The sanitized input data.
+    * @throws \InvalidArgumentException If an invalid sanitization rule is specified.
+    */
     public function sanitize(array $input, array $fieldRules)
     {
         $sanitizedInput = [];
@@ -34,12 +47,12 @@ class Sanitizer
         if (!isset($this->rules[$ruleName])) {
             throw new \InvalidArgumentException("Sanitization rule '$ruleName' does not exist.");
         }
-        $method = $this->rules[$ruleName];
+        $method = $this->sanitizing_rules[$ruleName];
 
         if (is_string($method)) {
             return $this->$method($value, $rule[1] ?? null);
         } elseif (isset($this->rules[$rule])) {
-            return filter_var($value, $this->rules[$rule]);
+            return filter_var($value, $this->sanitizing_rules[$rule]);
         } else {
             throw new \InvalidArgumentException("Unknown sanitization rule: $rule");
         }

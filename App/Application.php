@@ -65,7 +65,7 @@ class Application
         $this->router->map('POST', '/auth/sparalosenord', 'AuthController#resetAndSavePassword', 'reset-password');
 
         //Route all other urls to 404
-        $this->router->map('GET|POST', '*', 'HomeController#PageNotFound', '404');
+        $this->router->map('GET|POST', '*', 'HomeController#pageNotFound', '404');
     }
 
     private function dispatch($match, $request, $router)
