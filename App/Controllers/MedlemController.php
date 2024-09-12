@@ -200,7 +200,6 @@ class MedlemController extends BaseController
             ];
         }
 
-
         // Set the URL and redirect
         $redirectUrl = $this->router->generate('medlem-list');
         header('Location: ' . $redirectUrl);

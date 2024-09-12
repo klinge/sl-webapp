@@ -49,6 +49,11 @@
     fill: currentcolor;
 }
 
+/* Make bootstrap tables more compact */
+.table>:not(caption)>*>* {
+    padding: .2rem .2rem !important;
+}
+
 /* Rules to make forms more compact */
 .form-label { 
     margin-bottom: .2rem !important; 

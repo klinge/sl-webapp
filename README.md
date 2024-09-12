@@ -7,6 +7,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Auth: direct admin and non-admin to different pages after login
 * Other: make a proper 404 page
 * Other: add mail templetes for password reset and new user registration (https://github.com/ActiveCampaign/postmark-templates/tree/main)
+* Refactor: remove duplicated code between save() and insertNew() in MedlemController
 * Refactor: refactor the controller->render()-code to use a view-class
 * Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
 * Refactor: ensure consistent naming for CRUD operations..
