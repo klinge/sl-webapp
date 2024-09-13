@@ -3,12 +3,12 @@
 namespace App\Controllers;
 
 use PDO;
-use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use App\Utils\Session;
 use App\Utils\Email;
 use App\Utils\EmailType;
 use App\Models\Medlem;
+use App\Utils\Sanitizer;
 
 class AuthController extends BaseController
 {
@@ -17,7 +17,7 @@ class AuthController extends BaseController
         $this->render('login/viewLogin');
     }
 
-    public function login()
+    public function login(): void
     {
         $providedEmail = $_POST['email'];
         $providedPassword = $_POST['password'];
@@ -38,7 +38,6 @@ class AuthController extends BaseController
         }
         //Verify provided password with password from db
         if (password_verify($providedPassword, $medlem->password)) {
-            Session::start();
             Session::set('user_id', $medlem->id);
             Session::set('fornamn', $medlem->fornamn);
             if ($medlem->isAdmin) {
@@ -49,10 +48,8 @@ class AuthController extends BaseController
             if ($redirectUrl) {
                 Session::remove('redirect_url');
                 header('Location: ' . $redirectUrl);
-                exit;
             } else {
                 header('Location: ' . $this->app->getBaseUrl());
-                return true;
             }
         } else {
             Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! FELLÖSEN');
@@ -60,7 +57,7 @@ class AuthController extends BaseController
         }
     }
 
-    public function logout()
+    public function logout(): void
     {
         Session::remove('user_id');
         Session::remove('fornamn');
@@ -70,18 +67,37 @@ class AuthController extends BaseController
         exit;
     }
 
-    public function register()
+    public function register(): void
     {
+        //Start by sanitizing email and validating passwords
+        $s = new Sanitizer();
+        $rules = ['email' => 'email'];
+        $cleanValues = $s->sanitize($_POST, $rules);
 
-        $email = $_POST['email'];
+        $email = $cleanValues['email'];
         $password = $_POST['password'];
         $repeatPassword = $_POST['passwordRepeat'];
+
         //First validate that the passwords match
         if ($password != $repeatPassword) {
             Session::setFlashMessage('error', 'Lösenorden matchar inte!');
             $this->render('login/viewLogin');
             return;
         }
+
+        //Then check that it follows some basic rules
+        $passwordErrors = $this->validatePassword($password, $email);
+        if (!empty($passwordErrors)) {
+            $message = "<ul>";
+            foreach ($passwordErrors as $error) {
+                $message = $message . "<li>" . $error . "</li>";
+            }
+            $message = $message . "</ul>";
+            Session::setFlashMessage('error', $message);
+            $this->render('login/viewLogin');
+            return;
+        }
+
         //Then check if the user exists and already has a password
         $result = $this->getMemberByEmail($email);
         //Fail if user does not exist
@@ -103,7 +119,7 @@ class AuthController extends BaseController
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         //$token = bin2hex(random_bytes(16));
         //Changed to make url-safe tokens only containing alphanumeric characters
-        $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(18)));
+        $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(20)));
         $token_type = 'activate';
 
         //Add values to AuthToken table
@@ -254,7 +270,22 @@ class AuthController extends BaseController
             $this->render('login/viewSetNewPassword', $viewData);
             return;
         }
+
+        //Then check that it follows some basic rules
+        $passwordErrors = $this->validatePassword($password, $email);
+        if (!empty($passwordErrors)) {
+            $message = "<ul>";
+            foreach ($passwordErrors as $error) {
+                $message = $message . "<li>" . $error . "</li>";
+            }
+            $message = $message . "</ul>";
+            Session::setFlashMessage('error', 'Lösenorden matchar inte!');
+            $this->render('login/viewLogin');
+            return;
+        }
+
         $member = $this->getMemberByEmail($email);
+
         //Fail if member doesn't exist, should never happen
         if (!$member) {
             Session::setFlashMessage('error', 'OJ! Nu blev det ett tekniskt fel. Användaren finns inte..');
@@ -315,5 +346,46 @@ class AuthController extends BaseController
         $stmt->execute();
         //Return number of deleted rows
         return $stmt->rowCount();
+    }
+
+    private function validatePassword(string $password, string $email): array
+    {
+        $errors = [];
+        //BASIC VALIDATION
+        if (strlen($password) < 8) {
+            $errors[] = "Lösenordet måste vara minst 8 tecken.";
+        }
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = "Lösenordet måste innehålla minst en stor bokstav.";
+        }
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = "Lösenordet måste innehålla minst en liten bokstav.";
+        }
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = "Lösenordet måste innehålla minst en siffra";
+        }
+        if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+            $errors[] = "Lösenordet måste innehålla minst ett specialtecken.";
+        }
+        //CHECK THAT USERNAME OR NAME IS NOT PART OF PASSWORD
+        $username = strstr($email, '@', true);
+        $lowercasePassword = strtolower($password);
+
+        if (strpos($lowercasePassword, strtolower($username)) !== false) {
+            $errors[] = "Lösenordet får inte innehålla delar från din mailadress.";
+        }
+        // Check for firstname and lastname if email contains a period
+        if (strpos($username, '.') !== false) {
+            list($firstName, $lastName) = explode('.', $username, 2);
+
+            if (strpos($lowercasePassword, strtolower($firstName)) !== false) {
+                $errors[] = "Lösenordet får inte innehålla ditt förnamn.";
+            }
+            if (strpos($lowercasePassword, strtolower($lastName)) !== false) {
+                $errors[] = "Lösenordet får inte innehålla ditt efternamn.";
+            }
+        }
+
+        return $errors;
     }
 }
