@@ -5,18 +5,17 @@ Members and activities database for a sailing club, with an accompanying web-gui
 ## TODO (v0.9): 
 * Auth: add controller->requireAuth() to access all admin pages
 * Auth: direct admin and non-admin to different pages after login
-* Other: make a proper 404 page
 * Other: add mail templetes for password reset and new user registration (https://github.com/ActiveCampaign/postmark-templates/tree/main)
 * Refactor: remove duplicated code between save() and insertNew() in MedlemController
 * Refactor: refactor the controller->render()-code to use a view-class
 * Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
-* Refactor: ensure consistent naming for CRUD operations..
 
 ## DONE for v0.9: 
 * DONE Segling: Fix database for members on Seglingar
 * DONE Segling: Fix viewSeglingEdit to allow adding and deleting participants on a segling
 * DONE Segling: delete a Segling
 * DONE Segling: Create new Segling
+* DONE Other: make a proper 404 page
 * DONE Auth: add a reset password flow
 * DONE Auth: remove SMTP credentials from AuthController
 * DONE Refactor: make a Mail class
@@ -36,6 +35,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Other: add phpcs and PHPStan och Psalm to Github commit workflow
 * Refactor: add PSR-7 request and response classes
 * Refactor: add DocBlocks for all classes
+* Refactor: ensure consistent naming for CRUD operations..
 * Refactor: add a util class for validation of user input or add a validation library like Respect och Rakit
 * Auth: replace own code with a proper Auth component. Maybe Comet Auth. Integrate with Medlem class?
 

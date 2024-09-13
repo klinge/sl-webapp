@@ -5,6 +5,7 @@ namespace App;
 use Dotenv\Dotenv;
 use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
 use Exception;
+use App\Middleware\AuthMiddleware;
 use App\Utils\Session;
 
 class Application
@@ -63,6 +64,8 @@ class Application
         $this->router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
         $this->router->map('GET', '/auth/bytlosenord/[a:token]', 'AuthController#showResetPassword', 'show-reset-password');
         $this->router->map('POST', '/auth/sparalosenord', 'AuthController#resetAndSavePassword', 'reset-password');
+
+        $this->router->map('GET', '/user', 'UserController#home', 'user-home');
 
         //Route all other urls to 404
         $this->router->map('GET|POST', '*', 'HomeController#pageNotFound', '404');
@@ -138,6 +141,12 @@ class Application
         ini_set('session.use_only_cookies', 1);
         ini_set('session.cookie_lifetime', 1800);
         Session::start();
+    }
+
+    public function runMiddleware()
+    {
+        $authMiddleware = new AuthMiddleware($this);
+        $authMiddleware->handle();
     }
 
     public function run()

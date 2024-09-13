@@ -17,19 +17,16 @@ class SeglingController extends BaseController
 {
     public function list()
     {
-        $isLoggedIn = $this->requireLogin();
-        if ($isLoggedIn) {
-            $seglingar = new SeglingRepository($this->conn);
-            $result = $seglingar->getAllWithDeltagare();
+        $seglingar = new SeglingRepository($this->conn);
+        $result = $seglingar->getAllWithDeltagare();
 
-            //Put everyting in the data variable that is used by the view
-            $data = [
-                "title" => "Bokningslista",
-                "newAction" => $this->router->generate('segling-show-create'),
-                "items" => $result
-            ];
-            $this->render('viewSegling', $data);
-        }
+        //Put everyting in the data variable that is used by the view
+        $data = [
+            "title" => "Bokningslista",
+            "newAction" => $this->router->generate('segling-show-create'),
+            "items" => $result
+        ];
+        $this->render('viewSegling', $data);
     }
 
     public function edit(array $params)
