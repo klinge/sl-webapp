@@ -2,8 +2,12 @@
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
 
+## DOING: 
+* Debug AuthController after refactoring.. 
+
 ## TODO (v0.9): 
-* Auth: add controller->requireAuth() to access all admin pages
+
+* Auth: add admin checks in AuthMiddleware
 * Auth: direct admin and non-admin to different pages after login
 * Other: add mail templetes for password reset and new user registration (https://github.com/ActiveCampaign/postmark-templates/tree/main)
 * Refactor: remove duplicated code between save() and insertNew() in MedlemController
@@ -26,6 +30,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Refactor: database class
 * DONE Refactor: write a sanitization class to handle user input
 * DONE Auth: add a register user form - only allow existing members to register #1
+* DONE Auth: verify that a user is logged in for all pages
 
 ## Longer term TODO (v1.0): 
 * Selfservice: Add a page to let members update their personal information
