@@ -29,6 +29,9 @@ class AuthMiddleware
         $match = $this->app->getRouter()->match();
 
         if ($match && !in_array($match['name'], $this->exemptRoutes) && !Session::get('user_id')) {
+            // Store the current URL in the session
+            Session::set('redirect_url', $_SERVER['REQUEST_URI']);
+            //Then require login
             Session::setFlashMessage('error', 'Du måste vara inloggad för att se denna sida.');
             header('Location: ' . $this->app->getRouter()->generate('show-login'));
             exit;
