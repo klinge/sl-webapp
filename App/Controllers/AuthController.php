@@ -7,6 +7,7 @@ use App\Utils\Email;
 use App\Utils\EmailType;
 use App\Models\Medlem;
 use App\Utils\Sanitizer;
+use App\Utils\TokenHandler;
 use App\Utils\TokenType;
 use PDO;
 use PDOException;
@@ -14,7 +15,12 @@ use PHPMailer\PHPMailer\Exception;
 
 class AuthController extends BaseController
 {
+    private $tokenHandler;
 
+    public function __construct()
+    {
+        $this->tokenHandler = new TokenHandler($this->conn);
+    }
     public function showLogin()
     {
         $this->render('login/viewLogin');
@@ -121,32 +127,34 @@ class AuthController extends BaseController
         //Save hashed password and generate a token to be sent by mail to the user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $token = $this->generateAndSaveToken(TokenType::ACTIVATION, $email, $hashedPassword);
+        $token = $this->tokenHandler->generateToken();
+        $result = $this->tokenHandler->saveToken($token, TokenType::ACTIVATION, $email, $hashedPassword);
 
-        if ($token) {
-            //Successful update, send email with token
-            $mailer = new Email($this->app);
-            $data = [
-                'token' => $token,
-                'fornamn' => $medlem->fornamn,
-                'activate_url' => $this->createUrl('register-activate', ['token' => $token])
-            ];
-
-            try {
-                $mailer->send(EmailType::TEST, $email, data: $data);
-                Session::setFlashMessage(
-                    'success',
-                    'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'
-                );
-                $this->render('login/viewLogin');
-                return;
-            } catch (Exception $e) {
-                Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen. (' . $e->getMessage() . ')');
-                $this->render('login/viewLogin');
-                return;
-            }
-        } else {
+        //Fail if we couldn't save token
+        if (!$result) {
             Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen.');
+            $this->render('login/viewLogin');
+            return;
+        }
+
+        //Successful update, send email with token
+        $mailer = new Email($this->app);
+        $data = [
+            'token' => $token,
+            'fornamn' => $medlem->fornamn,
+            'activate_url' => $this->createUrl('register-activate', ['token' => $token])
+        ];
+
+        try {
+            $mailer->send(EmailType::TEST, $email, data: $data);
+            Session::setFlashMessage(
+                'success',
+                'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'
+            );
+            $this->render('login/viewLogin');
+            return;
+        } catch (Exception $e) {
+            Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen. (' . $e->getMessage() . ')');
             $this->render('login/viewLogin');
             return;
         }
@@ -155,20 +163,14 @@ class AuthController extends BaseController
     public function activate(array $params)
     {
         $token = $params['token'];
-        $result = $this->isValidToken($token, 'activate');
-        if ($result['valid']) {
+        $result = $this->tokenHandler->isValidToken($token, TokenType::ACTIVATION);
+        if ($result['status']) {
             //If all is okay, add password to Medlem table
-            $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
-            $stmt->bindParam(':password', $result['password_hash']);
-            $stmt->bindParam(':email', $result['email']);
-            $stmt->execute();
-            //Delete token from db
-            $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE token = :token");
-            $stmt->bindParam(':token', $token);
-            $stmt->execute();
+            $this->saveMembersPassword($result['password_hash'], $result['email']);
 
-            //Also take the chance to do some cleanup and delete all expired tokens
-            $deletedRows = $this->deleteExpiredTokens();
+            //Delete used token, also take the chance to do some cleanup and delete all expired tokens
+            $this->tokenHandler->deleteToken($token);
+            $this->tokenHandler->deleteExpiredTokens();
 
             Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
             header('Location: ' . $this->createUrl('login'));
@@ -191,9 +193,10 @@ class AuthController extends BaseController
         $member = $this->getMemberByEmail($email);
         //Don't do anything if member doesn't exist
         if ($member) {
-            $token = $this->generateAndSaveToken(TokenType::RESET, $email);
+            $token = $this->tokenHandler->generateToken();
+            $result = $this->tokenHandler->saveToken($token, TokenType::RESET, $email);
 
-            if (!$token) {
+            if (!$result) {
                 Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
                 $this->render('login/viewReqPassword');
                 exit;
@@ -225,7 +228,7 @@ class AuthController extends BaseController
     {
         $token = $params['token'];
         //Validate token
-        $result = $this->isValidToken($token, 'reset');
+        $result = $this->tokenHandler->isValidToken($token, TokenType::RESET);
         if ($result['valid']) {
             //Render set new password view
             $viewData = [
@@ -247,6 +250,7 @@ class AuthController extends BaseController
         $token = $_POST['token'];
         $password = $_POST['password'];
         $password2 = $_POST['password2'];
+
         //Fail if passwords don't match
         if ($password !== $password2) {
             Session::setFlashMessage('error', 'Lösenorden stämmer inte överens. Försök igen');
@@ -258,8 +262,9 @@ class AuthController extends BaseController
             return;
         }
 
-        //Then check that it follows some basic rules
+        //Then verify that it follows some basic rules
         $passwordErrors = $this->validatePassword($password, $email);
+
         if (!empty($passwordErrors)) {
             $message = "<ul>";
             foreach ($passwordErrors as $error) {
@@ -286,14 +291,9 @@ class AuthController extends BaseController
         // Hash the new password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         // And save it to db
-        $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
-        $stmt->bindParam(':password', $hashedPassword);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-        // Lastly remove the token
-        $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE token = :token");
-        $stmt->bindParam(':token', $token);
-        $stmt->execute();
+        $this->saveMembersPassword($hashedPassword, $email);
+        //Delete the used token
+        $this->tokenHandler->deleteToken($token);
         // And send the user to the login page
         Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
         header('Location: ' . $this->createUrl('show-login'));
@@ -309,66 +309,18 @@ class AuthController extends BaseController
         return $result;
     }
 
-    private function generateAndSaveToken(TokenType $tokenType, string $email, ?string $hashedPassword = null): string|bool
+    private function saveMembersPassword(string $hashedPassword, string $email): bool
     {
-        //$token = bin2hex(random_bytes(16));
-        //Changed to make url-safe tokens only containing alphanumeric characters
-        $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(20)));
+        $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
 
-        //Depending on if its an activation or a password reset the SQL is different
-        if ($tokenType::ACTIVATION) {
-            $stmt = $this->conn->prepare(
-                "INSERT INTO AuthToken (email, token, token_type, password_hash) VALUES (:email, :token, :token_type, :password_hash)"
-            );
-        } elseif ($tokenType::RESET) {
-            $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)");
+        if ($stmt->rowCount() == 1) {
+            return true;
         } else {
             return false;
         }
-
-        try {
-            //Add values to AuthToken table
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':token', $token);
-            $stmt->bindValue(':token_type', $tokenType->value);
-            if ($tokenType == 'activate') {
-                $stmt->bindParam(':password_hash', $hashedPassword);
-            }
-            $stmt->execute();
-            return $token;
-        } catch (PDOException $e) {
-            return false;
-        }
-    }
-
-    private function isValidToken(string $token, string $type): array
-    {
-        $stmt = $this->conn->prepare("SELECT * FROM AuthToken WHERE token = :token AND token_type = :token_type");
-        $stmt->bindParam(':token', $token);
-        $stmt->bindParam(':token_type', $type);
-        $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$result) {
-            //Fail if we didnt find the token
-            return ['valid' => false, 'message' => 'Länken är inte giltig'];
-        } else {
-            //Check if token is expired
-            $expirationTime = strtotime($result['created_at']) + (60 * 30); // 30 minutes in seconds
-            if (time() > $expirationTime) {
-                //Also fail if token is expired
-                return ['valid' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
-            }
-            return ['valid' => true, 'email' => $result['email']];
-        }
-    }
-
-    private function deleteExpiredTokens()
-    {
-        $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE created_at < datetime('now', '-1 hour')");
-        $stmt->execute();
-        //Return number of deleted rows
-        return $stmt->rowCount();
     }
 
     private function validatePassword(string $password, string $email): array
