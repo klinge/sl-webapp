@@ -10,17 +10,12 @@ use App\Utils\Sanitizer;
 use App\Utils\TokenHandler;
 use App\Utils\TokenType;
 use PDO;
-use PDOException;
 use PHPMailer\PHPMailer\Exception;
 
 class AuthController extends BaseController
 {
-    private $tokenHandler;
+    private ?TokenHandler $tokenHandler = null;
 
-    public function __construct()
-    {
-        $this->tokenHandler = new TokenHandler($this->conn);
-    }
     public function showLogin()
     {
         $this->render('login/viewLogin');
@@ -127,8 +122,8 @@ class AuthController extends BaseController
         //Save hashed password and generate a token to be sent by mail to the user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-        $token = $this->tokenHandler->generateToken();
-        $result = $this->tokenHandler->saveToken($token, TokenType::ACTIVATION, $email, $hashedPassword);
+        $token = $this->getTokenHandler()->generateToken();
+        $result = $this->getTokenHandler()->saveToken($token, TokenType::ACTIVATION, $email, $hashedPassword);
 
         //Fail if we couldn't save token
         if (!$result) {
@@ -163,14 +158,14 @@ class AuthController extends BaseController
     public function activate(array $params)
     {
         $token = $params['token'];
-        $result = $this->tokenHandler->isValidToken($token, TokenType::ACTIVATION);
+        $result = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
         if ($result['status']) {
             //If all is okay, add password to Medlem table
             $this->saveMembersPassword($result['password_hash'], $result['email']);
 
             //Delete used token, also take the chance to do some cleanup and delete all expired tokens
-            $this->tokenHandler->deleteToken($token);
-            $this->tokenHandler->deleteExpiredTokens();
+            $this->getTokenHandler()->deleteToken($token);
+            $this->getTokenHandler()->deleteExpiredTokens();
 
             Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
             header('Location: ' . $this->createUrl('login'));
@@ -193,8 +188,8 @@ class AuthController extends BaseController
         $member = $this->getMemberByEmail($email);
         //Don't do anything if member doesn't exist
         if ($member) {
-            $token = $this->tokenHandler->generateToken();
-            $result = $this->tokenHandler->saveToken($token, TokenType::RESET, $email);
+            $token = $this->getTokenHandler()->generateToken();
+            $result = $this->getTokenHandler()->saveToken($token, TokenType::RESET, $email);
 
             if (!$result) {
                 Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
@@ -228,7 +223,7 @@ class AuthController extends BaseController
     {
         $token = $params['token'];
         //Validate token
-        $result = $this->tokenHandler->isValidToken($token, TokenType::RESET);
+        $result = $this->getTokenHandler()->isValidToken($token, TokenType::RESET);
         if ($result['valid']) {
             //Render set new password view
             $viewData = [
@@ -293,13 +288,20 @@ class AuthController extends BaseController
         // And save it to db
         $this->saveMembersPassword($hashedPassword, $email);
         //Delete the used token
-        $this->tokenHandler->deleteToken($token);
+        $this->getTokenHandler()->deleteToken($token);
         // And send the user to the login page
         Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
         header('Location: ' . $this->createUrl('show-login'));
         return;
     }
 
+    private function getTokenHandler(): TokenHandler
+    {
+        if ($this->tokenHandler === null) {
+            $this->tokenHandler = new TokenHandler($this->conn);
+        }
+        return $this->tokenHandler;
+    }
     private function getMemberByEmail(string $email)
     {
         $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
