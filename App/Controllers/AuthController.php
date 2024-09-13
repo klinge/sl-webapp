@@ -158,8 +158,9 @@ class AuthController extends BaseController
     public function activate(array $params)
     {
         $token = $params['token'];
-        $result = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
-        if ($result['status']) {
+        $token_ok = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
+        if ($token_ok['success']) {
+            $result = $this->getMemberByEmail($token_ok['email']);
             //If all is okay, add password to Medlem table
             $this->saveMembersPassword($result['password_hash'], $result['email']);
 
@@ -171,7 +172,7 @@ class AuthController extends BaseController
             header('Location: ' . $this->createUrl('login'));
             return;
         } else {
-            Session::setFlashMessage('error', $result['message']);
+            Session::setFlashMessage('error', $token_ok['message']);
             header('Location: ' . $this->createUrl('login'));
             return;
         }
@@ -224,7 +225,7 @@ class AuthController extends BaseController
         $token = $params['token'];
         //Validate token
         $result = $this->getTokenHandler()->isValidToken($token, TokenType::RESET);
-        if ($result['valid']) {
+        if ($result['success']) {
             //Render set new password view
             $viewData = [
                 'email' => $result['email'],
@@ -289,9 +290,9 @@ class AuthController extends BaseController
         $this->saveMembersPassword($hashedPassword, $email);
         //Delete the used token
         $this->getTokenHandler()->deleteToken($token);
-        // And send the user to the login page
+        // And logout the user, which sends him to the login screen
         Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
-        header('Location: ' . $this->createUrl('show-login'));
+        $this->logout();
         return;
     }
 

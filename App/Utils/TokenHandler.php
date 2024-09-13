@@ -62,15 +62,15 @@ class TokenHandler
 
         if (!$result) {
             //Fail if we didnt find the token
-            return ['status' => false, 'message' => 'Länken är inte giltig'];
+            return ['success' => false, 'message' => 'Länken är inte giltig'];
         } else {
             //Check if token is expired
             $expirationTime = strtotime($result['created_at']) + (60 * 30); // 30 minutes in seconds
             if (time() > $expirationTime) {
                 //Also fail if token is expired
-                return ['status' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
+                return ['success' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
             }
-            return ['' => true, 'email' => $result['email']];
+            return ['success' => true, 'email' => $result['email']];
         }
     }
 
