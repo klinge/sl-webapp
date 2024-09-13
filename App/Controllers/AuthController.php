@@ -2,16 +2,19 @@
 
 namespace App\Controllers;
 
-use PDO;
-use PHPMailer\PHPMailer\Exception;
 use App\Utils\Session;
 use App\Utils\Email;
 use App\Utils\EmailType;
 use App\Models\Medlem;
 use App\Utils\Sanitizer;
+use App\Utils\TokenType;
+use PDO;
+use PDOException;
+use PHPMailer\PHPMailer\Exception;
 
 class AuthController extends BaseController
 {
+
     public function showLogin()
     {
         $this->render('login/viewLogin');
@@ -117,22 +120,10 @@ class AuthController extends BaseController
         }
         //Save hashed password and generate a token to be sent by mail to the user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        //$token = bin2hex(random_bytes(16));
-        //Changed to make url-safe tokens only containing alphanumeric characters
-        $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(20)));
-        $token_type = 'activate';
 
-        //Add values to AuthToken table
-        $stmt = $this->conn->prepare(
-            "INSERT INTO AuthToken (email, token, token_type, password_hash) VALUES (:email, :token, :token_type, :password_hash)"
-        );
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':token', $token);
-        $stmt->bindParam(':token_type', $token_type);
-        $stmt->bindParam(':password_hash', $hashedPassword);
-        $stmt->execute();
+        $token = $this->generateAndSaveToken(TokenType::ACTIVATION, $email, $hashedPassword);
 
-        if ($stmt->rowCount() > 0) {
+        if ($token) {
             //Successful update, send email with token
             $mailer = new Email($this->app);
             $data = [
@@ -200,17 +191,13 @@ class AuthController extends BaseController
         $member = $this->getMemberByEmail($email);
         //Don't do anything if member doesn't exist
         if ($member) {
-            //Generate a token and save it in the database
-            $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(20)));
-            $token_type = 'reset';
+            $token = $this->generateAndSaveToken(TokenType::RESET, $email);
 
-            $stmt = $this->conn->prepare(
-                "INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)"
-            );
-            $stmt->bindParam(':email', $email);
-            $stmt->bindParam(':token', $token);
-            $stmt->bindParam(':token_type', $token_type);
-            $stmt->execute();
+            if (!$token) {
+                Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
+                $this->render('login/viewReqPassword');
+                exit;
+            }
 
             $mailer = new Email($this->app);
             $data = [
@@ -279,8 +266,12 @@ class AuthController extends BaseController
                 $message = $message . "<li>" . $error . "</li>";
             }
             $message = $message . "</ul>";
-            Session::setFlashMessage('error', 'Lösenorden matchar inte!');
-            $this->render('login/viewLogin');
+            Session::setFlashMessage('error', $message);
+            $viewData = [
+                'email' => $email,
+                'token' => $token
+            ];
+            $this->render('login/viewSetNewPassword', $viewData);
             return;
         }
 
@@ -318,7 +309,39 @@ class AuthController extends BaseController
         return $result;
     }
 
-    private function isValidToken(string $token, string $type)
+    private function generateAndSaveToken(TokenType $tokenType, string $email, ?string $hashedPassword = null): string|bool
+    {
+        //$token = bin2hex(random_bytes(16));
+        //Changed to make url-safe tokens only containing alphanumeric characters
+        $token = preg_replace('/[^A-Za-z0-9]/', '', base64_encode(random_bytes(20)));
+
+        //Depending on if its an activation or a password reset the SQL is different
+        if ($tokenType::ACTIVATION) {
+            $stmt = $this->conn->prepare(
+                "INSERT INTO AuthToken (email, token, token_type, password_hash) VALUES (:email, :token, :token_type, :password_hash)"
+            );
+        } elseif ($tokenType::RESET) {
+            $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)");
+        } else {
+            return false;
+        }
+
+        try {
+            //Add values to AuthToken table
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':token', $token);
+            $stmt->bindValue(':token_type', $tokenType->value);
+            if ($tokenType == 'activate') {
+                $stmt->bindParam(':password_hash', $hashedPassword);
+            }
+            $stmt->execute();
+            return $token;
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    private function isValidToken(string $token, string $type): array
     {
         $stmt = $this->conn->prepare("SELECT * FROM AuthToken WHERE token = :token AND token_type = :token_type");
         $stmt->bindParam(':token', $token);
