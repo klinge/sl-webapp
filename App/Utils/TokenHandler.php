@@ -41,7 +41,7 @@ class TokenHandler
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':token', $token);
             $stmt->bindValue(':token_type', $tokenType->value);
-            if ($tokenType == 'activate') {
+            if ($tokenType::ACTIVATION) {
                 $stmt->bindParam(':password_hash', $hashedPassword);
             }
             $stmt->execute();
@@ -70,7 +70,8 @@ class TokenHandler
                 //Also fail if token is expired
                 return ['success' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
             }
-            return ['success' => true, 'email' => $result['email']];
+            $hashedPassword = $result['password_hash'] ?: '';
+            return ['success' => true, 'email' => $result['email'], 'hashedPassword' => $hashedPassword];
         }
     }
 

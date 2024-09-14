@@ -155,24 +155,25 @@ class AuthController extends BaseController
     public function activate(array $params)
     {
         $token = $params['token'];
-        $token_ok = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
-        if ($token_ok['success']) {
-            $result = $this->getMemberByEmail($token_ok['email']);
-            //If all is okay, add password to Medlem table
-            $this->saveMembersPassword($result['password_hash'], $result['email']);
+        $token_result = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
 
-            //Delete used token, also take the chance to do some cleanup and delete all expired tokens
-            $this->getTokenHandler()->deleteToken($token);
-            $this->getTokenHandler()->deleteExpiredTokens();
-
-            Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
-            header('Location: ' . $this->createUrl('login'));
-            return;
-        } else {
-            Session::setFlashMessage('error', $token_ok['message']);
+        if (!$token_result['success']) {
+            Session::setFlashMessage('error', $token_result['message']);
             header('Location: ' . $this->createUrl('login'));
             return;
         }
+        //If all is well add the hashed password to the member table and delete the token
+        $member = $this->getMemberByEmail($token_result['email']);
+        //If all is okay, add password to Medlem table
+        $this->saveMembersPassword($token_result['hashedPassword'], $member['email']);
+
+        //Delete used token, also take the chance to do some cleanup and delete all expired tokens
+        $this->getTokenHandler()->deleteToken($token);
+        $this->getTokenHandler()->deleteExpiredTokens();
+
+        Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
+        header('Location: ' . $this->createUrl('login'));
+        return;
     }
 
     public function showRequestPwd()
@@ -288,6 +289,7 @@ class AuthController extends BaseController
         //Delete the used token
         $this->getTokenHandler()->deleteToken($token);
         // And logout the user, which sends him to the login screen
+        // TODO This flash message does not work because logout() kills the session..
         Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
         $this->logout();
         return;
@@ -339,9 +341,9 @@ class AuthController extends BaseController
         if (!preg_match('/[0-9]/', $password)) {
             $errors[] = "Lösenordet måste innehålla minst en siffra";
         }
-        if (!preg_match('/[^A-Za-z0-9]/', $password)) {
-            $errors[] = "Lösenordet måste innehålla minst ett specialtecken.";
-        }
+        //if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+        //    $errors[] = "Lösenordet måste innehålla minst ett specialtecken.";
+        //}
         //CHECK THAT USERNAME OR NAME IS NOT PART OF PASSWORD
         $username = strstr($email, '@', true);
         $lowercasePassword = strtolower($password);

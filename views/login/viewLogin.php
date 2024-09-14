@@ -107,8 +107,9 @@ include_once $APP_DIR . "/layouts/header.php";
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
-                                                <input type="password" class="form-control" name="password" id="registerPassword" value="" placeholder="Password" required>
+                                                <input type="password" class="form-control" name="password" id="registerPassword" value="" placeholder="Password" describedBy="passwordHelp" required>
                                                 <label for="registerPassword" class="form-label">Lösenord</label>
+                                                <small id="passwordHelp" class="form-text text-muted">Lösenordet måste vara 8 tecken och innehålla minst en stor bokstav, en liten bokstav och en siffra.</small>
                                             </div>
                                         </div>
                                         <div class="col-12">

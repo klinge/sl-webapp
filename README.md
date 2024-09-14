@@ -4,6 +4,9 @@ Members and activities database for a sailing club, with an accompanying web-gui
 
 ## DOING: 
 * Debug AuthController after refactoring.. 
+- login: WORKS
+- reset pwd: WORKS but no flash message upon registering new password
+- register: DOES NOT WORK..
 
 ## TODO (v0.9): 
 
