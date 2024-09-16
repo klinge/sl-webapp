@@ -4,32 +4,25 @@ namespace App\Middleware;
 
 use App\Utils\Session;
 use App\Application;
+use App\Config\RouteConfig;
 
-class AuthMiddleware
+class AuthenticationMiddleware implements MiddlewareInterface
 {
     private $app;
-    private $exemptRoutes = [
-        'show-login',
-        'login',
-        'register',
-        'register-activate',
-        'show-request-password',
-        'handle-request-password',
-        'show-reset-password',
-        'reset-password'
-    ];
 
     public function __construct(Application $app)
     {
         $this->app = $app;
     }
 
-    public function handle()
+    public function handle(): void
     {
         $match = $this->app->getRouter()->match();
 
-        if ($match && !in_array($match['name'], $this->exemptRoutes) && !Session::get('user_id')) {
-            // Store the current URL in the session
+        //if it's a valid url AND it's not in the exempt list for login AND the user is not logged in
+        if ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
+            // Store the current URL in the session, this is used by AuthController::login() to redirect the user back
+            // to the page they wanted after login
             Session::set('redirect_url', $_SERVER['REQUEST_URI']);
             //Then require login
             Session::setFlashMessage('error', 'Du måste vara inloggad för att se denna sida.');

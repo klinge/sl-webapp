@@ -5,13 +5,16 @@ namespace App;
 use Dotenv\Dotenv;
 use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
 use Exception;
-use App\Middleware\AuthMiddleware;
+use App\Middleware\MiddlewareInterface;
+use App\Middleware\AuthorizationMiddleware;
+use App\Middleware\AuthenticationMiddleware;
 use App\Utils\Session;
 
 class Application
 {
     private $config;
     private $router;
+    private $middlewares = [];
 
     public function __construct()
     {
@@ -19,6 +22,10 @@ class Application
         $this->loadConfig();
         $this->setupRouter();
         $this->setupSession();
+
+        // Add middlewares here
+        $this->addMiddleware(new AuthenticationMiddleware($this));
+        $this->addMiddleware(new AuthorizationMiddleware($this));
     }
 
     private function setupRouter()
@@ -143,10 +150,16 @@ class Application
         Session::start();
     }
 
+    public function addMiddleware(MiddlewareInterface $middleware)
+    {
+        $this->middlewares[] = $middleware;
+    }
+
     public function runMiddleware()
     {
-        $authMiddleware = new AuthMiddleware($this);
-        $authMiddleware->handle();
+        foreach ($this->middlewares as $middleware) {
+            $middleware->handle();
+        }
     }
 
     public function run()

@@ -40,22 +40,33 @@ class AuthController extends BaseController
             Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA');
             $this->render('login/viewLogin');
         }
-        //Verify provided password with password from db
-        if (password_verify($providedPassword, $medlem->password)) {
-            Session::set('user_id', $medlem->id);
-            Session::set('fornamn', $medlem->fornamn);
-            if ($medlem->isAdmin) {
-                Session::set('isAdmin', true);
-            }
+        //Fail if passwork did not verify
+        if (!password_verify($providedPassword, $medlem->password)) {
+            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! FELLÖSEN');
+            $this->render('login/viewLogin');
+            return;
+        }
+        // User is successfully logged in
+        // Make sure to create a new session id directly after login
+        session_regenerate_id(true);
+        Session::set('user_id', $medlem->id);
+        Session::set('fornamn', $medlem->fornamn);
+        // Send admins and users to different parts of the site
+        if ($medlem->isAdmin) {
+            Session::set('is_admin', true);
             //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
             $redirectUrl = Session::get('redirect_url') ?? $this->app->getBaseUrl();
             Session::remove('redirect_url');
-
-            header('Location: ' . $redirectUrl);
         } else {
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! FELLÖSEN');
-            $this->render('login/viewLogin');
+            //if user is not an admin send them to the user part of the site
+            $redirectUrl = $this->app->getRouter()->generate('user-home');
+            Session::remove('redirect_url');
         }
+        //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
+        $redirectUrl = Session::get('redirect_url') ?? $this->app->getBaseUrl();
+        Session::remove('redirect_url');
+
+        header('Location: ' . $redirectUrl);
     }
 
     public function logout(): void
@@ -65,7 +76,7 @@ class AuthController extends BaseController
         Session::destroy();
         $redirectUrl = $this->router->generate('show-login');
         header('Location: ' . $redirectUrl);
-        exit;
+        return;
     }
 
     public function register(): void
@@ -193,7 +204,7 @@ class AuthController extends BaseController
             if (!$result) {
                 Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
                 $this->render('login/viewReqPassword');
-                exit;
+                return;
             }
 
             $mailer = new Email($this->app);
@@ -302,6 +313,7 @@ class AuthController extends BaseController
         }
         return $this->tokenHandler;
     }
+
     private function getMemberByEmail(string $email)
     {
         $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
@@ -344,6 +356,7 @@ class AuthController extends BaseController
         //if (!preg_match('/[^A-Za-z0-9]/', $password)) {
         //    $errors[] = "Lösenordet måste innehålla minst ett specialtecken.";
         //}
+
         //CHECK THAT USERNAME OR NAME IS NOT PART OF PASSWORD
         $username = strstr($email, '@', true);
         $lowercasePassword = strtolower($password);
@@ -362,7 +375,6 @@ class AuthController extends BaseController
                 $errors[] = "Lösenordet får inte innehålla ditt efternamn.";
             }
         }
-
         return $errors;
     }
 }
