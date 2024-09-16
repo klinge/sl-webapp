@@ -46,9 +46,8 @@ class AuthController extends BaseController
             $this->render('login/viewLogin');
             return;
         }
-        // User is successfully logged in
-        // Make sure to create a new session id directly after login
-        session_regenerate_id(true);
+        // User is successfully logged in, regenerate session id because it's a safe practice
+        Session::regenerateId();
         Session::set('user_id', $medlem->id);
         Session::set('fornamn', $medlem->fornamn);
         // Send admins and users to different parts of the site
