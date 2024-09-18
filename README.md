@@ -47,9 +47,13 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * User-site: build a proper homepage for non-admin users
 * User-site: build a page where users can update their contact details
 * Medlem class: keep track of who changed a record (last change or all changes?)
-* Refactor: add strict_types to all php classes
 * Refactor: add PSR-7 request and response classes
-* Testing: add unit tests for all classes
+* Refactor: adapt middleware to PSR-15
+* Refactor: add logging and a logging library
+* Testing: install PHPUnit
+* Testing: add unit tests for all Controllers
+* Testing: add unit tests for Models
+* Testing: add unit tests for remaining classes
 
 ## Longer term TODO (v1.0): 
 * Selfservice: Add a page to let members update their personal information
@@ -59,7 +63,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Refactor: add phpcs and PHPStan och Psalm to Github commit workflow
 * Refactor: add DocBlocks for all classes
 * Refactor: ensure consistent naming for CRUD operations..
-* Refactor: add a util class for validation of user input or add a validation library like Respect och Rakit
+* Refactor: move to a validation library like Respect och Rakit
 * Build: add Github actions to run PHP Codesniffer and PHPStan on commits
 * Auth: replace own code with a proper Auth component. Maybe Comet Auth. Integrate with Medlem class?
 
