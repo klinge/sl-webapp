@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use App\Models\BetalningRepository;
@@ -25,6 +27,7 @@ class SeglingController extends BaseController
         parent::__construct($app, $request, $router);
         $this->view = new View($this->app);
     }
+
     public function list()
     {
         $seglingar = new SeglingRepository($this->conn);
@@ -54,7 +57,7 @@ class SeglingController extends BaseController
         $segling->deltagare = $segling->getDeltagare();
 
         //Fetch payment status for deltagare and add to the $deltagare array
-        $year = substr($segling->start_dat, 0, 4);
+        $year = (int) substr($segling->start_dat, 0, 4);
         $deltagareWithBetalning = [];
         $betalningsRepo = new BetalningRepository($this->conn);
 

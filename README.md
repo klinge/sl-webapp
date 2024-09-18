@@ -11,10 +11,12 @@ Members and activities database for a sailing club, with an accompanying web-gui
 ## TODO (v0.9): 
 * Mail: test all email templates
 * Refactor: remove duplicated code between save() and insertNew() in MedlemController
-* Refactor: refactor the controller->render()-code to use a view-class
-* Refactor: fix messy setting of path in BaseController->render()
 * Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
 * Refactor: remove router->generate in controller classes instead use BaseController->createUrl()
+* Refactor: add strict_types to all Utils
+* Refactor: add strict_types to all Controllers
+* Refactor: add strict_types to all Models
+* Refactor: add strict_types to all Middlewares
 * Deploy: fix site to work on Nginx instead of Apache
 * Deploy: fix all hardcoded paths in the application (arghh!)
 * Deploy: import csv file with all current member data into database
@@ -33,6 +35,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Refactor: introduce namespaces in entire application and move to a proper directory structure
 * DONE Refactor: remove PHP CodeSniff errors
 * DONE Refactor: database class
+* DONE Refactor: refactor the controller->render()-code to use a view-class
+* DONE Refactor: fix messy setting of path in BaseController->render()
 * DONE Refactor: write a sanitization class to handle user input
 * DONE Auth: add a register user form - only allow existing members to register
 * DONE Auth: verify that a user is logged in for all pages
