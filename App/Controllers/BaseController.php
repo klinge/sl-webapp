@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use Datetime;
+use Altorouter;
 use App\Application;
 use App\Utils\Session;
 use App\Utils\Database;
@@ -17,7 +18,7 @@ class BaseController
     protected $sessionData;
     protected $app;
 
-    public function __construct(Application $app, $request, $router)
+    public function __construct(Application $app, array $request, AltoRouter $router)
     {
         Session::start();
         $this->app = $app;

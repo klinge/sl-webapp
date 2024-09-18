@@ -2,15 +2,26 @@
 
 namespace App\Controllers;
 
+use AltoRouter;
 use Exception;
 use App\Models\Medlem;
 use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Models\BetalningRepository;
 use App\Utils\Sanitizer;
+use App\Utils\View;
+use App\Application;
 
 class MedlemController extends BaseController
 {
+    private View $view;
+
+    public function __construct(Application $app, array $request, AltoRouter $router)
+    {
+        parent::__construct($app, $request, $router);
+        $this->view = new View($this->app);
+    }
+
     //Sanitizing rules for sanitizing user input for Medlem data
     private $sanitizerRules = [
         'id' => 'int',
@@ -40,7 +51,7 @@ class MedlemController extends BaseController
             "items" => $result,
             'newAction' => $this->router->generate('medlem-new')
         ];
-        $this->render('viewMedlem', $data);
+        $this->view->render('viewMedlem', $data);
     }
 
     public function listJson()
@@ -78,7 +89,7 @@ class MedlemController extends BaseController
                 'listBetalningAction' => $this->router->generate('betalning-medlem', ['id' => $id]),
                 'deleteAction' => $this->router->generate('medlem-delete')
             ];
-            $this->render('viewMedlemEdit', $data);
+            $this->view->render('viewMedlemEdit', $data);
         } catch (Exception $e) {
             $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Kunde inte hämta medlem!'];
             $redirectUrl = $this->router->generate('medlem-list');
@@ -156,7 +167,7 @@ class MedlemController extends BaseController
             //Used in the view to set the proper action url for the form
             'formAction' => $this->router->generate('medlem-create')
         ];
-        $this->render('viewMedlemNew', $data);
+        $this->view->render('viewMedlemNew', $data);
     }
 
     public function insertNew()
