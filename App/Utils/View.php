@@ -46,7 +46,7 @@ class View
         //TODO Keeps having data in the viewData array even if it would be better to just juse key:value-pairs
         $viewData = array_merge($data, Session::getSessionDataForViews());
         $viewData['APP_DIR'] = $this->app->getAppDir();
-        $viewData['BASE_URL'] = $this->app->getBaseUrl();
+        $viewData['BASE_URL'] = $this->app->getBasePath();
         $this->data = array_merge($this->data, ['viewData' => $viewData]);
 
         $filePath = $this->appPath . '/views/' . $template . '.php';

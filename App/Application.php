@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Dotenv\Dotenv;
@@ -32,7 +34,7 @@ class Application
     private function setupRouter(): void
     {
         $this->router = new AltoRouter();
-        $this->router->setBasePath('/sl-webapp');
+        $this->router->setBasePath($this->getBasePath());
 
         // Routes are created from the Config/RouteConfig class
         RouteConfig::createAppRoutes($this->router);
@@ -87,7 +89,7 @@ class Application
         return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
     }
 
-    public function getBaseUrl(): string
+    public function getBasePath(): string
     {
         return $this->config['APP_DIR'];
     }
