@@ -72,6 +72,8 @@ class Application
 
     private function loadEnvironment(): void
     {
+        // This is the only place where it's allowed to hardcode the path to the .env file
+        // After loading the .env file, the environment variables are available via Application::getConfig['key']
         $dotenv = Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/sl-webapp');
         $dotenv->load();
     }
