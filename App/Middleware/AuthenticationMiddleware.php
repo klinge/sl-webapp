@@ -2,7 +2,6 @@
 
 namespace App\Middleware;
 
-use App\Application;
 use App\Config\RouteConfig;
 use App\Utils\Session;
 

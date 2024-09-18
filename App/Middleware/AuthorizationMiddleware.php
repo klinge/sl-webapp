@@ -3,18 +3,10 @@
 namespace App\Middleware;
 
 use App\Utils\Session;
-use App\Application;
 use App\Config\RouteConfig;
 
-class AuthorizationMiddleware implements MiddlewareInterface
+class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterface
 {
-    private $app;
-
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-    }
-
     public function handle(): void
     {
         $match = $this->app->getRouter()->match();
