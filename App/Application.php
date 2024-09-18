@@ -1,5 +1,17 @@
 <?php
 
+/**
+ * The main Application class that bootstraps the application and handles routing.
+ *
+ * This class is responsible for:
+ * - Loading the environment variables from the .env file
+ * - Loading the application configuration
+ * - Setting up the routing using the AltoRouter library
+ * - Registering middleware to be executed for each request
+ * - Dispatching the appropriate controller action based on the current route
+ * - Starting the session
+ */
+
 declare(strict_types=1);
 
 namespace App;
@@ -31,6 +43,15 @@ class Application
         $this->addMiddleware(new AuthorizationMiddleware($this, $_SERVER));
     }
 
+    /**
+     * Sets up the router for the application.
+     *
+     * This method initializes the AltoRouter instance and sets the base path for
+     * the router. It then calls the `RouteConfig::createAppRoutes` static method
+     * to define the application routes using the router instance.
+     *
+     * @return void
+     */
     private function setupRouter(): void
     {
         $this->router = new AltoRouter();
@@ -40,6 +61,25 @@ class Application
         RouteConfig::createAppRoutes($this->router);
     }
 
+    /**
+     * Dispatches the request to the appropriate controller and action.
+     *
+     * This method handles the dispatching of the request based on the matched route.
+     * If the matched route target is a string in the format "controller#action", it
+     * will instantiate the specified controller class, check if the action method
+     * exists, and call it with the provided parameters.
+     *
+     * If the matched route target is a callable (closure), it will call the closure
+     * with the provided parameters.
+     *
+     * @param array $match The matched route information
+     * @param array $request The current request object
+     * @param AltoRouter $router The router instance
+     *
+     * @return void
+     *
+     * @throws Exception If the controller class is not found
+     */
     private function dispatch($match, $request, $router): void
     {
         //If we have a string with a # then it's a controller action pair
@@ -70,14 +110,29 @@ class Application
         }
     }
 
+    /**
+     * Loads the environment variables from the .env file using the Dotenv library.
+     *
+     * The path to the .env file is hardcoded in this method, as the base directory
+     * of the application in in the .env file. After loading the .env file, the
+     * environment variables can be accessed using Application::getConfig['key'].
+     *
+     * @return void
+     */
     private function loadEnvironment(): void
     {
-        // This is the only place where it's allowed to hardcode the path to the .env file
-        // After loading the .env file, the environment variables are available via Application::getConfig['key']
         $dotenv = Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/sl-webapp');
         $dotenv->load();
     }
 
+    /**
+     * Loads the application configuration.
+     *
+     * This method loads the application configuration from the environment variables
+     * and converts the string values to their appropriate data types (boolean, etc.).
+     *
+     * @return void
+     */
     private function loadConfig(): void
     {
         $this->config = array_map(function ($value) {
@@ -85,27 +140,57 @@ class Application
         }, $_ENV);
     }
 
-
+    /**
+     * Returns the full path to the application directory.
+     *
+     * @return string The full path to the application directory
+     */
     public function getAppDir(): string
     {
         return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
     }
 
+    /**
+     * Returns the path for the application relative to the servers document root.
+     *
+     * @return string The base path for the application
+     */
     public function getBasePath(): string
     {
         return $this->config['APP_DIR'];
     }
 
+
+    /**
+     * Returns the value of a specific environment variable.
+     *
+     * @param string $key The environment variable to retrieve
+     *
+     * @return string|null The value of the environment variebale, or null if the key is not found
+     */
     public function getConfig(string $key): string
     {
         return $this->config[$key] ?? null;
     }
 
+    /**
+     * Returns the AltoRouter instance used by the application.
+     *
+     * @return AltoRouter The AltoRouter instance
+     */
     public function getRouter(): AltoRouter
     {
         return $this->router;
     }
 
+    /**
+     * Sets up the session for the application.
+     *
+     * This method configures the session settings, such as the cookie settings
+     * and the session lifetime, and starts the session.
+     *
+     * @return void
+     */
     private function setupSession(): void
     {
         ini_set('session.cookie_httponly', 1);
@@ -114,11 +199,28 @@ class Application
         Session::start();
     }
 
+
+    /**
+     * Adds a middleware to the application. The middleware must implement
+     * the MiddlewareInterface.
+     *
+     * @param MiddlewareInterface $middleware The middleware instance to add
+     *
+     * @return void
+     */
     public function addMiddleware(MiddlewareInterface $middleware): void
     {
         $this->middlewares[] = $middleware;
     }
 
+    /**
+     * Runs all registered middlewares.
+     *
+     * This method iterates over the registered middlewares and calls the `handle`
+     * method on each middleware instance.
+     *
+     * @return void
+     */
     public function runMiddleware(): void
     {
         foreach ($this->middlewares as $middleware) {
@@ -126,6 +228,16 @@ class Application
         }
     }
 
+    /**
+     * Runs the application.
+     *
+     * This method is the entry point for the application. It matches the current
+     * request against the defined routes, and if a match is found, it dispatches
+     * the request to the appropriate controller and action. If no match is found,
+     * it handles the 404 error.
+     *
+     * @return void
+     */
     public function run(): void
     {
         // Match the current request

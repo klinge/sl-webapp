@@ -2,13 +2,14 @@
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
 -## DOING:
+* Deploy: fix all hardcoded paths in the application (arghh!)
+
+## TODO (v0.9): 
 * Mail: add mail templates for password reset and new user registration. Find something among these: 
     https://github.com/ActiveCampaign/postmark-templates/tree/main
     https://stripo.email/
     https://www.cerberusemail.com/
     https://github.com/mailchimp/email-blueprints
-
-## TODO (v0.9): 
 * Mail: test all email templates
 * Refactor: remove duplicated code between save() and insertNew() in MedlemController
 * Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
@@ -16,8 +17,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Refactor: add strict_types to all Utils
 * Refactor: add strict_types to all Models
 * Refactor: add strict_types to all Middlewares
-* Deploy: fix site to work on Nginx instead of Apache
-* Deploy: fix all hardcoded paths in the application (arghh!)
+* Refactor: add PSR-7 request and response handling
 * Deploy: import csv file with all current member data into database
 
 ## DONE for v0.9: 
@@ -42,12 +42,12 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Auth: verify that a user is logged in for all pages
 * DONE Auth: add admin checks in AuthMiddleware
 * DONE Auth: direct admin and non-admin to different pages after login
+* DONE Deploy: fix redirection rules for Nginx instead of Apache
 
 ## TODO (v0.95): 
 * User-site: build a proper homepage for non-admin users
 * User-site: build a page where users can update their contact details
 * Medlem class: keep track of who changed a record (last change or all changes?)
-* Refactor: add PSR-7 request and response classes
 * Refactor: adapt middleware to PSR-15
 * Refactor: add logging and a logging library
 * Testing: install PHPUnit
