@@ -201,6 +201,9 @@ include_once $APP_DIR . "/views/modals/memberBetalningModal.php";
         const formData = new FormData(form);
 
         fetch('/sl-webapp/betalning/create', { // Adjust this URL to match your routing structure
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
                 method: 'POST',
                 body: formData
             })

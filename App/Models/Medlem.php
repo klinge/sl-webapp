@@ -28,7 +28,7 @@ class Medlem
     public string $pref_kommunikation;
     // User login
     public string $password;
-    public string $isAdmin;
+    public int $isAdmin;
     //Fetched from Roller table
     public array $roller = [];
     // Timestamps
@@ -49,7 +49,7 @@ class Medlem
         }
     }
 
-    private function getDataFromDb($id)
+    private function getDataFromDb($id): bool
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
 
@@ -83,13 +83,13 @@ class Medlem
         }
     }
 
-    public function getNamn()
+    public function getNamn(): string
     {
         $namn = $this->fornamn . " " . $this->efternamn;
         return $namn;
     }
 
-    public function save()
+    public function save(): void
     {
         $query = "UPDATE $this->table_name SET 
         fodelsedatum = :fodelsedatum,
@@ -128,7 +128,7 @@ class Medlem
         $this->saveRoles();
     }
 
-    public function saveUserProvidedPassword()
+    public function saveUserProvidedPassword(): void
     {
         $password = password_hash($this->password, PASSWORD_DEFAULT);
 
@@ -140,7 +140,7 @@ class Medlem
         $stmt->execute();
     }
 
-    public function delete()
+    public function delete(): void
     {
         $query = 'DELETE FROM Medlem WHERE id = ?; ';
 
@@ -152,7 +152,7 @@ class Medlem
         $this->saveRoles();
     }
 
-    public function create()
+    public function create(): void
     {
         $query = 'INSERT INTO Medlem 
             (fodelsedatum, fornamn, efternamn, email, gatuadress, postnummer, postort, mobil, telefon, kommentar, godkant_gdpr, pref_kommunikation, isAdmin) 
@@ -182,7 +182,7 @@ class Medlem
 
 
     //find Seglingar a Medlem has participated in..
-    public function getSeglingar()
+    public function getSeglingar(): array
     {
         $query = 'SELECT smr.medlem_id, r.roll_namn, s.skeppslag, s.startdatum
             FROM Segling_Medlem_Roll smr
@@ -204,7 +204,7 @@ class Medlem
     //
     // FUNCTIONS RELATED TO ROLES
     //
-    public function getRoles()
+    public function getRoles(): array
     {
         $query = "SELECT mr.roll_id, r.roll_namn 
                     FROM Medlem_Roll mr
@@ -218,7 +218,7 @@ class Medlem
         return $results;
     }
 
-    public function saveRoles()
+    public function saveRoles(): void
     {
         $query = 'DELETE FROM Medlem_Roll WHERE medlem_id = ?; ';
 
@@ -254,13 +254,12 @@ class Medlem
     }
 
     //Method to check if a member has a given role
-    public function hasRole($searchRole)
+    public function hasRole(string $searchRole): bool
     {
-        foreach ($this->roller as $role) {
-            if (isset($role['roll_id']) && $role['roll_id'] === $searchRole) {
-                return true;
-            }
-        }
-        return false;
+        $extractRollId = function ($role) {
+            return $role['roll_id'] ?? null;
+        };
+
+        return in_array($searchRole, array_map($extractRollId, $this->roller));
     }
 }

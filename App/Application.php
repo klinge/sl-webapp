@@ -25,8 +25,8 @@ class Application
         $this->setupSession();
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this));
-        $this->addMiddleware(new AuthorizationMiddleware($this));
+        $this->addMiddleware(new AuthenticationMiddleware($this, $_SERVER));
+        $this->addMiddleware(new AuthorizationMiddleware($this, $_SERVER));
     }
 
     private function setupRouter(): void

@@ -89,11 +89,11 @@ class BetalningController extends BaseController
         ];
         $cleanValues = $sanitizer->sanitize($_POST, $rules);
 
-        $betalning->medlem_id = $cleanValues['medlem_id'];
+        $betalning->medlem_id = (int) $cleanValues['medlem_id'];
         $betalning->datum = $cleanValues['datum'];
-        $betalning->belopp = $cleanValues['belopp'];
-        $betalning->avser_ar = $cleanValues['avser_ar'];
-        $betalning->kommentar = $cleanValues['kommentar'] ?: null;
+        $betalning->belopp = (float) $cleanValues['belopp'];
+        $betalning->avser_ar = (int) $cleanValues['avser_ar'];
+        $betalning->kommentar = isset($cleanValues['kommentar']) ? $cleanValues['kommentar'] : '';
 
         $input_ok = $betalning->medlem_id && $betalning->datum && $betalning->belopp && $betalning->avser_ar;
 
