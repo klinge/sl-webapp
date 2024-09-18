@@ -22,6 +22,7 @@ class BetalningController extends BaseController
         parent::__construct($app, $request, $router);
         $this->view = new View($this->app);
     }
+
     public function list(): void
     {
         $betalningar = new BetalningRepository($this->conn);

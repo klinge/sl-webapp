@@ -9,12 +9,22 @@ use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Utils\Sanitizer;
 use App\Utils\Session;
+use App\Utils\View;
+use App\Application;
 use Exception;
 use PDO;
 use PDOException;
+use AltoRouter;
 
 class SeglingController extends BaseController
 {
+    private View $view;
+
+    public function __construct(Application $app, array $request, AltoRouter $router)
+    {
+        parent::__construct($app, $request, $router);
+        $this->view = new View($this->app);
+    }
     public function list()
     {
         $seglingar = new SeglingRepository($this->conn);
@@ -26,7 +36,7 @@ class SeglingController extends BaseController
             "newAction" => $this->router->generate('segling-show-create'),
             "items" => $result
         ];
-        $this->render('viewSegling', $data);
+        $this->view->render('viewSegling', $data);
     }
 
     public function edit(array $params)
@@ -76,7 +86,7 @@ class SeglingController extends BaseController
             "allaKockar" => $allaKockar,
             "formUrl" => $formAction
         ];
-        $this->render('viewSeglingEdit', $data);
+        $this->view->render('viewSeglingEdit', $data);
     }
 
     public function save(array $params)
@@ -133,7 +143,7 @@ class SeglingController extends BaseController
             "title" => "Skapa ny segling",
             "formUrl" => $formAction
         ];
-        $this->render('viewSeglingNew', $data);
+        $this->view->render('viewSeglingNew', $data);
     }
 
     public function create()
