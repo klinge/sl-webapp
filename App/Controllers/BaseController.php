@@ -38,15 +38,6 @@ class BaseController
         ];
     }
 
-    protected function render(string $viewName, array $data = []): void
-    {
-        // Merge the session data with the view-specific data
-        $viewData = array_merge($this->sessionData, $data);
-        $viewData['APP_DIR'] = $this->app->getAppDir();
-        $viewData['BASE_URL'] = $this->app->getBaseUrl();
-        require $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp/views/" . $viewName . ".php";
-    }
-
     private function getDatabaseConn(): PDO|false
     {
         try {
@@ -79,28 +70,5 @@ class BaseController
     protected function createUrl(string $routeName, array $params = []): string
     {
         return $this->router->generate($routeName, $params);
-    }
-
-    protected function requireLogin(): bool
-    {
-        if (Session::isLoggedIn()) {
-            return true;
-        } else {
-            Session::setFlashMessage('info', 'Du måste vara inloggad för att kunna visa denna sida.');
-            //Save current url in session to redirect to after login
-            $currentUrl = $this->request['REQUEST_URI'];
-            Session::set('redirect_url', $currentUrl);
-            $this->render('login/viewLogin');
-            exit;
-        }
-    }
-
-    protected function requireAdmin(): bool
-    {
-        if (!Session::isAdmin()) {
-            return false;
-            //TODO show error message to user
-        }
-        return true;
     }
 }

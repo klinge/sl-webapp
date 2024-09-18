@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Utils;
 
 class Session
@@ -27,7 +29,7 @@ class Session
         $_SESSION['flash_message'] = ['type' => $type, 'message' => $message];
     }
 
-    public static function get(string $key): string | null
+    public static function get(string $key): mixed
     {
         return $_SESSION[$key] ?? null;
     }

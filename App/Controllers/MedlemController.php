@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
 use AltoRouter;
@@ -23,7 +25,7 @@ class MedlemController extends BaseController
     }
 
     //Sanitizing rules for sanitizing user input for Medlem data
-    private $sanitizerRules = [
+    private array $sanitizerRules = [
         'id' => 'int',
         'fodelsedatum' => ['date', 'Y-m-d'],
         'fornamn' => 'string',
@@ -40,7 +42,7 @@ class MedlemController extends BaseController
         'isAdmin' => 'string',
     ];
 
-    public function list()
+    public function list(): void
     {
         $medlemRepo = new MedlemRepository($this->conn);
         $result = $medlemRepo->getAll();
@@ -54,7 +56,7 @@ class MedlemController extends BaseController
         $this->view->render('viewMedlem', $data);
     }
 
-    public function listJson()
+    public function listJson(): void
     {
         $medlemRepo = new MedlemRepository($this->conn);
         $result = $medlemRepo->getAll();
@@ -62,9 +64,9 @@ class MedlemController extends BaseController
         exit;
     }
 
-    public function edit(array $params)
+    public function edit(array $params): void
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
 
         //Fetch member data
         try {
@@ -98,7 +100,7 @@ class MedlemController extends BaseController
         }
     }
 
-    public function save(array $params)
+    public function save(array $params): void
     {
         $id = $params['id'];
         $medlem = new Medlem($this->conn, $id);
@@ -156,7 +158,7 @@ class MedlemController extends BaseController
         exit;
     }
 
-    public function new()
+    public function new(): void
     {
         $roll = new Roll($this->conn);
         $roller = $roll->getAll();
@@ -170,7 +172,7 @@ class MedlemController extends BaseController
         $this->view->render('viewMedlemNew', $data);
     }
 
-    public function insertNew()
+    public function insertNew(): void
     {
         $medlem = new Medlem($this->conn);
 
@@ -218,7 +220,7 @@ class MedlemController extends BaseController
     }
 
 
-    public function delete()
+    public function delete(): void
     {
         $id = $_POST['id'];
         try {

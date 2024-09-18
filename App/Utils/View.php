@@ -16,7 +16,7 @@ class View
     /** @var Application Instance of the application object */
     private Application $app;
 
-    /** @var Application Full path to the application */
+    /** @var Application Full path to the application base directory*/
     private string $appPath;
 
     /** @var array Data to be passed to the view */
