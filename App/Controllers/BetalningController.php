@@ -1,16 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use AltoRouter;
 use Exception;
 use App\Models\Betalning;
 use App\Models\BetalningRepository;
 use App\Models\Medlem;
 use App\Utils\Sanitizer;
+use App\Utils\View;
+use App\Application;
 
 class BetalningController extends BaseController
 {
-    public function list()
+    private View $view;
+
+    public function __construct(Application $app, array $request, AltoRouter $router)
+    {
+        parent::__construct($app, $request, $router);
+        $this->view = new View($this->app);
+    }
+    public function list(): void
     {
         $betalningar = new BetalningRepository($this->conn);
         $result = $betalningar->getAll();
@@ -20,10 +32,10 @@ class BetalningController extends BaseController
             "title" => "Betalningslista",
             "items" => $result
         ];
-        $this->render('viewBetalning', $data);
+        $this->view->render('viewBetalning', $data);
     }
 
-    public function getBetalning(array $params)
+    public function getBetalning(array $params): Betalning
     {
         $id = $params['id'];
         $betalning = new Betalning($this->conn);
@@ -33,7 +45,7 @@ class BetalningController extends BaseController
         return $betalning;
     }
 
-    public function getMedlemBetalning(array $params)
+    public function getMedlemBetalning(array $params): void
     {
         $id = $params['id'];
         $medlem = new Medlem($this->conn, $id);
@@ -53,10 +65,10 @@ class BetalningController extends BaseController
                 "title" => "Inga betalningar hittades"
             ];
         }
-        $this->render('viewBetalning', $data);
+        $this->view->render('viewBetalning', $data);
     }
 
-    public function createBetalning(array $params)
+    public function createBetalning(array $params): void
     {
         $betalning = new Betalning($this->conn);
 
@@ -98,7 +110,7 @@ class BetalningController extends BaseController
         }
     }
 
-    public function deleteBetalning(array $params)
+    public function deleteBetalning(array $params): void
     {
         $id = $params['id'];
         $betalning = new Betalning($this->conn);
