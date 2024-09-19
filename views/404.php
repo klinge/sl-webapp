@@ -1,9 +1,8 @@
 <?php
-$page_title = "";
-$APP_DIR = $_SERVER['DOCUMENT_ROOT'] . "/sl-webapp";
+$APP_DIR = $viewData['APP_DIR'];
 // set page headers
 $page_title = '';
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 ?>
 
 <div class="d-flex align-items-center justify-content-center section-notfound">
@@ -21,5 +20,5 @@ include_once $APP_DIR . "/layouts/header.php";
 </div>
 
 <?php // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/footer.php";
 ?>

@@ -4,13 +4,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 
 $APP_DIR = $viewData['APP_DIR'];
-
-// set page headers
-$page_title = $viewData['title'];
-include_once $APP_DIR . "/layouts/header.php";
-
 $medlem = $viewData['items'];
 $roller = $viewData['roles'];
+$page_title = $viewData['title'];
+
+include_once "views/_layouts/header.php";
 ?>
 
 <div class="container">
@@ -184,7 +182,7 @@ $roller = $viewData['roles'];
 
 <!-- Modal for adding a new payment -->
 <?php // footer
-include_once $APP_DIR . "/views/modals/memberBetalningModal.php";
+include_once "views/modals/memberBetalningModal.php";
 ?>
 
 <script>
@@ -225,5 +223,5 @@ include_once $APP_DIR . "/views/modals/memberBetalningModal.php";
 </script>
 
 <?php // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/footer.php";
 ?>

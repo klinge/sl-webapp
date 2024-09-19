@@ -4,7 +4,7 @@ $APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = $data['title'];
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 
 if (isset($data['items'])) {
     $num = sizeof($viewData['items']);
@@ -59,5 +59,5 @@ if (isset($data['items'])) {
 </script>
 
 <?php // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/footer.php";
 ?>

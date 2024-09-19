@@ -23,7 +23,7 @@ $APP_DIR = $viewData['APP_DIR'];
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11/font/bootstrap-icons.min.css"
         integrity="sha256-9kPW/n5nn53j4WMRYAxe9c1rCY96Oogo/MKSVdKzPmI=" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/2.1.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/site.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="<?php echo $APP_DIR ?>/assets/css/site.css" crossorigin="anonymous">
 
     <title><?php echo $page_title; ?></title>
 </head>

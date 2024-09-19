@@ -7,7 +7,7 @@ $APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = $viewData['title'];
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 
 //Seglingar is an array of Segling objects
 $seglingar = $viewData['items'];
@@ -78,5 +78,5 @@ $num = sizeof($seglingar);
 
 <?php
 // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/footer.php";
 ?>

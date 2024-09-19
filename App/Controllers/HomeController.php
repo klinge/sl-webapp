@@ -28,10 +28,4 @@ class HomeController
     {
         $this->view->render('404');
     }
-
-    protected function render(string $viewName): void
-    {
-        $viewData = ['BASE_PATH' => $this->app->getBasePath()];
-        require $viewData['BASE_PATH'] . "/views/" . $viewName . ".php";
-    }
 }

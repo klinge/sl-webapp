@@ -66,7 +66,7 @@ class AuthController extends BaseController
         if ($medlem->isAdmin) {
             Session::set('is_admin', true);
             //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
-            $redirectUrl = Session::get('redirect_url') ?? $this->app->getBasePath();
+            $redirectUrl = Session::get('redirect_url') ?? $this->app->getAppDir();
             Session::remove('redirect_url');
         } else {
             //if user is not an admin send them to the user part of the site
@@ -74,7 +74,7 @@ class AuthController extends BaseController
             Session::remove('redirect_url');
         }
         //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
-        $redirectUrl = Session::get('redirect_url') ?? $this->app->getBasePath();
+        $redirectUrl = Session::get('redirect_url') ?? $this->app->getAppDir();
         Session::remove('redirect_url');
 
         header('Location: ' . $redirectUrl);

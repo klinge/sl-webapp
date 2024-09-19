@@ -7,7 +7,7 @@ $APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = $viewData['title'];
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 ?>
 
 <div class="container">
@@ -97,3 +97,6 @@ include_once $APP_DIR . "/layouts/header.php";
         <button type="submit" class="btn btn-primary">Spara</button>
         <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
     </form>
+    <?php
+    include_once "views/_layouts/footer.php";
+    ?>
