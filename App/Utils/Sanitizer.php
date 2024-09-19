@@ -10,7 +10,7 @@ namespace App\Utils;
 class Sanitizer
 {
     //Tells the function what rule to use for sanitizing
-    private $sanitizing_rules = [
+    private array $sanitizing_rules = [
         'string' => 'sanitizeString', //FILTER_SANITIZE_STRING us deprecated so use htmlspecialchars() instead
         'email' => FILTER_SANITIZE_EMAIL,
         'int' => FILTER_SANITIZE_NUMBER_INT,
@@ -26,7 +26,7 @@ class Sanitizer
     * @return array The sanitized input data.
     * @throws \InvalidArgumentException If an invalid sanitization rule is specified.
     */
-    public function sanitize(array $input, array $fieldRules)
+    public function sanitize(array $input, array $fieldRules): array
     {
         $sanitizedInput = [];
 
@@ -39,7 +39,19 @@ class Sanitizer
         return $sanitizedInput;
     }
 
-    private function applySanitizationRule($value, $rule)
+
+    /**
+     * Applies a sanitization rule to the given value.
+     *
+     * @param mixed $value The value to be sanitized
+     * @param string|array $rule The sanitization rule to apply
+     *
+     * @return mixed The sanitized value
+     *
+     * @throws \InvalidArgumentException If the sanitization rule is invalid or doesn't exist
+     */
+
+    private function applySanitizationRule(mixed $value, string|array $rule): mixed
     {
         $value = trim($value);
 
@@ -49,7 +61,8 @@ class Sanitizer
         }
         $method = $this->sanitizing_rules[$ruleName];
 
-        if (is_string($method)) {
+        // If the method name is a string it should be the name of a class method to call
+        if (is_string($method) && method_exists($this, $method)) {
             return $this->$method($value, $rule[1] ?? null);
         } elseif (isset($this->sanitizing_rules[$rule])) {
             return filter_var($value, $this->sanitizing_rules[$rule]);

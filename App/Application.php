@@ -1,17 +1,5 @@
 <?php
 
-/**
- * The main Application class that bootstraps the application and handles routing.
- *
- * This class is responsible for:
- * - Loading the environment variables from the .env file
- * - Loading the application configuration
- * - Setting up the routing using the AltoRouter library
- * - Registering middleware to be executed for each request
- * - Dispatching the appropriate controller action based on the current route
- * - Starting the session
- */
-
 declare(strict_types=1);
 
 namespace App;
@@ -25,6 +13,17 @@ use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Utils\Session;
 
+/**
+ * The main Application class that bootstraps the application and handles routing.
+ *
+ * This class is responsible for:
+ * - Loading the environment variables from the .env file
+ * - Loading the application configuration
+ * - Setting up the routing using the AltoRouter library
+ * - Registering middleware to be executed for each request
+ * - Dispatching the appropriate controller action based on the current route
+ * - Starting the session
+ */
 class Application
 {
     private $config;
@@ -55,7 +54,7 @@ class Application
     private function setupRouter(): void
     {
         $this->router = new AltoRouter();
-        $this->router->setBasePath($this->getBasePath());
+        $this->router->setBasePath($this->getAppDir());
 
         // Routes are created from the Config/RouteConfig class
         RouteConfig::createAppRoutes($this->router);
@@ -145,7 +144,7 @@ class Application
      *
      * @return string The full path to the application directory
      */
-    public function getAppDir(): string
+    public function getAbsolutePath(): string
     {
         return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
     }
@@ -155,11 +154,10 @@ class Application
      *
      * @return string The base path for the application
      */
-    public function getBasePath(): string
+    public function getAppDir(): string
     {
         return $this->config['APP_DIR'];
     }
-
 
     /**
      * Returns the value of a specific environment variable.

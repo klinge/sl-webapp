@@ -16,8 +16,11 @@ class View
     /** @var Application Instance of the application object */
     private Application $app;
 
-    /** @var Application Full path to the application base directory*/
-    private string $appPath;
+    /** @var string Application directory relative to server root, used in the views */
+    private string $appDir;
+
+    /** @var string Full path to the application directory */
+    private string $fullPath;
 
     /** @var array Data to be passed to the view */
     private $data = [];
@@ -30,7 +33,8 @@ class View
     public function __construct(Application $app)
     {
         $this->app = $app;
-        $this->appPath = $this->app->getAppDir();
+        $this->appDir = $this->app->getAppDir();
+        $this->fullPath = $this->app->getAbsolutePath();
     }
 
     /**
@@ -45,14 +49,14 @@ class View
     {
         //TODO Keeps having data in the viewData array even if it would be better to just juse key:value-pairs
         $viewData = array_merge($data, Session::getSessionDataForViews());
-        $viewData['APP_DIR'] = $this->app->getAppDir();
-        $viewData['BASE_URL'] = $this->app->getBasePath();
+        $viewData['APP_DIR'] = $this->appDir;
         $this->data = array_merge($this->data, ['viewData' => $viewData]);
 
-        $filePath = $this->appPath . '/views/' . $template . '.php';
+        //File path has to be the full path to the view file on the server
+        $filePath = $this->fullPath . '/views/' . $template . '.php';
 
         if (!file_exists($filePath)) {
-            throw new \Exception("View {$template} not found");
+            throw new \Exception("View \"{$filePath}\" not found");
             return false;
         }
 

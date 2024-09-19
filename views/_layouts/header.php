@@ -2,6 +2,7 @@
 // enable debug info
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
+$APP_DIR = $viewData['APP_DIR'];
 ?>
 
 <!doctype html>
@@ -22,7 +23,7 @@ ini_set('display_errors', 'On');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11/font/bootstrap-icons.min.css"
         integrity="sha256-9kPW/n5nn53j4WMRYAxe9c1rCY96Oogo/MKSVdKzPmI=" crossorigin="anonymous">
     <link href="https://cdn.datatables.net/2.1.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/sl-webapp/assets/css/site.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="assets/css/site.css" crossorigin="anonymous">
 
     <title><?php echo $page_title; ?></title>
 </head>
@@ -56,11 +57,11 @@ ini_set('display_errors', 'On');
         </symbol>
     </svg>
 
-    <script src="/sl-webapp/assets/js/themeSwitcher.js"></script>
+    <script src="<?php echo $APP_DIR ?>/assets/js/themeSwitcher.js"></script>
 
     <nav class="navbar navbar-expand-lg bg-primary" id="slnav" data-bs-theme="dark" style="color:azure;" aria-label="Besättningsregister navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/sl-webapp">Sofia Linnea</a>
+            <a class="navbar-brand" href="<?php echo $APP_DIR ?> ">Sofia Linnea</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#slNavbar" aria-controls="slNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -69,15 +70,15 @@ ini_set('display_errors', 'On');
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Medlemmar") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="/sl-webapp/medlem">Medlemmar</a>
+                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="<?php echo $APP_DIR ?>/medlem">Medlemmar</a>
                     </li>
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Bokningslista") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" href="/sl-webapp/segling">Seglingar</a>
+                        <a class="nav-link <?= $isActive ?>" href="<?php echo $APP_DIR ?>/segling">Seglingar</a>
                     </li>
                     <li class="nav-item">
                         <?php $isActive = ($page_title == "Betalningslista") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" href="/sl-webapp/betalning">Betalningar</a>
+                        <a class="nav-link <?= $isActive ?>" href="<?php echo $APP_DIR ?>/betalning">Betalningar</a>
                     </li>
 
                     <?php if (isset($viewData) && $viewData['isLoggedIn']) : ?>
@@ -86,19 +87,19 @@ ini_set('display_errors', 'On');
                                 Inloggad: <?= $viewData['fornamn'] ?>
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdown05">
-                                <li><a class="dropdown-item" href="/sl-webapp/logout">Logout</a></li>
+                                <li><a class="dropdown-item" href="<?php echo $APP_DIR ?>/logout">Logout</a></li>
                                 <li><a class="dropdown-item" href="#">Another action</a></li>
                                 <li><a class="dropdown-item" href="#">Something else here</a></li>
                             </ul>
                         </li>
                     <?php else : ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="/sl-webapp/login">Logga in</a>
+                            <a class="nav-link" href="<?php echo $APP_DIR ?>/login">Logga in</a>
                         </li>
                     <?php endif; ?>
 
                     <!-- adding bootstrap color-mode switcher. See also "assets/js/themeSwitcher.js" -->
-                    <?php include_once $APP_DIR . "/layouts/colorswitcher.php"; ?>
+                    <?php include_once "views/_layouts/colorswitcher.php"; ?>
 
                 </ul>
             </div>

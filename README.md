@@ -67,5 +67,11 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Build: add Github actions to run PHP Codesniffer and PHPStan on commits
 * Auth: replace own code with a proper Auth component. Maybe Comet Auth. Integrate with Medlem class?
 
-
+## Notes on deploying to a new server
+1. Put proper values in the .env-EDITME file
+2. Application path is hardcoded in Application.php and HomeController.php
+   If it's in a subdiretory to the document root, these will need to be changed.
+3. The webserver need to redirect all requests to index.php. If the server is Apache
+   the .htacess in the repo does this. Remember to allow redirects in the site config. 
+   If nginx try_files in a location block need to point to index.php for not-found files. 
 

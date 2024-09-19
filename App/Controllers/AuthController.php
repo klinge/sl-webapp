@@ -325,7 +325,7 @@ class AuthController extends BaseController
         return $this->tokenHandler;
     }
 
-    private function getMemberByEmail(string $email)
+    private function getMemberByEmail(string $email): array|bool
     {
         $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
         $stmt->bindParam(':email', $email);
