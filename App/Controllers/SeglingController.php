@@ -44,7 +44,7 @@ class SeglingController extends BaseController
 
     public function edit(array $params)
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
         $formAction = $this->router->generate('segling-save', ['id' => $id]);
         //Fetch Segling
         try {
@@ -94,7 +94,7 @@ class SeglingController extends BaseController
 
     public function save(array $params)
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
         $segling = new Segling($this->conn, $id);
 
         //Sanitize user input

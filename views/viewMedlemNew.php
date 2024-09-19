@@ -95,7 +95,7 @@ include_once "views/_layouts/header.php";
         </div>
 
         <button type="submit" class="btn btn-primary">Spara</button>
-        <a class="button btn btn-secondary" href="/sl-webapp/medlem">Tillbaka</a>
+        <a class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/medlem">Tillbaka</a>
     </form>
     <?php
     include_once "views/_layouts/footer.php";

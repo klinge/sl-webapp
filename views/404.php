@@ -15,7 +15,7 @@ include_once "views/_layouts/header.php";
         <p class="lead">
             Sidan du försökte nå finns inte.
         </p>
-        <a href="/sl-webapp" class="btn btn-primary">Tillbaka till hemsidan.</a>
+        <a href="<?php echo $APP_DIR ?>" class="btn btn-primary">Tillbaka till hemsidan.</a>
     </div>
 </div>
 

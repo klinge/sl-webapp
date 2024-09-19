@@ -5,6 +5,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Deploy: fix all hardcoded paths in the application (arghh!)
 
 ## TODO (v0.9): 
+* Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
+* Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
 * Mail: add mail templates for password reset and new user registration. Find something among these: 
     https://github.com/ActiveCampaign/postmark-templates/tree/main
     https://stripo.email/
@@ -12,7 +14,6 @@ Members and activities database for a sailing club, with an accompanying web-gui
     https://github.com/mailchimp/email-blueprints
 * Mail: test all email templates
 * Refactor: remove duplicated code between save() and insertNew() in MedlemController
-* Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
 * Refactor: remove router->generate in controller classes instead use BaseController->createUrl()
 * Refactor: add strict_types to all Utils
 * Refactor: add strict_types to all Models
@@ -50,6 +51,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Medlem class: keep track of who changed a record (last change or all changes?)
 * Refactor: adapt middleware to PSR-15
 * Refactor: add logging and a logging library
+* Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
 * Testing: install PHPUnit
 * Testing: add unit tests for all Controllers
 * Testing: add unit tests for Models

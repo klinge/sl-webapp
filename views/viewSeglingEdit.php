@@ -7,7 +7,7 @@ $APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = $viewData['title'];
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 
 $segling = $viewData['items'];
 $roller = $viewData['roles'];
@@ -51,7 +51,7 @@ $roller = $viewData['roles'];
                                 <tr>
                                     <td><?= $deltagare['roll_namn'] ?></td>
                                     <td>
-                                        <a class="link-primary" href="/sl-webapp/medlem/<?php echo $deltagare['medlem_id'] ?>">
+                                        <a class="link-primary" href="<?php echo $APP_DIR ?>/medlem/<?php echo $deltagare['medlem_id'] ?>">
                                             <?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?>
                                         </a>
                                     </td>
@@ -94,7 +94,7 @@ $roller = $viewData['roles'];
                             <?php if (empty($deltagare['roll_namn'])) : ?>
                                 <tr>
                                     <td>
-                                        <a class="link-primary" href="/sl-webapp/medlem/<?php echo $deltagare['medlem_id'] ?>">
+                                        <a class="link-primary" href="<?php echo $APP_DIR ?>/medlem/<?php echo $deltagare['medlem_id'] ?>">
                                             <?= $deltagare['fornamn'] ?> <?= $deltagare['efternamn'] ?>
                                         </a>
                                     </td>
@@ -151,7 +151,7 @@ $roller = $viewData['roles'];
 
         <button type="submit" class="btn btn-primary">Uppdatera</button>
         <a class="button btn btn-warning" onclick="deleteSegling(<?php echo $segling->id ?>)">Ta bort</a>
-        <a class="button btn btn-secondary" href="/sl-webapp/segling">Tillbaka</a>
+        <a class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/segling">Tillbaka</a>
     </form>
 </div>
 
@@ -162,7 +162,7 @@ $roller = $viewData['roles'];
             const medlemId = this.dataset.medlemId;
 
             if (confirm('Är du säker på att du vill ta bort denna deltagare från seglingen?')) {
-                fetch('/sl-webapp/segling/medlem/delete', {
+                fetch('<?php echo $APP_DIR ?>/segling/medlem/delete', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -189,10 +189,10 @@ $roller = $viewData['roles'];
     function deleteSegling(seglingId) {
         if (confirm('Are you sure you want to delete this segling?')) {
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/sl-webapp/segling/delete/' + seglingId, true);
+            xhr.open('POST', '<?php echo $APP_DIR ?>/segling/delete/' + seglingId, true);
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.onload = function() {
-                window.location = '/sl-webapp/segling';
+                window.location = '<?php echo $APP_DIR ?>/segling';
             };
             xhr.send();
         }
@@ -200,6 +200,6 @@ $roller = $viewData['roles'];
 </script>
 
 <?php // footer
-include_once $APP_DIR . "/views/modals/seglingAddMedlemModal.php";
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/modals/seglingAddMedlemModal.php";
+include_once "views/_layouts/footer.php";
 ?>

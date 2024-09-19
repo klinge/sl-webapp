@@ -8,7 +8,7 @@ $APP_DIR = $viewData['APP_DIR'];
 // set page headers
 $page_title = $viewData['title'];
 
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 ?>
 
 <div class="container">
@@ -38,10 +38,10 @@ include_once $APP_DIR . "/layouts/header.php";
         </div>
 
         <button type="submit" class="btn btn-primary">Spara</button>
-        <a class="button btn btn-secondary" href="/sl-webapp/segling">Tillbaka</a>
+        <a class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/segling">Tillbaka</a>
     </form>
 </div>
 
 <?php // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/footer.php";
 ?>

@@ -47,7 +47,7 @@
     });
 
     function getAllMedlemmar() {
-        fetch(`/sl-webapp/medlem/json`)
+        fetch(`<?php echo $APP_DIR ?>/medlem/json`)
             .then(response => response.json())
             .then(medlemmar => {
                 updateNamnSelect(medlemmar);
@@ -56,7 +56,7 @@
     }
 
     function getMedlemmarWithRole(rollId) {
-        fetch(`/sl-webapp/roller/${rollId}/medlem`)
+        fetch(`<?php echo $APP_DIR ?>/roller/${rollId}/medlem`)
             .then(response => response.json())
             .then(medlemmar => {
                 updateNamnSelect(medlemmar);
@@ -81,7 +81,7 @@
         const formData = new FormData(form);
         console.log(Object.fromEntries(formData));
 
-        fetch('/sl-webapp/segling/medlem', {
+        fetch('<?php echo $APP_DIR ?>/segling/medlem', {
                 method: 'POST',
                 body: formData
             })

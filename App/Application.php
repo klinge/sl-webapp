@@ -120,6 +120,9 @@ class Application
      */
     private function loadEnvironment(): void
     {
+        var_dump($_SERVER);
+        exit;
+        //NOTE: Only place where the application path is hardcoded 
         $dotenv = Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/sl-webapp');
         $dotenv->load();
     }
