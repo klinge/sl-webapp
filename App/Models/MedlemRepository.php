@@ -17,9 +17,15 @@ class MedlemRepository
     }
 
 
-    // Fetches all members by querying Medlem table in DB
-    // Return: array of Medlem objects
-    public function getAll()
+    /**
+     * Retrieves all members from the database.
+     *
+     * Fetches member and creates Medlem objects for each,
+     * and returns them in an array sorted by last name.
+     *
+     * @return array Medlem[] An array of Medlem objects
+     */
+    public function getAll(): array
     {
         $medlemmar = [];
 
@@ -41,7 +47,7 @@ class MedlemRepository
 
     // Find all Medlemmar in a role by querying Medlem, Roll, and Medlem_Roll tables
     // to find members with a specified roll_namn
-    public function getMembersByRollName(string $rollName)
+    public function getMembersByRollName(string $rollName): array
     {
         $query = "SELECT m.id,m.fornamn, m.efternamn, r.roll_namn
             FROM  Medlem m
@@ -57,7 +63,7 @@ class MedlemRepository
 
     // Query Medlem, Roll, and Medlem_Roll tables
     // to find members with a specified roll_namn
-    public function getMembersByRollid(int $rollId)
+    public function getMembersByRollId(int $rollId): array
     {
         $query = "SELECT m.id,m.fornamn, m.efternamn, r.id AS roll_id, r.roll_namn
             FROM  Medlem m

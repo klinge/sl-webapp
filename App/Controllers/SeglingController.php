@@ -184,9 +184,10 @@ class SeglingController extends BaseController
             exit;
         }
     }
-    //
-    //FUNCTIONS THAT HANDLES MEMBERS ON A Segling
-    //
+
+    /*
+    * FUNCTIONS THAT HANDLES MEMBERS ON A Segling
+    */
     public function saveMedlem()
     {
         //validate input

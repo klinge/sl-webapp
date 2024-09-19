@@ -47,7 +47,13 @@
     });
 
     function getAllMedlemmar() {
-        fetch(`<?php echo $APP_DIR ?>/medlem/json`)
+        fetch('<?php echo $APP_DIR ?>/medlem/json', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
             .then(response => response.json())
             .then(medlemmar => {
                 updateNamnSelect(medlemmar);
@@ -56,7 +62,13 @@
     }
 
     function getMedlemmarWithRole(rollId) {
-        fetch(`<?php echo $APP_DIR ?>/roller/${rollId}/medlem`)
+        fetch('<?php echo $APP_DIR ?>/roller/' + rollId + '/medlem', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
             .then(response => response.json())
             .then(medlemmar => {
                 updateNamnSelect(medlemmar);
@@ -83,7 +95,11 @@
 
         fetch('<?php echo $APP_DIR ?>/segling/medlem', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'Acept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             })
             .then(response => response.json())
             .then(data => {
