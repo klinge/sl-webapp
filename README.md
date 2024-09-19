@@ -2,7 +2,6 @@
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
 -## DOING:
-* Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
 * Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
 
 ## TODO (v0.9): 
@@ -19,6 +18,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * Refactor: add strict_types to all Middlewares
 * Refactor: add PSR-7 request and response handling
 * Deploy: import csv file with all current member data into database
+* Deploy: move to Pi server and verify all is working
 
 ## DONE for v0.9: 
 * DONE Segling: Fix database for members on Seglingar
@@ -44,6 +44,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Auth: direct admin and non-admin to different pages after login
 * DONE Deploy: fix redirection rules for Nginx instead of Apache
 * DONE Deploy: fix all hardcoded paths in the application (arghh!)
+* DONE Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
 
 ## TODO (v0.95): 
 * User-site: build a proper homepage for non-admin users

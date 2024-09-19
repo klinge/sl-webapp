@@ -57,7 +57,6 @@ class View
 
         if (!file_exists($filePath)) {
             throw new \Exception("View \"{$filePath}\" not found");
-            return false;
         }
 
         extract($this->data);

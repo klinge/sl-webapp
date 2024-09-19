@@ -167,7 +167,7 @@ class Application
      *
      * @return string|null The value of the environment variebale, or null if the key is not found
      */
-    public function getConfig(string $key): string
+    public function getConfig(string $key): string|null
     {
         return $this->config[$key] ?? null;
     }
