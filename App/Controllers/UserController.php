@@ -6,15 +6,14 @@ namespace App\Controllers;
 
 use App\Application;
 use App\Utils\View;
-use AltoRouter;
 
 class UserController extends BaseController
 {
     private View $view;
 
-    public function __construct(Application $app, array $request, AltoRouter $router)
+    public function __construct(Application $app, array $request)
     {
-        parent::__construct($app, $request, $router);
+        parent::__construct($app, $request);
         $this->view = new View($this->app);
     }
 

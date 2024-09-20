@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use AltoRouter;
 use App\Application;
 use App\Utils\Session;
 use App\Utils\Database;
@@ -15,15 +14,13 @@ class BaseController
 {
     protected $conn;
     protected $request;
-    protected $router;
     protected $sessionData;
     protected $app;
 
-    public function __construct(Application $app, array $request, AltoRouter $router)
+    public function __construct(Application $app, array $request)
     {
         Session::start();
         $this->app = $app;
-        $this->router = $router;
         $this->request = $request;
         $this->initializeSessionData();
         $this->conn = $this->getDatabaseConn();
@@ -70,6 +67,6 @@ class BaseController
 
     protected function createUrl(string $routeName, array $params = []): string
     {
-        return $this->router->generate($routeName, $params);
+        return $this->app->getRouter()->generate($routeName, $params);
     }
 }

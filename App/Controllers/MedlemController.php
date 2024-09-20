@@ -18,9 +18,9 @@ class MedlemController extends BaseController
 {
     private View $view;
 
-    public function __construct(Application $app, array $request, AltoRouter $router)
+    public function __construct(Application $app, array $request)
     {
-        parent::__construct($app, $request, $router);
+        parent::__construct($app, $request);
         $this->view = new View($this->app);
     }
 
@@ -51,7 +51,7 @@ class MedlemController extends BaseController
         $data = [
             "title" => "Medlemmar",
             "items" => $result,
-            'newAction' => $this->router->generate('medlem-new')
+            'newAction' => $this->app->getRouter()->generate('medlem-new')
         ];
         $this->view->render('viewMedlem', $data);
     }
@@ -86,15 +86,15 @@ class MedlemController extends BaseController
                 'seglingar' => $seglingar,
                 'betalningar' => $betalningar,
                 //Used in the view to set the proper action url for the form
-                'formAction' => $this->router->generate('medlem-save', ['id' => $id]),
-                'createBetalningAction' => $this->router->generate('betalning-medlem', ['id' => $id]),
-                'listBetalningAction' => $this->router->generate('betalning-medlem', ['id' => $id]),
-                'deleteAction' => $this->router->generate('medlem-delete')
+                'formAction' => $this->app->getRouter()->generate('medlem-save', ['id' => $id]),
+                'createBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
+                'listBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
+                'deleteAction' => $this->app->getRouter()->generate('medlem-delete')
             ];
             $this->view->render('viewMedlemEdit', $data);
         } catch (Exception $e) {
             $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Kunde inte hämta medlem!'];
-            $redirectUrl = $this->router->generate('medlem-list');
+            $redirectUrl = $this->app->getRouter()->generate('medlem-list');
             header('Location: ' . $redirectUrl);
             exit;
         }
@@ -112,7 +112,7 @@ class MedlemController extends BaseController
         //Start by validating fodelsedatum and fail early if not valid
         if (empty($cleanValues['fodelsedatum'])) {
             $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Felaktigt fodelsedatum!'];
-            $redirectUrl = $this->router->generate('medlem-edit', ['id' => $id]);
+            $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $id]);
             header('Location: ' . $redirectUrl);
             exit;
         }
@@ -153,7 +153,7 @@ class MedlemController extends BaseController
         }
 
         // Set the URL and redirect
-        $redirectUrl = $this->router->generate('medlem-list');
+        $redirectUrl = $this->app->getRouter()->generate('medlem-list');
         header('Location: ' . $redirectUrl);
         exit;
     }
@@ -167,7 +167,7 @@ class MedlemController extends BaseController
             "title" => "Lägg till medlem",
             "roller" => $roller,
             //Used in the view to set the proper action url for the form
-            'formAction' => $this->router->generate('medlem-create')
+            'formAction' => $this->app->getRouter()->generate('medlem-create')
         ];
         $this->view->render('viewMedlemNew', $data);
     }
@@ -214,7 +214,7 @@ class MedlemController extends BaseController
         }
 
         // Set the URL and redirect
-        $redirectUrl = $this->router->generate('medlem-list');
+        $redirectUrl = $this->app->getRouter()->generate('medlem-list');
         header('Location: ' . $redirectUrl);
         exit;
     }
@@ -228,12 +228,12 @@ class MedlemController extends BaseController
             $medlem->delete();
             $_SESSION['flash_message'] = ['type' => 'ok', 'message' => 'Medlem borttagen!'];
             // Set the URL and redirect
-            $redirectUrl = $this->router->generate('medlem-list');
+            $redirectUrl = $this->app->getRouter()->generate('medlem-list');
             header('Location: ' . $redirectUrl);
             exit;
         } catch (Exception $e) {
             $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Kunde inte ta bort medlem!'];
-            $redirectUrl = $this->router->generate('medlem-list');
+            $redirectUrl = $this->app->getRouter()->generate('medlem-list');
         }
         header('Location: ' . $redirectUrl);
         exit;
