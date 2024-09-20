@@ -2,23 +2,10 @@
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
 ## DOING:
-* Refactor: remove duplicated code between save() and insertNew() in MedlemController
-* Refactor: remove router->generate in controller classes instead use BaseController->createUrl(), 
-  maybe also remove stop passing router to the controllers (it's already available in Application). 
+Moved to Github issues
 
 ## TODO (v0.9): 
-* Mail: add mail templates for password reset and new user registration. Find something among these: 
-    https://github.com/ActiveCampaign/postmark-templates/tree/main
-    https://stripo.email/
-    https://www.cerberusemail.com/
-    https://github.com/mailchimp/email-blueprints
-* Mail: test all email templates
-* Refactor: add strict_types to all Utils
-* Refactor: add strict_types to all Models
-* Refactor: add strict_types to all Middlewares
-* Refactor: add PSR-7 request and response handling
-* Deploy: import csv file with all current member data into database
-* Deploy: move to Pi server and verify all is working
+All items moved to Github issues
 
 ## DONE for v0.9: 
 * DONE Segling: Fix database for members on Seglingar
@@ -38,6 +25,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Refactor: fix messy setting of path in BaseController->render()
 * DONE Refactor: write a sanitization class to handle user input
 * DONE Refactor: add strict_types to all Controllers
+* DONE Refactor: remove router->generate in controller classes instead use BaseController->createUrl(), 
+       also remove stop passing router to the controllers (it's already available in Application)
 * DONE Auth: add a register user form - only allow existing members to register
 * DONE Auth: verify that a user is logged in for all pages
 * DONE Auth: add admin checks in AuthMiddleware
@@ -46,6 +35,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Deploy: fix all hardcoded paths in the application (arghh!)
 * DONE Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
 * DONE Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
+
 
 ## TODO (v0.95): 
 * User-site: build a proper homepage for non-admin users
