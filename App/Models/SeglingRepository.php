@@ -20,7 +20,7 @@ class SeglingRepository
      * Fetches all seglingar by querying Segling table in DB
      * The function takes no parameters and returns an array of all Segling objects
      *
-     * @return: array
+     * @return array Segling Array of all seglingar
      */
     public function getAll(): array
     {
@@ -32,7 +32,7 @@ class SeglingRepository
      * Fetches all seglingar by querying Segling table in DB
      * The function takes no parameters and returns an array of all Segling objects including deltagare
      *
-     * @return: array
+     * @return array Segling Array of all seglingar with deltagare details added
      */
     public function getAllWithDeltagare(): array
     {
