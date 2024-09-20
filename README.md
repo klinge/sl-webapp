@@ -1,8 +1,10 @@
-### sl-webapp
+# SL Member System
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
--## DOING:
-* Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
+## DOING:
+* Refactor: remove duplicated code between save() and insertNew() in MedlemController
+* Refactor: remove router->generate in controller classes instead use BaseController->createUrl(), 
+  maybe also remove stop passing router to the controllers (it's already available in Application). 
 
 ## TODO (v0.9): 
 * Mail: add mail templates for password reset and new user registration. Find something among these: 
@@ -11,8 +13,6 @@ Members and activities database for a sailing club, with an accompanying web-gui
     https://www.cerberusemail.com/
     https://github.com/mailchimp/email-blueprints
 * Mail: test all email templates
-* Refactor: remove duplicated code between save() and insertNew() in MedlemController
-* Refactor: remove router->generate in controller classes instead use BaseController->createUrl()
 * Refactor: add strict_types to all Utils
 * Refactor: add strict_types to all Models
 * Refactor: add strict_types to all Middlewares
@@ -45,6 +45,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Deploy: fix redirection rules for Nginx instead of Apache
 * DONE Deploy: fix all hardcoded paths in the application (arghh!)
 * DONE Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
+* DONE Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
 
 ## TODO (v0.95): 
 * User-site: build a proper homepage for non-admin users
