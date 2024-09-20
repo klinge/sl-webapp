@@ -81,7 +81,7 @@ class Application
      *
      * @throws Exception If the controller class is not found
      */
-    private function dispatch($match, $request, $router): void
+    private function dispatch(array $match, array $request): void
     {
         //If we have a string with a # then it's a controller action pair
         if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
@@ -97,7 +97,7 @@ class Application
 
             //Check that the controller has the requested method and call it
             if (method_exists($controllerClass, $action)) {
-                $controllerInstance = new $controllerClass($this, $request, $router);
+                $controllerInstance = new $controllerClass($this, $request);
                 $controllerInstance->{$action}($params);
             } else {
                 echo 'Error: can not call ' . $controller . '#' . $action;
@@ -249,7 +249,7 @@ class Application
             // here you can handle 404
         } else {
             $request = $_SERVER;
-            $this->dispatch($match, $request, $this->router);
+            $this->dispatch($match, $request);
         }
     }
 }

@@ -14,7 +14,6 @@ use App\Utils\TokenType;
 use App\Utils\View;
 use App\Application;
 use PDO;
-use AltoRouter;
 use PHPMailer\PHPMailer\Exception;
 
 class AuthController extends BaseController
@@ -22,9 +21,9 @@ class AuthController extends BaseController
     private ?TokenHandler $tokenHandler = null;
     private View $view;
 
-    public function __construct(Application $app, array $request, AltoRouter $router)
+    public function __construct(Application $app, array $request)
     {
-        parent::__construct($app, $request, $router);
+        parent::__construct($app, $request);
         $this->view = new View($this->app);
     }
 
@@ -82,7 +81,7 @@ class AuthController extends BaseController
         Session::remove('user_id');
         Session::remove('fornamn');
         Session::destroy();
-        $redirectUrl = $this->router->generate('show-login');
+        $redirectUrl = $this->app->getRouter()->generate('show-login');
         header('Location: ' . $redirectUrl);
         return;
     }
@@ -153,7 +152,7 @@ class AuthController extends BaseController
         $data = [
             'token' => $token,
             'fornamn' => $medlem->fornamn,
-            'activate_url' => $this->createUrl('register-activate', ['token' => $token])
+            'activate_url' => $this->app->getRouter()->generate('register-activate', ['token' => $token])
         ];
 
         try {
@@ -178,7 +177,7 @@ class AuthController extends BaseController
 
         if (!$token_result['success']) {
             Session::setFlashMessage('error', $token_result['message']);
-            header('Location: ' . $this->createUrl('login'));
+            header('Location: ' . $this->app->getRouter()->generate('login'));
             return;
         }
         //If all is well add the hashed password to the member table and delete the token
@@ -191,7 +190,7 @@ class AuthController extends BaseController
         $this->getTokenHandler()->deleteExpiredTokens();
 
         Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
-        header('Location: ' . $this->createUrl('login'));
+        header('Location: ' . $this->app->getRouter()->generate('login'));
         return;
     }
 
@@ -219,7 +218,7 @@ class AuthController extends BaseController
             $data = [
                 'token' => $token,
                 'fornamn' => $member['fornamn'],
-                'pwd_reset_url' => $this->createUrl('show-reset-password', ['token' => $token]),
+                'pwd_reset_url' => $this->app->getRouter()->generate('show-reset-password', ['token' => $token]),
             ];
 
             try {
@@ -252,7 +251,7 @@ class AuthController extends BaseController
             return;
         } else {
             Session::setFlashMessage('error', $result['message']);
-            header('Location: ' . $this->createUrl('show-request-password'));
+            header('Location: ' . $this->app->getRouter()->generate('show-request-password'));
             return;
         }
     }
@@ -298,7 +297,7 @@ class AuthController extends BaseController
         //Fail if member doesn't exist, should never happen
         if (!$member) {
             Session::setFlashMessage('error', 'OJ! Nu blev det ett tekniskt fel. Användaren finns inte..');
-            header('Location: ' . $this->createUrl('show-request-password'));
+            header('Location: ' . $this->app->getRouter()->generate('show-request-password'));
             return;
         }
         // Hash the new password

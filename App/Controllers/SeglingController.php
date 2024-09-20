@@ -16,15 +16,14 @@ use App\Application;
 use Exception;
 use PDO;
 use PDOException;
-use AltoRouter;
 
 class SeglingController extends BaseController
 {
     private View $view;
 
-    public function __construct(Application $app, array $request, AltoRouter $router)
+    public function __construct(Application $app, array $request)
     {
-        parent::__construct($app, $request, $router);
+        parent::__construct($app, $request);
         $this->view = new View($this->app);
     }
 
@@ -36,7 +35,7 @@ class SeglingController extends BaseController
         //Put everyting in the data variable that is used by the view
         $data = [
             "title" => "Bokningslista",
-            "newAction" => $this->router->generate('segling-show-create'),
+            "newAction" => $this->app->getRouter()->generate('segling-show-create'),
             "items" => $result
         ];
         $this->view->render('viewSegling', $data);
@@ -45,7 +44,7 @@ class SeglingController extends BaseController
     public function edit(array $params)
     {
         $id = (int) $params['id'];
-        $formAction = $this->router->generate('segling-save', ['id' => $id]);
+        $formAction = $this->app->getRouter()->generate('segling-save', ['id' => $id]);
         //Fetch Segling
         try {
             $segling = new Segling($this->conn, $id);
@@ -116,7 +115,7 @@ class SeglingController extends BaseController
         if ($segling->save()) {
             // Set the URL and redirect
             Session::setFlashMessage('success', 'Segling uppdaterad!');
-            $redirectUrl = $this->router->generate('segling-list');
+            $redirectUrl = $this->app->getRouter()->generate('segling-list');
             header('Location: ' . $redirectUrl);
             exit;
         } else {
@@ -141,7 +140,7 @@ class SeglingController extends BaseController
 
     public function showCreate()
     {
-        $formAction = $this->router->generate('segling-create');
+        $formAction = $this->app->getRouter()->generate('segling-create');
         $data = [
             "title" => "Skapa ny segling",
             "formUrl" => $formAction
@@ -175,7 +174,7 @@ class SeglingController extends BaseController
 
         if ($result) {
             Session::setFlashMessage('success', 'Seglingen är nu skapad!');
-            $redirectUrl = $this->router->generate('segling-edit', ['id' => $result]);
+            $redirectUrl = $this->app->getRouter()->generate('segling-edit', ['id' => $result]);
             header('Location: ' . $redirectUrl);
             exit;
         } else {
@@ -229,7 +228,7 @@ class SeglingController extends BaseController
         try {
             $stmt->execute();
         } catch (PDOException $e) {
-            $return = ['success' => false, 'message' => "PDO error: " + $e->getMessage()];
+            $return = ['success' => false, 'message' => "PDO error: " . $e->getMessage()];
             $this->jsonResponse($return);
             exit;
         }
