@@ -4,7 +4,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 ## DOING:
 * Refactor: remove duplicated code between save() and insertNew() in MedlemController
 * Refactor: remove router->generate in controller classes instead use BaseController->createUrl(), 
-  also maybe no need to pass router to controller classes (they already have router in the Application class)	
+  also maybe no need to pass router to controller classes (they already have router in the Application class)
+* Remove PHPStan errors level 4
 
 ## TODO (v0.9): 
 * Mail: add mail templates for password reset and new user registration. Find something among these: 
