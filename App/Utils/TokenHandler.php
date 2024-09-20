@@ -26,11 +26,11 @@ class TokenHandler
     public function saveToken(string $token, TokenType $tokenType, string $email, ?string $hashedPassword = null): bool
     {
         //Activation has a password, reset does not..
-        if ($tokenType::ACTIVATION) {
+        if ($tokenType === TokenType::ACTIVATION) {
             $stmt = $this->conn->prepare(
                 "INSERT INTO AuthToken (email, token, token_type, password_hash) VALUES (:email, :token, :token_type, :password_hash)"
             );
-        } elseif ($tokenType::RESET) {
+        } elseif ($tokenType === TokenType::RESET) {
             $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)");
         } else {
             return false;
@@ -41,7 +41,7 @@ class TokenHandler
             $stmt->bindParam(':email', $email);
             $stmt->bindParam(':token', $token);
             $stmt->bindValue(':token_type', $tokenType->value);
-            if ($tokenType::ACTIVATION) {
+            if ($tokenType === TokenType::ACTIVATION) {
                 $stmt->bindParam(':password_hash', $hashedPassword);
             }
             $stmt->execute();

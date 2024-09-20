@@ -24,8 +24,8 @@ class Medlem
     public string $postort;
     public string $kommentar;
     // User preferences
-    public string $godkant_gdpr;
-    public string $pref_kommunikation;
+    public int $godkant_gdpr;
+    public int $pref_kommunikation;
     // User login
     public string $password;
     public int $isAdmin;

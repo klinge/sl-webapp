@@ -15,7 +15,7 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
             // Check 1. that route exists, 2. that it's not in routes that not require login
             // 3. that it's not a user route and 4. that user is not an admin
             // If all are true redirect to a page saying user can't access the required page
-            if ($match && !in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !$this->isUserRoute($routeName) && !Session::get('is_admin')) {
+            if (!in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !$this->isUserRoute($routeName) && !Session::get('is_admin')) {
                 if ($this->isAjaxRequest()) {
                     $this->sendJsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.']);
                 } else {

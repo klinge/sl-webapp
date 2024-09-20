@@ -75,7 +75,6 @@ class Application
      *
      * @param array $match The matched route information
      * @param array $request The current request object
-     * @param AltoRouter $router The router instance
      *
      * @return void
      *
