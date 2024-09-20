@@ -26,12 +26,14 @@ use App\Utils\Session;
  */
 class Application
 {
-    private $config;
-    private $router;
-    private $middlewares = [];
+    private array $config = [];
+    private ?AltoRouter $router = null;
+    private array $middlewares = [];
+    private string $rootDir = '';
 
     public function __construct()
     {
+        $this->rootDir = dirname(__DIR__);
         $this->loadEnvironment();
         $this->loadConfig();
         $this->setupRouter();
@@ -120,8 +122,7 @@ class Application
      */
     private function loadEnvironment(): void
     {
-        //NOTE: Only place where the application path is hardcoded
-        $dotenv = Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/sl-webapp');
+        $dotenv = Dotenv::createImmutable($this->rootDir);
         $dotenv->load();
     }
 
@@ -141,16 +142,6 @@ class Application
     }
 
     /**
-     * Returns the full path to the application directory.
-     *
-     * @return string The full path to the application directory
-     */
-    public function getAbsolutePath(): string
-    {
-        return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
-    }
-
-    /**
      * Returns the path for the application relative to the servers document root.
      *
      * @return string The base path for the application
@@ -158,6 +149,16 @@ class Application
     public function getAppDir(): string
     {
         return $this->config['APP_DIR'];
+    }
+
+    /**
+     * Returns the full path for the application root directory
+     *
+     * @return string The full path to the application root directory
+     */
+    public function getRootDir(): string
+    {
+        return $this->rootDir;
     }
 
     /**
