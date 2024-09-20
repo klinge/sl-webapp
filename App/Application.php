@@ -56,7 +56,7 @@ class Application
     private function setupRouter(): void
     {
         $this->router = new AltoRouter();
-        $this->router->setBasePath($this->getAppDir());
+        $this->router->setBasePath($this->getConfig('APP_DIR'));
 
         // Routes are created from the Config/RouteConfig class
         RouteConfig::createAppRoutes($this->router);
@@ -142,11 +142,12 @@ class Application
     }
 
     /**
-     * Returns the path for the application relative to the servers document root.
+     * Returns the path for the application relative to the servers document root,
+     * returns an empty string if the APP_DIR is not set.
      *
-     * @return string The base path for the application
+     * @return ?string The base path for the application
      */
-    public function getAppDir(): string
+    public function getAppDir(): ?string
     {
         return $this->config['APP_DIR'];
     }
