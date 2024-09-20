@@ -102,48 +102,22 @@ class MedlemController extends BaseController
 
     public function save(array $params): void
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $id);
+        $postData = $_POST;
 
-        //Sanitize user input
-        $sanitizer = new Sanitizer();
-        $cleanValues = $sanitizer->sanitize($_POST, $this->sanitizerRules);
+        $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
 
-        //Start by validating fodelsedatum and fail early if not valid
-        if (empty($cleanValues['fodelsedatum'])) {
-            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Felaktigt fodelsedatum!'];
-            $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $id]);
-            header('Location: ' . $redirectUrl);
+        ///If the sanitization fails, just exit
+        if (!$result) {
             exit;
         }
 
-        //Loop over everything in POST and set values on the Medlem object
-        foreach ($cleanValues as $key => $value) {
-            //Special handling for roller that is an array of ids
-            if ($key === 'roller') {
-                $medlem->updateMedlemRoles($value);
-            } elseif (property_exists($medlem, $key)) {
-                $medlem->$key = $value; // Assign value to corresponding property
-            }
-        }
-
-        //If preference checkboxes are not checked they don't exist in $_POST so set to False/0
-        if (!isset($_POST['godkant_gdpr'])) {
-            $medlem->godkant_gdpr = 0;
-        }
-        if (!isset($_POST['pref_kommunikation'])) {
-            $medlem->pref_kommunikation = 0;
-        }
-        if (!isset($_POST['isAdmin'])) {
-            $medlem->isAdmin = 0;
-        }
-
-        //After setting all values on the member object try to save it
         try {
             $medlem->save();
             $_SESSION['flash_message'] = [
                 'type' => 'success',
-                'message' => 'Medlem uppdaterad!'
+                'message' => 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
             ];
         } catch (Exception $e) {
             $_SESSION['flash_message'] = [
@@ -175,29 +149,12 @@ class MedlemController extends BaseController
     public function insertNew(): void
     {
         $medlem = new Medlem($this->conn);
+        $postData = $_POST;
 
-        $s = new Sanitizer();
-        $cleanValues = $s->sanitize($_POST, $this->sanitizerRules);
-
-        foreach ($cleanValues as $key => $value) {
-            //Special handling for roller that is an array of ids
-            if ($key === 'roller') {
-                $medlem->updateMedlemRoles($value);
-            } elseif (property_exists($medlem, $key)) {
-                $_POST[$key] = $value;
-                $medlem->$key = $value; // Assign value to corresponding property
-            }
-        }
-
-        //If preference checkboxes are not checked they don't exist in $_POST so set to False/0
-        if (!isset($_POST['godkant_gdpr'])) {
-            $medlem->godkant_gdpr = 0;
-        }
-        if (!isset($_POST['pref_kommunikation'])) {
-            $medlem->pref_kommunikation = 0;
-        }
-        if (!isset($_POST['isAdmin'])) {
-            $medlem->isAdmin = 0;
+        $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
+        //If the sanitize function returns false, we have an error, just exit
+        if (!$result) {
+            exit;
         }
 
         try {
@@ -237,5 +194,58 @@ class MedlemController extends BaseController
         }
         header('Location: ' . $redirectUrl);
         exit;
+    }
+
+    private function prepareAndSanitizeMedlemData(Medlem $medlem, array $postData): bool
+    {
+        $errors = [];
+        $requiredFields = ['fornamn', 'efternamn', 'fodelsedatum'];
+        $checkboxFields = ['godkant_gdpr', 'pref_kommunikation', 'isAdmin'];
+
+        //Sanitize user input
+        $sanitizer = new Sanitizer();
+        $cleanValues = $sanitizer->sanitize($postData, $this->sanitizerRules);
+
+        //Save roller because the sanitizer removes them from the array
+        $roller = $postData['roller'];
+
+        // Validate required fields
+        foreach ($requiredFields as $field) {
+            if (empty($cleanValues[$field])) {
+                $errors[] = $field;
+            }
+        }
+        // If there were errors show a flash message and redirect back to the form
+        if ($errors) {
+            $errorMsg = "Följande obligatoriska fält måste fyllas i: " . implode(', ', $errors);
+            $_SESSION['flash_message'] = ['type' => 'error', 'message' => $errorMsg];
+            if (isset($medlem->id)) {
+                $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
+            } else {
+                $redirectUrl = $this->app->getRouter()->generate('medlem-new');
+            }
+            header('Location: ' . $redirectUrl);
+            return false;
+        }
+
+        //Loop over everything in POST and set values on the Medlem object
+        foreach ($cleanValues as $key => $value) {
+            if (property_exists($medlem, $key) && !in_array($key, $checkboxFields)) {
+                // Assign value to corresponding property, checkoxes are handled below
+                $medlem->$key = $value;
+            }
+        }
+
+        // If checkboxes are not checked they don't exist in $_POST so set to False/0
+        foreach ($checkboxFields as $field) {
+            $medlem->$field = isset($cleanValues[$field]) ? 1 : 0;
+        }
+
+        //Update the medlem's roles
+        if (isset($roller)) {
+            $medlem->updateMedlemRoles($roller);
+        }
+
+        return true;
     }
 }
