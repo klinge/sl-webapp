@@ -51,6 +51,7 @@ class AuthController extends BaseController
         } catch (Exception $e) {
             Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA');
             $this->view->render('login/viewLogin');
+            return;
         }
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
@@ -66,17 +67,13 @@ class AuthController extends BaseController
         if ($medlem->isAdmin) {
             Session::set('is_admin', true);
             //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
-            $redirectUrl = Session::get('redirect_url') ?? $this->app->getAppDir();
+            $redirectUrl = Session::get('redirect_url') ?? $this->app->getRouter()->generate('home');
             Session::remove('redirect_url');
         } else {
             //if user is not an admin send them to the user part of the site
             $redirectUrl = $this->app->getRouter()->generate('user-home');
             Session::remove('redirect_url');
         }
-        //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
-        $redirectUrl = Session::get('redirect_url') ?? $this->app->getAppDir();
-        Session::remove('redirect_url');
-
         header('Location: ' . $redirectUrl);
     }
 
