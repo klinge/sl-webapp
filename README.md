@@ -1,9 +1,10 @@
-### sl-webapp
+# Sailing Club Database
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
--## DOING:
-* Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
-* Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
+## DOING:
+* Refactor: remove duplicated code between save() and insertNew() in MedlemController
+* Refactor: remove router->generate in controller classes instead use BaseController->createUrl(), 
+  also maybe no need to pass router to controller classes (they already have router in the Application class)	
 
 ## TODO (v0.9): 
 * Mail: add mail templates for password reset and new user registration. Find something among these: 
@@ -12,8 +13,6 @@ Members and activities database for a sailing club, with an accompanying web-gui
     https://www.cerberusemail.com/
     https://github.com/mailchimp/email-blueprints
 * Mail: test all email templates
-* Refactor: remove duplicated code between save() and insertNew() in MedlemController
-* Refactor: remove router->generate in controller classes instead use BaseController->createUrl()
 * Refactor: add strict_types to all Utils
 * Refactor: add strict_types to all Models
 * Refactor: add strict_types to all Middlewares
@@ -44,6 +43,8 @@ Members and activities database for a sailing club, with an accompanying web-gui
 * DONE Auth: direct admin and non-admin to different pages after login
 * DONE Deploy: fix redirection rules for Nginx instead of Apache
 * DONE Deploy: fix all hardcoded paths in the application (arghh!)
+* DONE Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
+* DONE Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
 
 ## TODO (v0.95): 
 * User-site: build a proper homepage for non-admin users
@@ -71,8 +72,7 @@ Members and activities database for a sailing club, with an accompanying web-gui
 
 ## Notes on deploying to a new server
 1. Put proper values in the .env-EDITME file
-2. Application path is hardcoded in Application.php. This will have to change
-   if the app path related to the document root of the webserver changes. 
+2. The webserver needs to be configured to set the document root to the "public" folder. 
 3. The webserver need to redirect all requests to index.php. If the server is Apache
    the .htacess in the repo does this. Remember to allow redirects in the site config. 
    If nginx try_files in a location block need to point to index.php for not-found files. 
