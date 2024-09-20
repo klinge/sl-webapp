@@ -20,7 +20,7 @@ class View
     private string $appDir;
 
     /** @var string Full path to the application directory */
-    private string $fullPath;
+    private string $rootPath;
 
     /** @var array Data to be passed to the view */
     private $data = [];
@@ -34,7 +34,7 @@ class View
     {
         $this->app = $app;
         $this->appDir = $this->app->getAppDir();
-        $this->fullPath = $this->app->getAbsolutePath();
+        $this->rootPath = $this->app->getRootDir();
     }
 
     /**
@@ -53,11 +53,10 @@ class View
         $this->data = array_merge($this->data, ['viewData' => $viewData]);
 
         //File path has to be the full path to the view file on the server
-        $filePath = $this->fullPath . '/views/' . $template . '.php';
+        $filePath = $this->rootPath . '/public/views/' . $template . '.php';
 
         if (!file_exists($filePath)) {
             throw new \Exception("View \"{$filePath}\" not found");
-            return false;
         }
 
         extract($this->data);

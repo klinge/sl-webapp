@@ -26,12 +26,14 @@ use App\Utils\Session;
  */
 class Application
 {
-    private $config;
-    private $router;
-    private $middlewares = [];
+    private array $config = [];
+    private ?AltoRouter $router = null;
+    private array $middlewares = [];
+    private string $rootDir = '';
 
     public function __construct()
     {
+        $this->rootDir = dirname(__DIR__);
         $this->loadEnvironment();
         $this->loadConfig();
         $this->setupRouter();
@@ -54,7 +56,7 @@ class Application
     private function setupRouter(): void
     {
         $this->router = new AltoRouter();
-        $this->router->setBasePath($this->getAppDir());
+        $this->router->setBasePath($this->getConfig('APP_DIR'));
 
         // Routes are created from the Config/RouteConfig class
         RouteConfig::createAppRoutes($this->router);
@@ -120,8 +122,7 @@ class Application
      */
     private function loadEnvironment(): void
     {
-        //NOTE: Only place where the application path is hardcoded
-        $dotenv = Dotenv::createImmutable($_SERVER['DOCUMENT_ROOT'] . '/sl-webapp');
+        $dotenv = Dotenv::createImmutable($this->rootDir);
         $dotenv->load();
     }
 
@@ -141,23 +142,24 @@ class Application
     }
 
     /**
-     * Returns the full path to the application directory.
+     * Returns the path for the application relative to the servers document root,
+     * returns an empty string if the APP_DIR is not set.
      *
-     * @return string The full path to the application directory
+     * @return ?string The base path for the application
      */
-    public function getAbsolutePath(): string
+    public function getAppDir(): ?string
     {
-        return $_SERVER['DOCUMENT_ROOT'] . $this->config['APP_DIR'];
+        return $this->config['APP_DIR'];
     }
 
     /**
-     * Returns the path for the application relative to the servers document root.
+     * Returns the full path for the application root directory
      *
-     * @return string The base path for the application
+     * @return string The full path to the application root directory
      */
-    public function getAppDir(): string
+    public function getRootDir(): string
     {
-        return $this->config['APP_DIR'];
+        return $this->rootDir;
     }
 
     /**
@@ -167,7 +169,7 @@ class Application
      *
      * @return string|null The value of the environment variebale, or null if the key is not found
      */
-    public function getConfig(string $key): string
+    public function getConfig(string $key): string|null
     {
         return $this->config[$key] ?? null;
     }

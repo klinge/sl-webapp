@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use Datetime;
-use Altorouter;
+use AltoRouter;
 use App\Application;
 use App\Utils\Session;
 use App\Utils\Database;
