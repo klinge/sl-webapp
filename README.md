@@ -36,6 +36,12 @@ All items moved to Github issues
 * DONE Bug: fix error in SeglingEdit - medlemmar is not populated when adding a medlem
 * DONE Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
 
+## TODO (v0.92) - The testing milestone: 
+* Testing: install PHPUnit
+* Testing: add unit tests for all Controllers
+* Testing: add unit tests for Models
+* Testing: add unit tests for Middlewares
+* Testing: add unit tests for remaining classes
 
 ## TODO (v0.95): 
 * User-site: build a proper homepage for non-admin users
@@ -44,21 +50,17 @@ All items moved to Github issues
 * Refactor: adapt middleware to PSR-15
 * Refactor: add logging and a logging library
 * Refactor: handle dates in the Segling&Medlem class as proper dates and not strings
-* Testing: install PHPUnit
-* Testing: add unit tests for all Controllers
-* Testing: add unit tests for Models
-* Testing: add unit tests for remaining classes
+
 
 ## Longer term TODO (v1.0): 
 * Selfservice: Add a page to let members update their personal information
 * Medlem: Add more fields to Medlem (like last-login, received-mails, etc)
 * Aktier: db, relations to Medlem, controller and views
 * Roller: CRUD for Roller
-* Refactor: add phpcs and PHPStan och Psalm to Github commit workflow
 * Refactor: add DocBlocks for all classes
 * Refactor: ensure consistent naming for CRUD operations..
 * Refactor: move to a validation library like Respect och Rakit
-* Build: add Github actions to run PHP Codesniffer and PHPStan on commits
+* Build/CI: add Github actions to run PHP Codesniffer and PHPStan on commits
 * Auth: replace own code with a proper Auth component. Maybe Comet Auth. Integrate with Medlem class?
 
 ## Notes on deploying to a new server
