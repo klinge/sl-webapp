@@ -31,7 +31,7 @@ class Email
         $this->mailer->SMTPDebug = SMTP::DEBUG_OFF;
     }
 
-    public function send(EmailType $type, string $to, string $subject = null, array $data = [])
+    public function send(EmailType $type, string $to, string $subject = null, array $data = []): bool
     {
         //Load correct email template
         switch ($type) {
@@ -69,7 +69,6 @@ class Email
             $this->mailer->setFrom($fromMail, $fromName);
             $this->mailer->addAddress($to);
             $replyTo = $this->app->getConfig("SMTP_REPLYTO");
-            var_dump($replyTo);
             if ($replyTo) {
                 $this->mailer->addReplyTo($replyTo);
             }
