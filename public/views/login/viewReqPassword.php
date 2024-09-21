@@ -4,7 +4,7 @@ $APP_DIR = $viewData['APP_DIR'];
 
 // set page headers
 $page_title = "Begär nytt lösenord";
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 ?>
 
 <!-- Password Reset 3 - Bootstrap Brain Component -->
@@ -56,5 +56,5 @@ include_once $APP_DIR . "/layouts/header.php";
 </section>
 
 <?php // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/footer.php";
 ?>

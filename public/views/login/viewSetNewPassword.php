@@ -1,11 +1,9 @@
 <?php
 
 $APP_DIR = $viewData['APP_DIR'];
-$BASE_URL = $viewData['BASE_URL'];
-
 // set page headers
 $page_title = "";
-include_once $APP_DIR . "/layouts/header.php";
+include_once "views/_layouts/header.php";
 
 ?>
 
@@ -94,5 +92,5 @@ include_once $APP_DIR . "/layouts/header.php";
 </script>
 
 <?php // footer
-include_once $APP_DIR . "/layouts/footer.php";
+include_once "views/_layouts/header.php";
 ?>
