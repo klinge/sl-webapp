@@ -19,9 +19,10 @@ use App\Utils\Session;
  * This class is responsible for:
  * - Loading the environment variables from the .env file
  * - Loading the application configuration
+ * - Setting up the error reporting based on the application environment
  * - Setting up the routing using the AltoRouter library
  * - Registering middleware to be executed for each request
- * - Dispatching the appropriate controller action based on the current route
+ * - Dispatching to the appropriate controller action based on the current route
  * - Starting the session
  */
 class Application
@@ -36,6 +37,7 @@ class Application
         $this->rootDir = dirname(__DIR__);
         $this->loadEnvironment();
         $this->loadConfig();
+        $this->setErrorReporting($this->getAppEnv());
         $this->setupRouter();
         $this->setupSession();
 
@@ -60,54 +62,6 @@ class Application
 
         // Routes are created from the Config/RouteConfig class
         RouteConfig::createAppRoutes($this->router);
-    }
-
-    /**
-     * Dispatches the request to the appropriate controller and action.
-     *
-     * This method handles the dispatching of the request based on the matched route.
-     * If the matched route target is a string in the format "controller#action", it
-     * will instantiate the specified controller class, check if the action method
-     * exists, and call it with the provided parameters.
-     *
-     * If the matched route target is a callable (closure), it will call the closure
-     * with the provided parameters.
-     *
-     * @param array $match The matched route information
-     * @param array $request The current request object
-     *
-     * @return void
-     *
-     * @throws Exception If the controller class is not found
-     */
-    private function dispatch(array $match, array $request): void
-    {
-        //If we have a string with a # then it's a controller action pair
-        if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
-            //Parse the match to get controller, action and params
-            list($controller, $action) = explode('#', $match['target']);
-            $params = $match['params'];
-
-            //Autoloading does not work with dynamically created classes, manually load the class
-            $controllerClass = "App\\Controllers\\{$controller}";
-            if (!class_exists($controllerClass)) {
-                throw new Exception("Controller class {$controllerClass} not found");
-            }
-
-            //Check that the controller has the requested method and call it
-            if (method_exists($controllerClass, $action)) {
-                $controllerInstance = new $controllerClass($this, $request);
-                $controllerInstance->{$action}($params);
-            } else {
-                echo 'Error: can not call ' . $controller . '#' . $action;
-                //possibly throw a 404 error
-            }
-        } elseif (is_array($match) && is_callable($match['target'])) {
-            //Handle the case then the target is a closure
-            call_user_func_array($match['target'], $match['params']);
-        } else {
-            header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
-        }
     }
 
     /**
@@ -162,6 +116,17 @@ class Application
     }
 
     /**
+     * Returns the full path for the application root directory
+     *
+     * @return string The full path to the application root directory
+     */
+    public function getAppEnv(): string
+    {
+        //Only return DEV if the APP_ENV is set to DEV, otherwise default to PROD
+        return ($this->config['APP_ENV'] === "DEV") ? "DEV" : "PROD";
+    }
+
+    /**
      * Returns the value of a specific environment variable.
      *
      * @param string $key The environment variable to retrieve
@@ -199,6 +164,23 @@ class Application
         Session::start();
     }
 
+    /**
+     * Sets error reporting for the application.
+     *
+     * Turns error reporting on or off depending on the application environment.
+     *
+     * @return void
+     */
+    private function setErrorReporting(string $appEnv): void
+    {
+        if ($appEnv === 'DEV') {
+            error_reporting(E_ALL);
+            ini_set('display_errors', 'On');
+        } else {
+            error_reporting(0);
+            ini_set('display_errors', 'Off');
+        }
+    }
 
     /**
      * Adds a middleware to the application. The middleware must implement
@@ -225,6 +207,54 @@ class Application
     {
         foreach ($this->middlewares as $middleware) {
             $middleware->handle();
+        }
+    }
+
+    /**
+     * Dispatches the request to the appropriate controller and action.
+     *
+     * This method handles the dispatching of the request based on the matched route.
+     * If the matched route target is a string in the format "controller#action", it
+     * will instantiate the specified controller class, check if the action method
+     * exists, and call it with the provided parameters.
+     *
+     * If the matched route target is a callable (closure), it will call the closure
+     * with the provided parameters.
+     *
+     * @param array $match The matched route information
+     * @param array $request The current request object
+     *
+     * @return void
+     *
+     * @throws Exception If the controller class is not found
+     */
+    private function dispatch(array $match, array $request): void
+    {
+        //If we have a string with a # then it's a controller action pair
+        if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
+            //Parse the match to get controller, action and params
+            list($controller, $action) = explode('#', $match['target']);
+            $params = $match['params'];
+
+            //Autoloading does not work with dynamically created classes, manually load the class
+            $controllerClass = "App\\Controllers\\{$controller}";
+            if (!class_exists($controllerClass)) {
+                throw new Exception("Controller class {$controllerClass} not found");
+            }
+
+            //Check that the controller has the requested method and call it
+            if (method_exists($controllerClass, $action)) {
+                $controllerInstance = new $controllerClass($this, $request);
+                $controllerInstance->{$action}($params);
+            } else {
+                echo 'Error: can not call ' . $controller . '#' . $action;
+                //possibly throw a 404 error
+            }
+        } elseif (is_array($match) && is_callable($match['target'])) {
+            //Handle the case then the target is a closure
+            call_user_func_array($match['target'], $match['params']);
+        } else {
+            header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
         }
     }
 

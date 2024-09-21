@@ -1,7 +1,4 @@
 <?php
-// enable debug info
-error_reporting(E_ALL);
-ini_set('display_errors', 'On');
 
 $APP_DIR = $viewData['APP_DIR'];
 $medlem = $viewData['items'];
