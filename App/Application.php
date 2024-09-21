@@ -31,6 +31,7 @@ class Application
     private ?AltoRouter $router = null;
     private array $middlewares = [];
     private string $rootDir = '';
+    private array $request = [];
 
     public function __construct()
     {
@@ -40,10 +41,12 @@ class Application
         $this->setErrorReporting($this->getAppEnv());
         $this->setupRouter();
         $this->setupSession();
+        //TODO In the future maybe add PSR-7 Request and Response objects
+        $this->request = $_SERVER;
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this, $_SERVER));
-        $this->addMiddleware(new AuthorizationMiddleware($this, $_SERVER));
+        $this->addMiddleware(new AuthenticationMiddleware($this, $this->request));
+        $this->addMiddleware(new AuthorizationMiddleware($this, $this->request));
     }
 
     /**
@@ -277,8 +280,7 @@ class Application
             echo "404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!";
             // here you can handle 404
         } else {
-            $request = $_SERVER;
-            $this->dispatch($match, $request);
+            $this->dispatch($match, $this->request);
         }
     }
 }
