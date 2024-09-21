@@ -88,7 +88,7 @@ class Email
 
     private function loadTemplate(EmailType $type, array $data = [])
     {
-        $template = file_get_contents($this->app->getAppDir() . "/views/emails/{$type->value}.tpl");
+        $template = file_get_contents($this->app->getRootDir() . "/public/views/emails/{$type->value}.tpl");
         foreach ($data as $key => $value) {
             $template = str_replace("{{ $key }}", $value, $template);
         }
