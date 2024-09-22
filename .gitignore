@@ -1,4 +1,5 @@
 *.sqlite
+*.csv
 .vscode/
 *-TEST
 *-test

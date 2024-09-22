@@ -94,6 +94,7 @@ include_once "views/_layouts/header.php";
                                     <div class="col-12">
                                         <div class="mb-4">
                                             <h3>Registrera dig</h3>
+                                            <p>Här kan du som är medlem i Föreningen Sofia Linnea registrera ett lösenord så att du kan logga in</p>
                                         </div>
                                     </div>
                                 </div>
