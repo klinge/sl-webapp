@@ -41,20 +41,21 @@ class AuthController extends BaseController
 
         //User not found
         if (!$result) {
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! INTEIDB');
+            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
             $this->view->render('login/viewLogin');
+            exit;
         }
-        //Catch exception if medlem not found
+        //Catch exception if medlem not found, should not happen since we already checked for it
         try {
             $medlem = new Medlem($this->conn, $result['id']);
         } catch (Exception $e) {
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! KUNDEINTESKAPA');
+            Session::setFlashMessage('error', 'Tekniskt fel. Försök igen eller kontakta en administratör!');
             $this->view->render('login/viewLogin');
             return;
         }
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord! FELLÖSEN');
+            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
             $this->view->render('login/viewLogin');
             return;
         }
