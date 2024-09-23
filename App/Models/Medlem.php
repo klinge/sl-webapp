@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use PDO;
+use PDOException;
 use Exception;
 
 class Medlem
@@ -13,21 +14,21 @@ class Medlem
 
     // Class properties
     public int $id;
-    public string $fodelsedatum;
+    public string|null $fodelsedatum;
     public string $fornamn;
     public string $efternamn;
-    public string $email;
-    public string $mobil;
-    public string $telefon;
-    public string $adress;
-    public string $postnummer;
-    public string $postort;
-    public string $kommentar;
+    public string|null $email;
+    public string|null $mobil;
+    public string|null $telefon;
+    public string|null $adress;
+    public string|null $postnummer;
+    public string|null $postort;
+    public string|null $kommentar;
     // User preferences
     public int $godkant_gdpr;
     public int $pref_kommunikation;
     // User login
-    public string $password;
+    public string|null $password;
     public int $isAdmin;
     //Fetched from Roller table
     public array $roller = [];
@@ -152,32 +153,43 @@ class Medlem
         $this->saveRoles();
     }
 
-    public function create(): void
+    public function create(): int
     {
         $query = 'INSERT INTO Medlem 
             (fodelsedatum, fornamn, efternamn, email, gatuadress, postnummer, postort, mobil, telefon, kommentar, godkant_gdpr, pref_kommunikation, isAdmin) 
             VALUES (:fodelsedatum, :fornamn, :efternamn, :email, :gatuadress, :postnummer, :postort, :mobil, :telefon, :kommentar, :godkant_gdpr, :pref_kommunikation, :isAdmin); ';
-
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':fodelsedatum', $this->fodelsedatum);
-        $stmt->bindParam(':fornamn', $this->fornamn);
-        $stmt->bindParam(':efternamn', $this->efternamn);
-        $stmt->bindParam(':email', $this->email);
-        $stmt->bindParam(':gatuadress', $this->adress);
-        $stmt->bindParam(':postnummer', $this->postnummer);
-        $stmt->bindParam(':postort', $this->postort);
-        $stmt->bindParam(':mobil', $this->mobil);
-        $stmt->bindParam(':telefon', $this->telefon);
-        $stmt->bindParam(':kommentar', $this->kommentar);
-        $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr);
-        $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation);
-        $stmt->bindParam(':isAdmin', $this->isAdmin);
+        try {
+            $stmt->bindParam(':fodelsedatum', $this->fodelsedatum, PDO::PARAM_STR);
+            $stmt->bindParam(':fornamn', $this->fornamn, PDO::PARAM_STR);
+            $stmt->bindParam(':efternamn', $this->efternamn, PDO::PARAM_STR);
+            //If email is empty make sure to save it as null, to avoid UNIQUE issues
+            $email = $this->email ?: null;
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->bindParam(':gatuadress', $this->adress, PDO::PARAM_STR);
+            $stmt->bindParam(':postnummer', $this->postnummer, PDO::PARAM_STR);
+            $stmt->bindParam(':postort', $this->postort, PDO::PARAM_STR);
+            $stmt->bindParam(':mobil', $this->mobil, PDO::PARAM_STR);
+            $stmt->bindParam(':telefon', $this->telefon, PDO::PARAM_STR);
+            $stmt->bindParam(':kommentar', $this->kommentar, PDO::PARAM_STR);
+            $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr, PDO::PARAM_BOOL);
+            $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation, PDO::PARAM_BOOL);
+            $stmt->bindParam(':isAdmin', $this->isAdmin, PDO::PARAM_BOOL);
 
-        $stmt->execute();
+            $stmt->execute();
 
-        $this->id = $this->conn->lastInsertId();
-        $this->saveRoles();
-        $this->getDataFromDb($this->id);
+            $this->id = $this->conn->lastInsertId();
+            $this->saveRoles();
+            $this->getDataFromDb($this->id);
+            return $this->id;
+        } catch (PDOException $e) {
+            if ($e->getCode() == '23000') {
+                //For troubleshooting csv import
+                //error_log("UNIQUE constraint violation for email: " . $this->email);
+                //error_log("SQL: " . $stmt->queryString);
+            }
+            throw $e; // Re-throw the exception if you want to handle it further up the call stack
+        }
     }
 
 
