@@ -1,6 +1,7 @@
 *.sqlite
 *.csv
 *.xlsx
+*.txt
 .vscode/
 *-TEST
 *-test
