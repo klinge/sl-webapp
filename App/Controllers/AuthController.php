@@ -219,15 +219,15 @@ class AuthController extends BaseController
             $data = [
                 'token' => $token,
                 'fornamn' => $member['fornamn'],
-                'pwd_reset_url' => $this->app->getRouter()->generate('show-reset-password', ['token' => $token]),
+                'pwd_reset_link' => $this->app->getRouter()->generate('show-reset-password', ['token' => $token]),
             ];
 
             try {
-                $mailer->send(EmailType::TEST, $email, data: $data);
+                $mailer->send(EmailType::PASSWORD_RESET, $email, data: $data);
                 $this->view->render('login/viewLogin');
                 return;
             } catch (Exception $e) {
-                Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ') Länk: ' . $data['pwd_reset_url']);
+                Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ') Länk: ' . $data['pwd_reset_link']);
                 $this->view->render('login/viewReqPassword');
                 return;
             }
