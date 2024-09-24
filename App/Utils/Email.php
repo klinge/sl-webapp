@@ -21,6 +21,7 @@ class Email
 
     private function configure()
     {
+        //SMTP settings
         $this->mailer->isSMTP();
         $this->mailer->Host = $this->app->getConfig("SMTP_HOST");
         $this->mailer->SMTPAuth = true;
@@ -29,6 +30,10 @@ class Email
         $this->mailer->Port = $this->app->getConfig("SMTP_PORT");
         $this->mailer->Timeout = 20;
         $this->mailer->SMTPDebug = SMTP::DEBUG_OFF;
+        //General content settings
+        $this->mailer->CharSet = 'UTF-8';
+        $this->mailer->isHTML(true);
+        $this->mailer->ContentType = 'text/html; charset=UTF-8';
     }
 
     public function send(EmailType $type, string $to, string $subject = null, array $data = []): bool
@@ -72,7 +77,6 @@ class Email
             if ($replyTo) {
                 $this->mailer->addReplyTo($replyTo);
             }
-            $this->mailer->isHTML(true);
             $this->mailer->Subject = $templateSubject;
             $this->mailer->Body = $template;
 
@@ -89,7 +93,8 @@ class Email
     {
         $template = file_get_contents($this->app->getRootDir() . "/public/views/emails/{$type->value}.tpl");
         foreach ($data as $key => $value) {
-            $template = str_replace("{{ $key }}", $value, $template);
+            //Use mb_ereg_replace to support UTF-8 instead of str_replace that is not multibyte safe
+            $template = mb_ereg_replace("{{ $key }}", $value, $template);
         }
         return $template;
     }

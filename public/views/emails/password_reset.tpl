@@ -157,7 +157,7 @@ text-decoration: none
 <table class="t5" role="presentation" cellpadding="0" cellspacing="0" align="center" valign="top">
 <tr class="t4"><td></td><td class="t3" width="179" valign="top">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="t2" style="width:100%;"><tr>
-<td class="t1"><div style="font-size:0px;"><img class="t0" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="179" height="179" alt="" src="../../assets/img/mail/logga_svart.png"/></div></td>
+<td class="t1"><div style="font-size:0px;"><img class="t0" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="179" height="179" alt="" src="https://sl.klin.ge/assets/img/mail/logga_svart.png"/></div></td>
 </tr></table>
 </td>
 <td></td></tr>
@@ -181,7 +181,7 @@ text-decoration: none
 <!--[if !mso]>-->
 <td class="t9" style="background-color:#FFFFFF;width:320px;">
 <!--<![endif]-->
-<div style="font-size:0px;"><img class="t8" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="320" height="187.8125" alt="" src="../../assets/img/mail/logga_svart.png"/></div></td>
+<div style="font-size:0px;"><img class="t8" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="320" height="187.8125" alt="" src="https://sl.klin.ge/assets/img/mail/logga_svart.png"/></div></td>
 </tr></table>
 </td></tr><tr><td><div class="t12" style="mso-line-height-rule:exactly;mso-line-height-alt:20px;line-height:20px;font-size:1px;display:block;">&nbsp;&nbsp;</div></td></tr><tr><td align="center">
 <table class="t14" role="presentation" cellpadding="0" cellspacing="0" style="Margin-left:auto;Margin-right:auto;">

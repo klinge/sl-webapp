@@ -20,11 +20,13 @@ class AuthController extends BaseController
 {
     private ?TokenHandler $tokenHandler = null;
     private View $view;
+    private string $siteAddress;
 
     public function __construct(Application $app, array $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
+        $this->siteAddress = $this->app->getConfig('SITE_ADDRESS');
     }
 
     public function showLogin()
@@ -219,13 +221,11 @@ class AuthController extends BaseController
             $data = [
                 'token' => $token,
                 'fornamn' => $member['fornamn'],
-                'pwd_reset_link' => $this->app->getRouter()->generate('show-reset-password', ['token' => $token]),
+                'pwd_reset_link' => $this->siteAddress . $this->app->getRouter()->generate('show-reset-password', ['token' => $token]),
             ];
 
             try {
                 $mailer->send(EmailType::PASSWORD_RESET, $email, data: $data);
-                $this->view->render('login/viewLogin');
-                return;
             } catch (Exception $e) {
                 Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ') Länk: ' . $data['pwd_reset_link']);
                 $this->view->render('login/viewReqPassword');
