@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use PDO;
 use PDOException;
 use App\Models\Medlem;
+use App\Utils\DateFormatter;
 use InvalidArgumentException;
 use Datetime;
 
@@ -16,7 +17,7 @@ class CsvImporter
 {
     public $data = [];
     private $conn = null;
-    private $dbfile = '/var/www/html/sl-webapp/db/sldb-test.sqlite';
+    private $dbfile = '/var/www/html/sl-webapp/db/sldb-prod.sqlite';
     private $csvfile = '/var/www/html/sl-webapp/db/csv-data/medlemmar-cleaned.csv';
     public $csvRowsNotImported = [];
     public $dbRowsNotCreated = [];
@@ -59,11 +60,15 @@ class CsvImporter
         $countNotUpdated = 0;
         $allRoles = $this->fetchRoller();
 
-        //LastUpdate;MemberId;AÄ;Aktie1;Aktie2;Grupp;Organisation;AntalTidning;EjUtskick;Rekrytering;BesättningRoll;UnderhållRoll;Styrelse;Kommentar;Familjekoppling;Ålder;Födelsedatum;Förnamn;Efternamn;Adress;Postnr;Ort;Telefonnr;Mobiltelefon;E-post;Hemsida;B24;S24;B23;S23;B22;S22;
         foreach ($this->data as $row) {
             //First populate a member object with the row data and save it
             $member = new Medlem($this->conn);
-            $member->fodelsedatum = isset($row['Födelsedatum']) ? $row['Födelsedatum'] : "";
+            $birthdate = DateFormatter::formatDateWithHms($row['Födelsedatum']);
+            $member->fodelsedatum = $birthdate ?: "";
+            if (!empty($this->fodelsedatum)) {
+                print_r($member->fodelsedatum);
+                exit;
+            }
             $member->fornamn = $row['Förnamn'];
             $member->efternamn = $row['Efternamn'];
             $member->email = isset($row['E-post']) ? $row['E-post'] : "";
@@ -84,14 +89,16 @@ class CsvImporter
                 $countUpdated++;
                 //Add roller to Medlem
                 $this->addRolesForMember($member->id, $row['BesättningRoll'], $row['UnderhållRoll'], $allRoles);
-                $betalningar = array_filter([
-                    '2024' => $row['B24'] ?? null,
-                    '2023' => $row['B23'] ?? null,
-                    '2022' => $row['B22'] ?? null
-                ]);
 
-                $this->addPaymentsForMember($member->id, $betalningar);
-                //Using the member id created add to Betalning
+                $betalningar = array_filter([
+                    '2024' => DateFormatter::formatDateWithHms($row['B24']),
+                    '2023' => DateFormatter::formatDateWithHms($row['B23']),
+                    '2022' => DateFormatter::formatDateWithHms($row['B22'])
+                ]);
+                if (!empty($betalningar)) {
+                    $this->addPaymentsForMember($member->id, $betalningar);
+                }
+
                 //Finish off by returning if it went well or not
             } catch (PDOException $e) {
                 $countNotUpdated++;
@@ -125,9 +132,10 @@ class CsvImporter
 
         if ($file !== false) {
             // Read the header row to get column names
-            $headers = fgetcsv($file, 0, ';');
+            $headers = fgetcsv($file, 0, ',');
             // Read the rest of the rows
-            while (($row = fgetcsv($file, 0, ';')) !== false) {
+            while (($row = fgetcsv($file, 0, ',')) !== false) {
+                // Combine the headers and row data into an associative array
                 $combinedRow = array_combine($headers, $row);
                 if ($this->isValidCsvRow($combinedRow)) {
                     $data[] = $combinedRow;
@@ -151,7 +159,7 @@ class CsvImporter
     public function isValidCsvRow(array $row): bool
     {
         // Define the expected number of columns based on your CSV header
-        $expectedColumns = 33;
+        $expectedColumns = 32;
         // Check if the row has the correct number of elements
         if (count($row) !== $expectedColumns) {
             return false;
@@ -171,35 +179,8 @@ class CsvImporter
         foreach ($row as $key => $value) {
             $row[$key] = trim($value);
         }
-        //Format födelsedatum and set to null if not a valid
-        $row['Födelsedatum'] = $this->formatBirthDate($row['Födelsedatum']);
 
         return true;
-    }
-
-    private function formatBirthDate($date): ?string
-    {
-        if (empty($date)) {
-            return null;
-        }
-
-        $dateTime = DateTime::createFromFormat('Y-m-d', $date);
-        if ($dateTime === false) {
-            // Try other common formats
-            $formats = ['d-m-Y', 'd/m/Y', 'Y/m/d', 'Ymd'];
-            foreach ($formats as $format) {
-                $dateTime = DateTime::createFromFormat($format, $date);
-                if ($dateTime !== false) {
-                    break;
-                }
-            }
-        }
-
-        if ($dateTime === false) {
-            return null;
-        }
-
-        return $dateTime->format('Y-m-d');
     }
 
     private function fetchRoller(): array
@@ -240,21 +221,35 @@ class CsvImporter
 
     private function addPaymentsForMember(int $memberId, array $betalningar): void
     {
-        foreach ($betalningar as $year => $value) {
-            if (!empty($value)) {
-                $date = $year . '-' . $value;
-                $formattedDate = date('Y-m-d', strtotime($date));
+        foreach ($betalningar as $year => $date) {
+            if (!empty($date)) {
                 $query = "INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) VALUES (:medlem_id, :belopp, :datum, :avser_ar, :kommentar)";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(':medlem_id', $memberId);
                 $stmt->bindValue(':belopp', 300);
-                $stmt->bindParam(':datum', $formattedDate);
+                $stmt->bindParam(':datum', $date);
                 $stmt->bindParam(':avser_ar', $year);
                 $stmt->bindValue(':kommentar', "Automatskapad vid import");
-                //$stmt->execute();
+                $stmt->execute();
             }
         }
     }
+
+    public function addJohanWithPwdAndAdmin(): void
+    {
+        $query = "SELECT id FROM Medlem WHERE fornamn = 'Johan' AND efternamn = 'Klinge';";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        $query = "UPDATE Medlem SET password = :pwd, isAdmin = :isAdmin WHERE id = :id;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':pwd', password_hash('Alfa1212', PASSWORD_DEFAULT));
+        $stmt->bindValue(':isAdmin', 1);
+        $stmt->bindParam(':id', $result[0]['id']);
+        $stmt->execute();
+        echo "---Johan Klinge har nu admin-rättigheter" . PHP_EOL;
+    }
+
 
     private function connect()
     {
@@ -273,14 +268,11 @@ class CsvImporter
 }
 
 $importer = new CsvImporter();
-/*
+
 $importer->deleteMedlemmar();
 $updatedRows = $importer->insertToDb();
 echo "--- Rader som inte gick att läsa in från csv ---" . PHP_EOL;
 print_r($importer->csvRowsNotImported);
 echo "--- Rader som inte gick att skapa i databasen ---" . PHP_EOL;
 print_r($importer->dbRowsNotCreated);
-*/
-foreach ($importer->data as $row) {
-    echo $row['B24'] .  ":";
-}
+$importer->addJohanWithPwdAndAdmin();

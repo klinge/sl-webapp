@@ -21,9 +21,6 @@ def clean_and_export_excel(input_file, output_file, sheet_name=0):
     # Remove any completely empty rows
     df = df.dropna(how='all')
     
-    # Remove any completely empty columns
-    df = df.dropna(axis=1, how='all')
-    
     # Export to CSV
     df.to_csv(output_file, index=False, encoding='utf-8')
     
