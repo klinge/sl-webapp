@@ -17,7 +17,7 @@ $num = sizeof($viewData['items']);
 
 <div class="row">
     <div class="col-md-12">
-        <table class='table display dt-responsive nowrap table-hover table-bordered table-striped' id="memberTable">
+        <table class='table table-striped table-hover table-bordered' data-page-length="20" id="memberTable">
             <thead>
                 <tr>
                     <th>Id</th>
@@ -65,7 +65,7 @@ $num = sizeof($viewData['items']);
 <script src="https://cdn.datatables.net/2.1.5/js/dataTables.min.js" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/2.1.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
 <script>
-    let dataTable = new DataTable('#memberTable', {
+    let dataTable = new DataTable(' #memberTable', {
         ordering: true, // Enable sorting
         order: [
             [2, 'asc']

@@ -107,24 +107,30 @@ $APP_DIR = $viewData['APP_DIR'];
     </nav>
 
     <!-- container -->
-    <div class="container">
-        <?php
-        if (isset($_SESSION['flash_message'])) {
-            // Bootstrap alert structure
-            if ($_SESSION['flash_message']['type'] === 'error') {
-                echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';
-            } elseif ($_SESSION['flash_message']['type'] === 'info') {
-                echo '<div class="alert alert-info alert-dismissible fade show" role="alert">';
-            } else {
-                echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
-            }
-            echo $_SESSION['flash_message']['message'];
-            echo '</div>';
+    <div class="container-fluid">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Hem</a></li>
+                <li class="breadcrumb-item"><a href="#"></a>Medlemmar</li>
+                <li class="breadcrumb-item active" aria-current="page">Sidan..</li>
+            </ol>
+        </nav>
+        <div class="row">
+            <?php
+            if (isset($_SESSION['flash_message'])) {
+                // Bootstrap alert structure
+                if ($_SESSION['flash_message']['type'] === 'error') {
+                    echo '<div class="alert alert-warning alert-dismissible fade show" role="alert">';
+                } elseif ($_SESSION['flash_message']['type'] === 'info') {
+                    echo '<div class="alert alert-info alert-dismissible fade show" role="alert">';
+                } else {
+                    echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
+                }
+                echo $_SESSION['flash_message']['message'];
+                echo '</div>';
 
-            // Unset the message from the session
-            unset($_SESSION['flash_message']);
-        }
-        ?>
-        <div class='page-header'>
-            <h1><?php echo $page_title ?></h1>
+                // Unset the message from the session
+                unset($_SESSION['flash_message']);
+            }
+            ?>
         </div>
