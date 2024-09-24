@@ -17,7 +17,7 @@ $num = sizeof($viewData['items']);
 
 <div class="row">
     <div class="col-md-12">
-        <table class='table table-striped table-hover table-bordered' data-page-length="20" id="memberTable">
+        <table class='table table-striped table-hover table-bordered' data-page-length="15" id="memberTable">
             <thead>
                 <tr>
                     <th>Id</th>

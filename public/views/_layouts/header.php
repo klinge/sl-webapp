@@ -61,7 +61,7 @@ $APP_DIR = $viewData['APP_DIR'];
 
     <nav class="navbar navbar-expand-lg bg-primary" id="slnav" data-bs-theme="dark" style="color:azure;" aria-label="Besättningsregister navbar">
         <div class="container-fluid">
-            <a class="navbar-brand" href="<?php echo $APP_DIR ?> ">Sofia Linnea</a>
+            <a class="navbar-brand" href="/">Sofia Linnea</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#slNavbar" aria-controls="slNavbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
