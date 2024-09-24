@@ -131,7 +131,7 @@ class AuthController extends BaseController
 
         //Fail if user already has a password
         if ($medlem->password) {
-            Session::setFlashMessage('error', 'Konto redan registrerat. Prova att byta lösenord.');
+            Session::setFlashMessage('error', 'Ditt konto är redan redan registrerat. Har du glömt dit lösenord? Prova att byta lösenord.');
             $this->view->render('login/viewLogin');
             return;
         }
