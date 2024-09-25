@@ -17,7 +17,8 @@ class RouteConfig
         'show-reset-password',
         'reset-password',
         '404',
-        'home'
+        'home',
+        'git-webhook-listener'
     ];
 
     // Central place to put all the applications routes
@@ -62,6 +63,8 @@ class RouteConfig
         $router->map('POST', '/auth/sparalosenord', 'AuthController#resetAndSavePassword', 'reset-password');
 
         $router->map('GET', '/user', 'UserController#home', 'user-home');
+
+        $router->map('POST', '/api/gitdeploy', 'ApiController#handleGithubWebhook', 'git-webhook-listener');
 
         //Route all other urls to 404
         $router->map('GET|POST', '*', 'HomeController#pageNotFound', '404');
