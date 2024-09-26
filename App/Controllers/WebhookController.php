@@ -36,10 +36,11 @@ class WebhookController extends BaseController
         $repoUrl = $payload['repository']['clone_url'];
         $result = $this->handleRepositoryOperations($branch, $repoUrl);
         if ($result['status'] !== 'success') {
-            //log error message and exit
+            $this->app->getLogger()->error("Error occurred while handling repository operations. Message: $result['message']", ['class' => __CLASS__, 'function' => __FUNCTION__]);
         }
         //Finally deploy the repository to the web server
-        //$result = $this->deploy();
+        $result = $this->scheduleDeployment();
+        //TODO add error handling
     }
 
     public function verifyRequest(): array
@@ -144,14 +145,20 @@ class WebhookController extends BaseController
         return ['status' => 'success', 'message' => 'Repository operations completed successfully'];
     }
 
-    private function deploy(): bool
+
+    private function scheduleDeployment(): bool
     {
-        //backup database
-        //move the pulled branch to the deployment directory
-        //run composer update --no-dev
-        //set file ownership
-        //set file permissions
-        echo "Running deploy...";
+        $deployScriptPath = '/var/www/html/scrips/deployScript.sh';
+        $command = "echo '/var/www/html/sl-webapp/scripts/deployScript.sh > /var/www/html/deploy.log 2>&1' | at now + 2 minutes";
+
+        exec($command, $output, $returnVar);
+
+        if ($returnVar !== 0) {
+            $this->app->getLogger()->error('Failed to schedule deployment', ['output' => implode("\n", $output)]);
+            return false;
+        }
+
+        $this->app->getLogger()->info('Deployment scheduled successfully, check job queue with atq');
         return true;
     }
 }
