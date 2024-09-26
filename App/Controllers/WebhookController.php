@@ -36,7 +36,10 @@ class WebhookController extends BaseController
         $repoUrl = $payload['repository']['clone_url'];
         $result = $this->handleRepositoryOperations($branch, $repoUrl);
         if ($result['status'] !== 'success') {
-            $this->app->getLogger()->error("Error occurred while handling repository operations. Message: $result['message']", ['class' => __CLASS__, 'function' => __FUNCTION__]);
+            $this->app->getLogger()->error(
+                "Error occurred while handling repository operations. Message: {$result['message']}",
+                ['class' => __CLASS__, 'function' => __FUNCTION__]
+            );
         }
         //Finally deploy the repository to the web server
         $result = $this->scheduleDeployment();
