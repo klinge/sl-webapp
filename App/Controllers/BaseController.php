@@ -16,6 +16,7 @@ class BaseController
     protected $request;
     protected $sessionData;
     protected $app;
+    private const JSON_CONTENT_TYPE = 'application/json';
 
     public function __construct(Application $app, array $request)
     {
@@ -47,22 +48,22 @@ class BaseController
         }
     }
 
-    protected function jsonResponse(array $data): string|false
+    protected function jsonResponse(array $data, int $statusCode = 200): string
     {
+        // Set the HTTP response code
+        http_response_code($statusCode);
         // Set the content type to JSON
-        header('Content-Type: application/json');
-
+        header('Content-Type: ' . self::JSON_CONTENT_TYPE);
         // Encode the data as JSON
         $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-
         // Check for encoding errors
         if (json_last_error() !== JSON_ERROR_NONE) {
             // Handle encoding errors gracefully
             $jsonData = json_encode(['success' => false, 'message' => 'Error encoding data']);
         }
-        // Send the JSON response
+        // Send the json response to the client and return
         echo $jsonData;
-        exit;
+        return $jsonData;
     }
 
     protected function createUrl(string $routeName, array $params = []): string

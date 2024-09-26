@@ -6,6 +6,9 @@ namespace App;
 
 use Dotenv\Dotenv;
 use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 use App\Config\RouteConfig;
 use Exception;
 use App\Middleware\MiddlewareInterface;
@@ -32,6 +35,7 @@ class Application
     private array $middlewares = [];
     private string $rootDir = '';
     private array $request = [];
+    private Logger $logger;
 
     public function __construct()
     {
@@ -40,6 +44,7 @@ class Application
         $this->loadConfig();
         $this->setErrorReporting($this->getAppEnv());
         $this->setupRouter();
+        $this->setupLogger($this->getAppEnv());
         $this->setupSession();
         //TODO In the future maybe add PSR-7 Request and Response objects
         $this->request = $_SERVER;
@@ -165,6 +170,21 @@ class Application
         ini_set('session.use_only_cookies', 1);
         ini_set('session.cookie_lifetime', 1800);
         Session::start();
+    }
+
+    private function setupLogger(string $appEnv): void
+    {
+        $this->logger = new Logger('sl-member-system');
+        if ($appEnv === 'DEV') {
+            $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
+        } else {
+            $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Info));
+        }
+    }
+
+    public function getLogger(): Logger
+    {
+        return $this->logger;
     }
 
     /**
