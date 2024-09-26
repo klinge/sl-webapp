@@ -64,7 +64,7 @@ class RouteConfig
 
         $router->map('GET', '/user', 'UserController#home', 'user-home');
 
-        $router->map('POST', '/api/gitdeploy', 'ApiController#handleGithubWebhook', 'git-webhook-listener');
+        $router->map('POST', '/webhooks/git/handle', 'WebhookController#handle', 'git-webhook-listener');
 
         //Route all other urls to 404
         $router->map('GET|POST', '*', 'HomeController#pageNotFound', '404');
