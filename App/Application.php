@@ -166,15 +166,25 @@ class Application
      */
     private function setupSession(): void
     {
-        ini_set('session.cookie_httponly', 1);
-        ini_set('session.use_only_cookies', 1);
-        ini_set('session.cookie_lifetime', 1800);
+        session_set_cookie_params([
+            'lifetime' => 3600,
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
         Session::start();
+        //Regenerate session id every 30 mins
+        if (!isset($_SESSION['session_regeneration_time'])) {
+            $_SESSION['session_regeneration_time'] = time();
+        } elseif (time() - $_SESSION['session_regeneration_time'] > 1800) { // every 30 minutes
+            session_regenerate_id(true);
+            $_SESSION['session_regeneration_time'] = time();
+        }
     }
 
     private function setupLogger(string $appEnv): void
     {
-        $this->logger = new Logger('sl-member-system');
+        $this->logger = new Logger('sl-medlem');
         if ($appEnv === 'DEV') {
             $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
         } else {

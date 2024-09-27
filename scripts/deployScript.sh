@@ -8,7 +8,7 @@
 # echo "/var/www/html/sl-webapp/scripts/deployScript.sh > /var/www/html/deploy.log 2>&1" | at now + 2 minutes
 
 
-WEBSERVER_FOLDER="/var/www/html/deploy-test"
+WEBSERVER_FOLDER="/var/www/sl.klin.ge"
 REPO_FOLDER="/var/www/.repos/sl-webapp"
 REPO_NAME="sl-webapp"
 DB_FILE="sldb.sqlite"

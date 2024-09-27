@@ -11,9 +11,11 @@ class Database
     private static $instance = null;
     private $conn;
     private $dbfile;
+    private $app;
 
     private function __construct(Application $app)
     {
+        $this->app = $app;
         $this->dbfile = $app->getConfig('DB_PATH');
         //$this->dbfile = "slask";
         $this->connect();
@@ -35,6 +37,7 @@ class Database
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $exception) {
+            $this->app->getLogger()->error("Could not connect to the database. Error: {$exception}");
             throw new PDOException($exception->getMessage(), (int) $exception->getCode());
         }
     }
