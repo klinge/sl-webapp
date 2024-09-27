@@ -9,9 +9,9 @@
 
 
 WEBSERVER_FOLDER="/var/www/html/deploy-test"
-REPO_FOLDER="/var/www/html/repos/sl-webapp"
+REPO_FOLDER="/var/www/.repos/sl-webapp"
 REPO_NAME="sl-webapp"
-DB_FILE="test.sqlite"
+DB_FILE="sldb.sqlite"
 LOG_FILE="app.log"
 HAS_ERRORS=false
 SCRIPT_USER="johan"
@@ -54,12 +54,12 @@ fi
 log INFO "PREREQS OK---------------------------"
 log INFO "STARTING DEPLOY----------------------"
 
-# Backup database file
-if ! cp "$WEBSERVER_FOLDER/db/$DB_FILE" "$WEBSERVER_FOLDER/../"; then
-    log ERROR "Failed to backup database file"
+# Backup database and .env file
+if ! cp "$WEBSERVER_FOLDER/db/$DB_FILE" "$WEBSERVER_FOLDER/.env" "$WEBSERVER_FOLDER/../"; then
+    log ERROR "Failed to backup database and .env file"
     exit 1
 fi
-log "DEBUG" "1. Backed up database file to ${WEBSERVER_FOLDER}/../"
+log "DEBUG" "1. Backed up database and .env file to ${WEBSERVER_FOLDER}/../"
 
 # Delete contents
 if ! rm -rf "$WEBSERVER_FOLDER"/.[!.]* "$WEBSERVER_FOLDER"/* 2>/dev/null; then
@@ -96,9 +96,10 @@ mkdir -p $WEBSERVER_FOLDER/logs
 touch $WEBSERVER_FOLDER/logs/$LOG_FILE
 log DEBUG "6. Created logs directory and log file"
 
-#Restore backup database file
-mv $WEBSERVER_FOLDER/../$DB_FILE $WEBSERVER_FOLDER/db/$DB_FILE
-log DEBUG "5. Restored database file from ${WEBSERVER_FOLDER}/../"
+#Restore backup database and .env files
+mv $WEBSERVER_FOLDER/../$DB_FILE $WEBSERVER_FOLDER/db/
+mv $WEBSERVER_FOLDER/../.env $WEBSERVER_FOLDER/.env
+log DEBUG "5. Restored database and .env files from ${WEBSERVER_FOLDER}/../"
 
 #Set file and folder permissions
 if ! chown -R johan:www-data "$WEBSERVER_FOLDER"; then
@@ -108,7 +109,7 @@ fi
 log "DEBUG" "7. Set folder ownership"
 
 #Set permissions for db and logs directories
-if ! chmod -R 775 "$WEBSERVER_FOLDER/db" "$WEBSERVER_FOLDER/logs"; then
+if ! chmod 775 "$WEBSERVER_FOLDER/db" "$WEBSERVER_FOLDER/logs"; then
     log ERROR "Failed to set permissions for db and logs directories"
     $HAS_ERRORS=true
 fi
