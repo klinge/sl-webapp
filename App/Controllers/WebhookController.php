@@ -12,6 +12,7 @@ use App\Application;
 class WebhookController extends BaseController
 {
     private string $githubSecret = '';
+    private const REPOSITORY_ID = 781366756;
 
     public function __construct(Application $app, array $request)
     {
@@ -21,9 +22,12 @@ class WebhookController extends BaseController
 
     public function handle(): void
     {
+        $this->app->getLogger()->info('Webhook called from: ' . $this->request['REMOTE_ADDR']);
+
         $payload = $this->verifyRequest();
+
         //If payload is empty, it was a ping request or it didn't pass the verification
-        if (empty($payload)) {
+        if (!$payload) {
             exit;
         }
         $branch = str_replace('refs/heads/', '', $payload['ref']);
@@ -50,7 +54,7 @@ class WebhookController extends BaseController
     {
         $payload = [];
         $event = '';
-        $this->app->getLogger()->info('Webhook called from: ' . $this->request['REMOTE_ADDR']);
+
         // Verify that it's a github webhook request
         if (!isset($this->request['HTTP_X_GITHUB_EVENT'])) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
@@ -71,40 +75,53 @@ class WebhookController extends BaseController
         // Validate signature header format
         $signature = $this->request['HTTP_X_HUB_SIGNATURE_256'];
         $signature_parts = explode('=', $signature);
-        if (count($signature_parts) != 2 && $signature_parts[0] != 'sha256') {
+
+        if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
             $this->jsonResponse(['status' => 'error', 'message' => 'Bad header format'], 400);
             return $payload;
         }
         //All is well so far - get the request body and validate the signature
         $rawBody = file_get_contents('php://input');
 
-        if (!$this->validateSignature($rawBody, $signature_parts[1], $this->githubSecret)) {
-            //Signature didn't validate so send an error message
-            $this->jsonResponse(['status' => 'error', 'message' => 'Invalid signature'], 401);
-            return $payload;
-        } elseif ($event === 'ping') {
-            //Pings don't have a payload, just return a pong
-            $this->jsonResponse(['status' => 'ok', 'message' => 'Pong'], 200);
-            return $payload;
-        } else {
-            $fullJson = json_decode($rawBody, true);
-            $payload = $fullJson['payload'];
+        $signatureResult = $this->validateSignature($rawBody, $signature_parts[1], $this->githubSecret);
+
+        if ($signatureResult !== true) {
+            $this->jsonResponse(['status' => 'error', 'message' => $signatureResult], 401);
+            return [];
         }
+
+        $payload = json_decode($rawBody, true);
+
+        //Lastly check that the request was for the correct repository
+        if ($payload['repository']['id'] !== self::REPOSITORY_ID) {
+            $this->jsonResponse(['status' => 'ignored', 'message' => "Not handling requests for this repo, {$payload['repository']['full_name']}"], 200);
+            $payload = [];
+            return $payload;
+        }
+
+        //Handle the ping event here, just send a pong back
+        if ($event === 'ping') {
+            $this->jsonResponse(['status' => 'ok', 'message' => 'Pong'], 200);
+            return [];
+        }
+
         //Return paylod, empty array if there were any errors
         return $payload;
     }
 
-    private function validateSignature(string $rawRequestBody, string $signature, string $secret): bool
+    private function validateSignature(string $rawRequestBody, string $signature, string $secret): bool|string
     {
         //Calculate the expected signature
         //$utf8Body = mb_convert_encoding($rawRequestBody, 'UTF-8', 'ASCII');
-        $expectedSignature = hash_hmac('sha256', $rawRequestBody, $secret, false);
-        //echo "Expected signature: $expectedSignature\n";
-        //echo "Actual signature: $signature\n";
-        //exit;
+        $calculatedSignature = hash_hmac('sha256', $rawRequestBody, $secret, false);
+
         //Compare it to the actual signature
-        //return hash_equals($expectedSignature, $signature);
-        return true;
+        $hashOk = hash_equals($calculatedSignature, $signature);
+        if ($hashOk) {
+            return true;
+        } else {
+            return "Request signature: {$signature}, calulated signature: {$calculatedSignature}";
+        }
     }
 
     private function handleRepositoryOperations(string $branch, string $repoUrl): array
