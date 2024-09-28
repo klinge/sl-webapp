@@ -61,15 +61,30 @@ $num = sizeof($viewData['items']);
 <script src="assets/js/site.js"></script>
 
 <!-- datatables js -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script src="https://cdn.datatables.net/2.1.5/js/dataTables.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.datatables.net/2.1.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
+<!-- get download package from https://datatables.net/download/ -->
+<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.7/datatables.min.js"></script>
 <script>
     let dataTable = new DataTable(' #memberTable', {
         ordering: true, // Enable sorting
+        "language": {
+            "lengthMenu": "Visa _MENU_ rader",
+            "info": "Visar _START_ till _END_ av totalt _TOTAL_ poster",
+            "infoEmpty": "Visar 0 av totalt 0 poster",
+            "loadingRecords": "Laddar...",
+            "search": "Sök:",
+            "zeroRecords": "Inga poster hittades",
+            "paginate": {
+                "first": "Första",
+                "last": "Sista",
+                "next": "Nästa",
+                "previous": "Föregående"
+            },
+        }
+        /* remove ordering temporarily to see if improves performance
         order: [
             [2, 'asc']
         ] // Sort on the third column (index 2) in ascending order by default
+         */
     });
 </script>
 
