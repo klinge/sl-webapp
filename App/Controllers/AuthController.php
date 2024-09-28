@@ -31,6 +31,7 @@ class AuthController extends BaseController
 
     public function showLogin()
     {
+        $this->setCsrfToken();
         $this->view->render('login/viewLogin');
     }
 
@@ -38,6 +39,14 @@ class AuthController extends BaseController
     {
         $providedEmail = $_POST['email'];
         $providedPassword = $_POST['password'];
+        print_r($_SESSION);
+
+        //Validate csrf token
+        if (!array_key_exists("token", $_POST) || !$this->validateCsrfToken($_POST['token'])) {
+            Session::setFlashMessage('error', 'Kunde inte validera csrf token! Försök igen. ');
+            $this->view->render('login/viewLogin');
+            exit;
+        }
 
         $result = $this->getMemberByEmail($providedEmail);
 

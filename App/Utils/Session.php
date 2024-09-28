@@ -57,11 +57,12 @@ class Session
     public static function getSessionDataForViews(): array
     {
         return [
-            'isLoggedIn' => Session::isLoggedIn(),
-            'isAdmin' => Session::isAdmin(),
-            'fornamn' => Session::get('fornamn'),
+            'isLoggedIn' => self::isLoggedIn(),
+            'isAdmin' => self::isAdmin(),
+            'fornamn' => self::get('fornamn'),
             'user_id' => self::get('user_id'),
-            'flash_message' => self::get('flash_message')
+            'flash_message' => self::get('flash_message'),
+            'csrf_token' => self::get('csrf_token')
         ];
     }
 }

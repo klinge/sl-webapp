@@ -166,13 +166,18 @@ class Application
      */
     private function setupSession(): void
     {
+        //Only require a secure connection for production
+        $isProduction = $this->getAppEnv() === 'PROD';
+
         session_set_cookie_params([
             'lifetime' => 3600,
-            'secure' => true,
+            'secure' => $isProduction,
             'httponly' => true,
             'samesite' => 'Strict',
         ]);
+
         Session::start();
+
         //Regenerate session id every 30 mins
         if (!isset($_SESSION['session_regeneration_time'])) {
             $_SESSION['session_regeneration_time'] = time();

@@ -47,7 +47,8 @@ include_once "views/_layouts/header.php";
                                     </div>
                                 </div>
                                 <form id="loginForm" action="./login" method="POST">
-                                    <div class="row gy-3 overflow-hidden">
+                                    <input type="hidden" name="token" value="<?php echo $viewData["csrf_token"]; ?>">
+                                    <div class=" row gy-3 overflow-hidden">
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
                                                 <input type="email" class="form-control" name="email" id="loginEmail" placeholder="name@example.com" required>

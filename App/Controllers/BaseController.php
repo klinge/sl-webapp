@@ -20,7 +20,6 @@ class BaseController
 
     public function __construct(Application $app, array $request)
     {
-        Session::start();
         $this->app = $app;
         $this->request = $request;
         $this->initializeSessionData();
@@ -64,6 +63,17 @@ class BaseController
         // Send the json response to the client and return
         echo $jsonData;
         return $jsonData;
+    }
+
+    protected function setCsrfToken(): void
+    {
+        $token = bin2hex(random_bytes(32));
+        Session::set('csrf_token', $token);
+    }
+
+    protected function validateCsrfToken(string $token): bool
+    {
+        return Session::get('csrf_token') && hash_equals(Session::get('csrf_token'), $token);
     }
 
     protected function createUrl(string $routeName, array $params = []): string
