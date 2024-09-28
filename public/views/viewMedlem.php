@@ -66,6 +66,9 @@ $num = sizeof($viewData['items']);
 <script>
     let dataTable = new DataTable(' #memberTable', {
         ordering: true, // Enable sorting
+        order: [
+            [2, 'asc']
+        ],
         "language": {
             "lengthMenu": "Visa _MENU_ rader",
             "info": "Visar _START_ till _END_ av totalt _TOTAL_ poster",
@@ -80,11 +83,6 @@ $num = sizeof($viewData['items']);
                 "previous": "Föregående"
             },
         }
-        /* remove ordering temporarily to see if improves performance
-        order: [
-            [2, 'asc']
-        ] // Sort on the third column (index 2) in ascending order by default
-         */
     });
 </script>
 
