@@ -181,7 +181,7 @@ text-decoration: none
 <!--[if !mso]>-->
 <td class="t9" style="background-color:#FFFFFF;width:320px;">
 <!--<![endif]-->
-<div style="font-size:0px;"><img class="t8" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="320" height="187.8125" alt="" src="https://sl.klin.ge/assets/img/mail/logga_svart.png"/></div></td>
+<div style="font-size:0px;"><img class="t8" style="display:block;border:0;height:auto;width:100%;Margin:0;max-width:100%;" width="320" height="187.8125" alt="" src="https://sl.klin.ge/assets/img/mail/reset-password.png"/></div></td>
 </tr></table>
 </td></tr><tr><td><div class="t12" style="mso-line-height-rule:exactly;mso-line-height-alt:20px;line-height:20px;font-size:1px;display:block;">&nbsp;&nbsp;</div></td></tr><tr><td align="center">
 <table class="t14" role="presentation" cellpadding="0" cellspacing="0" style="Margin-left:auto;Margin-right:auto;">

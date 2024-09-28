@@ -168,7 +168,7 @@ class AuthController extends BaseController
         ];
 
         try {
-            $mailer->send(EmailType::TEST, $email, data: $data);
+            $mailer->send(EmailType::VERIFICATION, $email, data: $data);
             Session::setFlashMessage(
                 'success',
                 'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'
@@ -203,6 +203,7 @@ class AuthController extends BaseController
 
         Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
         header('Location: ' . $this->app->getRouter()->generate('login'));
+        //TODO Send a welcome mail on successful activation
         return;
     }
 
