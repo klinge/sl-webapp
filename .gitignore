@@ -2,7 +2,7 @@
 *.csv
 *.xlsx
 *.txt
-logs/
+*.log
 .vscode/
 *-TEST
 *-test
