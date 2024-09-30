@@ -66,7 +66,7 @@ td a {
     color: var(--bs-primary-text-emphasis) !important;
 }
 [data-bs-theme="dark"] td a {
-    color: var(--bs-light) !important;
+    color: var(--bs-body-color) !important;
     text-decoration-color: var(--bs-light) !important;
 }
 [data-bs-theme="dark"] td a:hover {
