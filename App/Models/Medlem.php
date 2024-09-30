@@ -112,7 +112,8 @@ class Medlem
         $stmt->bindParam(':fodelsedatum', $this->fodelsedatum);
         $stmt->bindParam(':fornamn', $this->fornamn);
         $stmt->bindParam(':efternamn', $this->efternamn);
-        $stmt->bindParam(':email', $this->email);
+        $email = $this->email ?: null; //Make sure empty emails is stored as null
+        $stmt->bindParam(':email', $email);
         $stmt->bindParam(':gatuadress', $this->adress);
         $stmt->bindParam(':postnummer', $this->postnummer);
         $stmt->bindParam(':postort', $this->postort);
