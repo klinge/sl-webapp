@@ -36,6 +36,9 @@ class WebhookController extends BaseController
             $this->jsonResponse(['status' => 'ignored', 'message' => 'Not a push to the release branch']);
             $this->app->getLogger()->info('Not a push to the release branch', ['class' => __CLASS__, 'function' => __FUNCTION__]);
             exit;
+        } else {
+            $this->jsonResponse(['status' => 'success', 'message' => 'Successfully received a push on the release branch']);
+            $this->app->getLogger()->info('Received a push on the release branch. Continuing to deploy.. ', ['class' => __CLASS__, 'function' => __FUNCTION__]);
         }
         $repoUrl = $payload['repository']['clone_url'];
         $result = $this->handleRepositoryOperations($branch, $repoUrl);
@@ -126,7 +129,7 @@ class WebhookController extends BaseController
 
     private function handleRepositoryOperations(string $branch, string $repoUrl): array
     {
-        $cloneDir = '/var/www/html/repos/' . basename($repoUrl, '.git');
+        $cloneDir = '/var/www/.repos/' . basename($repoUrl, '.git');
 
         if (!is_dir($cloneDir)) {
             // Clone the repository if it doesn't exist
@@ -168,16 +171,18 @@ class WebhookController extends BaseController
 
     private function scheduleDeployment(): bool
     {
-        $deployScriptPath = '/var/www/html/scrips/deployScript.sh';
-        $command = "echo '/var/www/html/sl-webapp/scripts/deployScript.sh > /var/www/html/deploy.log 2>&1' | at now + 2 minutes";
+        $deployScriptPath = '/var/www/sl.klin.ge/scrips/deployScript.sh';
+        $command = "echo '/var/www/sl.klin.ge/scripts/deployScript.sh > /var/www/html/deploy.log 2>&1' | at now + 2 minutes";
 
+        //TODO Fix a way to run at as user "johan"
+        /*
         exec($command, $output, $returnVar);
 
         if ($returnVar !== 0) {
             $this->app->getLogger()->error('Failed to schedule deployment', ['output' => implode("\n", $output)]);
             return false;
         }
-
+        */
         $this->app->getLogger()->info('Deployment scheduled successfully, check job queue with atq');
         return true;
     }
