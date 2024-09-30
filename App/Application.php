@@ -124,9 +124,9 @@ class Application
     }
 
     /**
-     * Returns the full path for the application root directory
+     * Returns the application environment as a string "DEV|PROD", defaults to PROD
      *
-     * @return string The full path to the application root directory
+     * @return string "DEV"|"PROD""
      */
     public function getAppEnv(): string
     {
@@ -193,7 +193,7 @@ class Application
         if ($appEnv === 'DEV') {
             $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
         } else {
-            $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Info));
+            $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', Level::Debug));
         }
     }
 
