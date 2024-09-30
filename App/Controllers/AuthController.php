@@ -52,6 +52,7 @@ class AuthController extends BaseController
 
         //User not found
         if (!$result) {
+            $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail);
             Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
             $this->view->render('login/viewLogin');
             exit;
@@ -60,17 +61,20 @@ class AuthController extends BaseController
         try {
             $medlem = new Medlem($this->conn, $result['id']);
         } catch (Exception $e) {
+            $this->app->getLogger()->error("Technical error. Could not create member object for member id: " . $result['id']);
             Session::setFlashMessage('error', 'Tekniskt fel. Försök igen eller kontakta en administratör!');
             $this->view->render('login/viewLogin');
             return;
         }
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
+            $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail);
             Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
             $this->view->render('login/viewLogin');
             return;
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
+        $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email);
         Session::regenerateId();
         Session::set('user_id', $medlem->id);
         Session::set('fornamn', $medlem->fornamn);
@@ -133,6 +137,7 @@ class AuthController extends BaseController
         $result = $this->getMemberByEmail($email);
         //Fail if user does not exist
         if (!$result) {
+            $this->app->getLogger()->info("Register member: Failed to register new member. Email does not exist: " . $email);
             Session::setFlashMessage('error', 'Det finns ingen medlem med den emailadressen. Du måste vara medlem för att kunna registrera dig.');
             $this->view->render('login/viewLogin');
             return;
@@ -142,6 +147,7 @@ class AuthController extends BaseController
 
         //Fail if user already has a password
         if ($medlem->password) {
+            $this->app->getLogger()->info("Register member: Failed to register new member. Account already activated: " . $email);
             Session::setFlashMessage('error', 'Ditt konto är redan redan registrerat. Har du glömt dit lösenord? Prova att byta lösenord.');
             $this->view->render('login/viewLogin');
             return;
@@ -154,6 +160,7 @@ class AuthController extends BaseController
 
         //Fail if we couldn't save token
         if (!$result) {
+            $this->app->getLogger()->error("Register member: could not save token for member:" . $email);
             Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen.');
             $this->view->render('login/viewLogin');
             return;
@@ -188,6 +195,7 @@ class AuthController extends BaseController
         $token_result = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
 
         if (!$token_result['success']) {
+            $this->app->getLogger()->warning("Activate account: failed to activate account. Token given was" . $token . ". Remote IP: " . $this->request['REMOTE_ADDR']);
             Session::setFlashMessage('error', $token_result['message']);
             header('Location: ' . $this->app->getRouter()->generate('login'));
             return;
@@ -202,6 +210,7 @@ class AuthController extends BaseController
         $this->getTokenHandler()->deleteExpiredTokens();
 
         Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
+        $this->app->getLogger()->info("Activated account for member: " . $member['email'] . ". IP: " . $this->request['REMOTE_ADDR']);
         header('Location: ' . $this->app->getRouter()->generate('login'));
         //TODO Send a welcome mail on successful activation
         return;
@@ -220,6 +229,7 @@ class AuthController extends BaseController
         if ($member) {
             $token = $this->getTokenHandler()->generateToken();
             $result = $this->getTokenHandler()->saveToken($token, TokenType::RESET, $email);
+            $this->app->getLogger()->info("Reset password called for user: " . $email . ". Remote IP: " . $this->request['REMOTE_ADDR']);
 
             if (!$result) {
                 Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
@@ -241,6 +251,8 @@ class AuthController extends BaseController
                 $this->view->render('login/viewReqPassword');
                 return;
             }
+        } else {
+            $this->app->getLogger()->warning("Reset password called for non-existing user: " . $email . ". Remote IP: " . $this->request['REMOTE_ADDR']);
         }
         //Set the same message disregarding if user existed or not
         Session::setFlashMessage('success', 'Om du har ett konto får du strax ett mail med en återställningslänk till din e-postadress.');
