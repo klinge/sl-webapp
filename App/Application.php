@@ -14,6 +14,7 @@ use Exception;
 use App\Middleware\MiddlewareInterface;
 use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
+use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
 
 /**
@@ -52,6 +53,7 @@ class Application
         // Add middlewares here
         $this->addMiddleware(new AuthenticationMiddleware($this, $this->request));
         $this->addMiddleware(new AuthorizationMiddleware($this, $this->request));
+        //$this->addMiddleware(new CsrfMiddleware($this, $this->request));
     }
 
     /**
