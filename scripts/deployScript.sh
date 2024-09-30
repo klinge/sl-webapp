@@ -109,7 +109,7 @@ fi
 log "DEBUG" "7. Set folder ownership"
 
 #Set permissions for db and logs directories
-if ! chmod 775 "$WEBSERVER_FOLDER/db" "$WEBSERVER_FOLDER/logs"; then
+if ! chmod 770 "$WEBSERVER_FOLDER/db" "$WEBSERVER_FOLDER/logs"; then
     log ERROR "Failed to set permissions for db and logs directories"
     $HAS_ERRORS=true
 fi

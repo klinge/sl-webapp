@@ -2,7 +2,7 @@
 TRIGGER_DIR="/var/www/.deploy_triggers"
 PROCESSED_DIR="/var/www/.deploy_triggers/processed"
 DEPLOY_SCRIPT="/var/www/sl.klin.ge/scripts/deployScript.sh"
-LOG_FILE="/var/www/html/deploy.log"
+LOG_FILE="/var/www/.deploy_log/deploy.log"
 
 mkdir -p "$PROCESSED_DIR"
 
