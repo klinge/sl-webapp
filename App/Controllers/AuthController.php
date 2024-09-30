@@ -164,7 +164,7 @@ class AuthController extends BaseController
         $data = [
             'token' => $token,
             'fornamn' => $medlem->fornamn,
-            'activate_url' => $this->app->getRouter()->generate('register-activate', ['token' => $token])
+            'activate_url' => $this->siteAddress . $this->app->getRouter()->generate('register-activate', ['token' => $token])
         ];
 
         try {
