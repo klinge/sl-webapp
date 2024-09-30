@@ -78,7 +78,7 @@ log "DEBUG" "3. Copied all contents from ${REPO_FOLDER} to ${WEBSERVER_FOLDER}"
 
 #Install dependencies
 cd $WEBSERVER_FOLDER
-composer_output=$(timeout 300 composer update --no-dev --no-interaction --no-progress --quiet 2>&1)
+composer_output=$(timeout 300 /usr/local/bin/composer update --no-dev --no-interaction --no-progress --quiet 2>&1)
 composer_exit_code=$?
 if [ $composer_exit_code -eq 124 ]; then
     log ERROR "Composer update timed out after 5 minutes"
