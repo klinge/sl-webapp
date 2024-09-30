@@ -39,7 +39,6 @@ class AuthController extends BaseController
     {
         $providedEmail = $_POST['email'];
         $providedPassword = $_POST['password'];
-        print_r($_SESSION);
 
         //Validate csrf token
         if (!array_key_exists("token", $_POST) || !$this->validateCsrfToken($_POST['token'])) {
