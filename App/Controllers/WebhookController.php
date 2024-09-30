@@ -129,7 +129,7 @@ class WebhookController extends BaseController
 
     private function handleRepositoryOperations(string $branch, string $repoUrl): array
     {
-        $cloneDir = '/var/www/.repos/' . basename($repoUrl, '.git');
+        $cloneDir = $this->app->getConfig('REPO_BASE_DIRECTORY') . basename($repoUrl, '.git');
 
         if (!is_dir($cloneDir)) {
             // Clone the repository if it doesn't exist
@@ -171,19 +171,15 @@ class WebhookController extends BaseController
 
     private function scheduleDeployment(): bool
     {
-        $deployScriptPath = '/var/www/sl.klin.ge/scrips/deployScript.sh';
-        $command = "echo '/var/www/sl.klin.ge/scripts/deployScript.sh > /var/www/html/deploy.log 2>&1' | at now + 2 minutes";
+        $triggerFile = $this->app->getConfig('TRIGGER_FILE_DIRECTORY') . 'deploy_' . time() . '.trigger';
+        $result = file_put_contents($triggerFile, '');
 
-        //TODO Fix a way to run at as user "johan"
-        /*
-        exec($command, $output, $returnVar);
-
-        if ($returnVar !== 0) {
-            $this->app->getLogger()->error('Failed to schedule deployment', ['output' => implode("\n", $output)]);
+        if ($result === false) {
+            $this->app->getLogger()->error('Failed to create deployment trigger file');
             return false;
         }
-        */
-        $this->app->getLogger()->info('Deployment scheduled successfully, check job queue with atq');
+
+        $this->app->getLogger()->info('Deployment trigger file created successfully, deployment job will be run by cron');
         return true;
     }
 }
