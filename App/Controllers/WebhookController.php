@@ -47,10 +47,10 @@ class WebhookController extends BaseController
                 "Error occurred while handling repository operations. Message: {$result['message']}",
                 ['class' => __CLASS__, 'function' => __FUNCTION__]
             );
+            exit;
         }
         //Finally deploy the repository to the web server
-        $result = $this->scheduleDeployment();
-        //TODO add error handling
+        $this->scheduleDeployment();
     }
 
     public function verifyRequest(): array
