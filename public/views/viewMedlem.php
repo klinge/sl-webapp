@@ -77,10 +77,10 @@ $num = sizeof($viewData['items']);
             "search": "Sök:",
             "zeroRecords": "Inga poster hittades",
             "paginate": {
-                "first": "Första",
-                "last": "Sista",
-                "next": "Nästa",
-                "previous": "Föregående"
+                "first": "<<",
+                "last": ">>",
+                "next": ">",
+                "previous": "<"
             },
         }
     });

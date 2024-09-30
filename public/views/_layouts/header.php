@@ -1,7 +1,4 @@
 <?php
-// enable debug info
-error_reporting(E_ALL);
-ini_set('display_errors', 'On');
 $APP_DIR = $viewData['APP_DIR'];
 ?>
 
@@ -25,7 +22,7 @@ $APP_DIR = $viewData['APP_DIR'];
     <link href="https://cdn.datatables.net/v/bs5/dt-2.1.7/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo $APP_DIR ?>/assets/css/site.css" crossorigin="anonymous">
 
-    <title><?php echo $page_title; ?></title>
+    <title><?php echo $page_title; ?> | SL-Medlem</title>
 </head>
 
 <body>
