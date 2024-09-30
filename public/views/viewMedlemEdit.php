@@ -166,7 +166,9 @@ include_once "views/_layouts/header.php";
                         <tr>
                             <td><?= htmlspecialchars($segling['startdatum']) ?></td>
                             <td><?= htmlspecialchars($segling['roll_namn']) ?></td>
-                            <td><?= htmlspecialchars($segling['skeppslag']) ?></td>
+                            <td>
+                                <a href="/segling/<?php echo $segling['segling_id'] ?>"><?= htmlspecialchars($segling['skeppslag']) ?></a>
+                            </td>
                         </tr>
                     <?php endforeach ?>
                 </tbody>
