@@ -22,7 +22,7 @@ class WebhookController extends BaseController
 
     public function handle(): void
     {
-        $this->app->getLogger()->info('Webhook called from: ' . $this->request['REMOTE_ADDR']);
+        $this->app->getLogger()->info('Starting to process webhook call from: ' . $this->request['REMOTE_ADDR'], ['class' => __CLASS__, 'function' => __FUNCTION__]);
 
         $payload = $this->verifyRequest();
 
@@ -38,7 +38,7 @@ class WebhookController extends BaseController
             exit;
         } else {
             $this->jsonResponse(['status' => 'success', 'message' => 'Successfully received a push on the release branch']);
-            $this->app->getLogger()->info('Received a push on the release branch. Continuing to deploy.. ', ['class' => __CLASS__, 'function' => __FUNCTION__]);
+            $this->app->getLogger()->info('Received a push on the release branch. Continuing to deploy.. ');
         }
         $repoUrl = $payload['repository']['clone_url'];
         $result = $this->handleRepositoryOperations($branch, $repoUrl);
@@ -61,6 +61,7 @@ class WebhookController extends BaseController
         // Verify that it's a github webhook request
         if (!isset($this->request['HTTP_X_GITHUB_EVENT'])) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
+            $this->app->getLogger()->error("Missing X_GITHUB_EVENT header");
             return $payload;
         } else {
             $event = $this->request['HTTP_X_GITHUB_EVENT'];
@@ -68,11 +69,13 @@ class WebhookController extends BaseController
         // Validate that it's ping or a push
         if (!empty($event) && $event !== 'push' && $event !== 'ping') {
             $this->jsonResponse(['status' => 'error', 'message' => 'Event not supported'], 400);
+            $this->app->getLogger()->error("Github event was not push or ping");
             return $payload;
         }
         // Validate the signature using the github secret
         if (!isset($this->request['HTTP_X_HUB_SIGNATURE_256'])) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
+            $this->app->getLogger()->error("Github signature header missing");
             return $payload;
         }
         // Validate signature header format
@@ -81,6 +84,7 @@ class WebhookController extends BaseController
 
         if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
             $this->jsonResponse(['status' => 'error', 'message' => 'Bad header format'], 400);
+            $this->app->getLogger()->error("Bad format for the github signature header");
             return $payload;
         }
         //All is well so far - get the request body and validate the signature
@@ -90,6 +94,7 @@ class WebhookController extends BaseController
 
         if ($signatureResult !== true) {
             $this->jsonResponse(['status' => 'error', 'message' => $signatureResult], 401);
+            $this->app->getLogger()->error("Github signature did not verify");
             return [];
         }
 
@@ -98,6 +103,7 @@ class WebhookController extends BaseController
         //Lastly check that the request was for the correct repository
         if ($payload['repository']['id'] !== self::REPOSITORY_ID) {
             $this->jsonResponse(['status' => 'ignored', 'message' => "Not handling requests for this repo, {$payload['repository']['full_name']}"], 200);
+            $this->app->getLogger()->error("Repository Id in the request was not correct");
             $payload = [];
             return $payload;
         }
@@ -105,6 +111,7 @@ class WebhookController extends BaseController
         //Handle the ping event here, just send a pong back
         if ($event === 'ping') {
             $this->jsonResponse(['status' => 'ok', 'message' => 'Pong'], 200);
+            $this->app->getLogger()->info("Got a ping event, sent a pong back");
             return [];
         }
 
@@ -129,13 +136,14 @@ class WebhookController extends BaseController
 
     private function handleRepositoryOperations(string $branch, string $repoUrl): array
     {
-        $cloneDir = $this->app->getConfig('REPO_BASE_DIRECTORY') . basename($repoUrl, '.git');
+        $cloneDir = $this->app->getConfig('REPO_BASE_DIRECTORY') . '/' . basename($repoUrl, '.git');
+        $this->app->getLogger()->info("Fetching github repo to directory: " . $cloneDir);
 
         if (!is_dir($cloneDir)) {
             // Clone the repository if it doesn't exist
             exec("git clone $repoUrl $cloneDir 2>&1", $output, $returnVar);
             if ($returnVar !== 0) {
-                error_log("Failed to clone repository: " . implode("\n", $output));
+                $this->app->getLogger()->error("Failed to clone repository: " . implode(",", $output));
                 return ['status' => 'error', 'message' => 'Failed to clone repository'];
             }
         } else {
@@ -143,7 +151,7 @@ class WebhookController extends BaseController
             chdir($cloneDir);
             exec("git fetch --all 2>&1", $output, $returnVar);
             if ($returnVar !== 0) {
-                error_log("Failed to fetch latest changes: " . implode("\n", $output));
+                $this->app->getLogger()->error("Failed to fetch latest changes: " . implode(",", $output));
                 return ['status' => 'error', 'message' => 'Failed to fetch latest changes'];
             }
         }
@@ -153,25 +161,25 @@ class WebhookController extends BaseController
         // Checkout the branch that was pushed
         exec("git checkout $branch 2>&1", $output, $returnVar);
         if ($returnVar !== 0) {
-            error_log("Failed to checkout branch $branch: " . implode("\n", $output));
+            $this->app->getLogger()->error("Failed to checkout branch $branch: " . implode(",", $output));
             return ['status' => 'error', 'message' => 'Failed to checkout branch'];
         }
-
         // Pull the latest changes
+        $this->app->getLogger()->debug("Checking out and pulling changes for branch: " . $branch);
         exec("git pull origin $branch 2>&1", $output, $returnVar);
         if ($returnVar !== 0) {
-            error_log("Failed to pull latest changes for branch $branch: " . implode("\n", $output));
+            $this->app->getLogger()->error("Failed to pull latest changes for branch $branch: " . implode("\n", $output));
             return ['status' => 'error', 'message' => 'Failed to pull latest changes'];
         }
 
-        error_log("Successfully updated and checked out branch $branch");
+        $this->app->getLogger()->info("Successfully updated and checked out branch $branch");
         return ['status' => 'success', 'message' => 'Repository operations completed successfully'];
     }
 
 
     private function scheduleDeployment(): bool
     {
-        $triggerFile = $this->app->getConfig('TRIGGER_FILE_DIRECTORY') . 'deploy_' . time() . '.trigger';
+        $triggerFile = $this->app->getConfig('TRIGGER_FILE_DIRECTORY') . '/deploy_' . time() . '.trigger';
         $result = file_put_contents($triggerFile, '');
 
         if ($result === false) {
