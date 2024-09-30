@@ -85,8 +85,8 @@ $APP_DIR = $viewData['APP_DIR'];
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="dropdown05">
                                 <li><a class="dropdown-item" href="<?php echo $APP_DIR ?>/logout">Logout</a></li>
-                                <li><a class="dropdown-item" href="#">Another action</a></li>
-                                <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                <li><a class="dropdown-item" href="/roller">Roller</a></li>
+                                <li><a class="dropdown-item" href="#">Nåt annat här..</a></li>
                             </ul>
                         </li>
                     <?php else : ?>
