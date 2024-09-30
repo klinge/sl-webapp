@@ -1,7 +1,7 @@
+/* Navbar styling */
 .bd-navbar .dropdown-toggle:focus:not(:focus-visible) {
     outline: 0
 }
-
 .bd-navbar .dropdown-menu {
     --bs-dropdown-min-width: 12rem;
     --bs-dropdown-padding-x: .25rem;
@@ -13,31 +13,24 @@
     border-radius: .5rem;
     box-shadow: var(--bs-box-shadow)
 }
-
 .bd-navbar .dropdown-menu li+li {
     margin-top: .125rem
 }
-
 .bd-navbar .dropdown-menu .dropdown-item {
     border-radius: .25rem
 }
-
 .bd-navbar .dropdown-menu .dropdown-item:active .bi {
     color: inherit !important
 }
-
 .bd-navbar .dropdown-menu .active {
     font-weight: 600
 }
-
 .bd-navbar .dropdown-menu .active .bi {
     display: block !important
 }
-
 .bd-navbar .dropdown-menu-end {
     --bs-dropdown-min-width: 8rem
 }
-
 [data-bs-theme="dark"] .bd-navbar {
     box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15),inset 0 -1px 0 rgba(255,255,255,0.15)
 }
@@ -66,6 +59,19 @@
     background-position: center;
     background-repeat: no-repeat;
     min-height: 100vh;
+}
+
+/* Make links in tables have the default  color also fix table links in dark mode*/
+td a {
+    color: var(--bs-primary-text-emphasis) !important;
+}
+[data-bs-theme="dark"] td a {
+    color: var(--bs-light) !important;
+    text-decoration-color: var(--bs-light) !important;
+}
+[data-bs-theme="dark"] td a:hover {
+    color: var(--bs-form-valid-color) !important;
+    text-decoration-color: var(--bs-form-valid-color) !important;
 }
 
 /* Bootstrap Brain css*/
