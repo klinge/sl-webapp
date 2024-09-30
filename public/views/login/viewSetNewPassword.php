@@ -31,6 +31,7 @@ include_once "views/_layouts/header.php";
                     </div>
                     <form action="<?php echo $BASE_URL ?>/auth/sparalosenord" method="post" id="resetPasswordForm">
                         <!-- Send some needed data to the server with hidden form fields-->
+                        <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                         <input type="hidden" class="form-control" name="email" id="email" value="<?php echo $viewData['email'] ?>">
                         <input type="hidden" class="form-control" name="token" id="token" value="<?php echo $viewData['token'] ?>">
 

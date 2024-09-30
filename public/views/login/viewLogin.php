@@ -47,7 +47,7 @@ include_once "views/_layouts/header.php";
                                     </div>
                                 </div>
                                 <form id="loginForm" action="./login" method="POST">
-                                    <input type="hidden" name="token" value="<?php echo $viewData["csrf_token"]; ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                                     <div class=" row gy-3 overflow-hidden">
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
