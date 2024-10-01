@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS "Medlem";
 DROP TABLE IF EXISTS "Betalning";
 DROP TABLE IF EXISTS "Roll";
 DROP TABLE IF EXISTS "Segling";
+DROP TABLE IF EXISTS "Aktie";
 DROP TABLE IF EXISTS "Segling_Medlem_Roll";
 DROP TABLE IF EXISTS "AuthToken";
 
@@ -12,6 +13,7 @@ DROP TRIGGER IF EXISTS besattning_after_update;
 DROP TRIGGER IF EXISTS betalning_after_update;
 DROP TRIGGER IF EXISTS segling_after_update;
 DROP TRIGGER IF EXISTS roll_after_update;
+DROP TRIGGER IF EXISTS aktie_after_update;
 
 DROP INDEX IF EXISTS idx_skeppar_id;
 DROP INDEX IF EXISTS idx_batsman_id;
@@ -47,6 +49,16 @@ CREATE TABLE Betalning (
   "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (medlem_id) REFERENCES Medlem(id) ON DELETE CASCADE
+);
+
+CREATE TABLE Aktie (
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "medlem_id" INTEGER, 
+    "aktie_nummer" INTEGER NOT NULL,
+	"kommentar" VARCHAR(200),
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (medlem_id) REFERENCES Medlem(id) ON DELETE SET NULL
 );
 
 CREATE TABLE Roll (
@@ -126,6 +138,13 @@ AFTER UPDATE ON Roll
 FOR EACH ROW
 BEGIN
   UPDATE Roll SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
+END;
+
+CREATE TRIGGER aktie_after_update 
+AFTER UPDATE ON Aktie
+FOR EACH ROW
+BEGIN
+  UPDATE Aktie SET updated_at = CURRENT_TIMESTAMP WHERE id = OLD.id;
 END;
 
 INSERT INTO Roll (roll_namn, kommentar) 
