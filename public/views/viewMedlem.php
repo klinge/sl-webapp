@@ -40,7 +40,7 @@ $num = sizeof($viewData['items']);
                         <td><?= $medlem->fornamn ?></td>
                         <td><?= $medlem->efternamn ?></td>
                         <td><?php $roll_namn_array = array_column($medlem->roller, 'roll_namn');
-                            echo (implode(', ', $roll_namn_array)); ?></td>
+                            echo implode(', ', $roll_namn_array); ?></td>
                         <td><?= $medlem->email ?></td>
                         <td><?= $medlem->mobil ?></td>
                         <td><?= $medlem->telefon ?></td>
