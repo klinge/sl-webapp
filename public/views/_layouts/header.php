@@ -1,4 +1,7 @@
 <?php
+// enable debug info
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
 $APP_DIR = $viewData['APP_DIR'];
 ?>
 
@@ -22,7 +25,7 @@ $APP_DIR = $viewData['APP_DIR'];
     <link href="https://cdn.datatables.net/v/bs5/dt-2.1.7/datatables.min.css" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo $APP_DIR ?>/assets/css/site.css" crossorigin="anonymous">
 
-    <title><?php echo $page_title; ?> | SL-Medlem</title>
+    <title><?php echo $page_title; ?> | SL Medlem</title>
 </head>
 
 <body>
@@ -63,19 +66,23 @@ $APP_DIR = $viewData['APP_DIR'];
                 <span class="navbar-toggler-icon"></span>
             </button>
 
+            <?php
+            $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $isActive = function ($path) use ($currentPath) {
+                return strpos($currentPath, $path) === 0 ? 'active' : '';
+            };
+            ?>
+
             <div class="collapse navbar-collapse" id="slNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <?php $isActive = ($page_title == "Medlemmar") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" aria-current="page" href="<?php echo $APP_DIR ?>/medlem">Medlemmar</a>
+                        <a class="nav-link <?= $isActive('/medlem') ?>" aria-current="page" href="<?php echo $APP_DIR ?>/medlem">Medlemmar</a>
                     </li>
                     <li class="nav-item">
-                        <?php $isActive = ($page_title == "Bokningslista") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" href="<?php echo $APP_DIR ?>/segling">Seglingar</a>
+                        <a class="nav-link <?= $isActive('/segling') ?>" href="<?php echo $APP_DIR ?>/segling">Seglingar</a>
                     </li>
                     <li class="nav-item">
-                        <?php $isActive = ($page_title == "Betalningslista") ? "active" : ""; ?>
-                        <a class="nav-link <?= $isActive ?>" href="<?php echo $APP_DIR ?>/betalning">Betalningar</a>
+                        <a class="nav-link <?= $isActive('/betalning') ?>" href="<?php echo $APP_DIR ?>/betalning">Betalningar</a>
                     </li>
 
                     <?php if (isset($viewData) && $viewData['isLoggedIn']) : ?>
@@ -91,7 +98,7 @@ $APP_DIR = $viewData['APP_DIR'];
                         </li>
                     <?php else : ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?php echo $APP_DIR ?>/login">Logga in</a>
+                            <a class="nav-link <?= $isActive('/login') ?>" href="<?php echo $APP_DIR ?>/login">Logga in</a>
                         </li>
                     <?php endif; ?>
 
@@ -105,13 +112,6 @@ $APP_DIR = $viewData['APP_DIR'];
 
     <!-- container -->
     <div class="container-fluid">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="/">Hem</a></li>
-                <li class="breadcrumb-item"><a href="#"></a>Medlemmar</li>
-                <li class="breadcrumb-item active" aria-current="page">Sidan..</li>
-            </ol>
-        </nav>
         <div class="row">
             <?php
             if (isset($_SESSION['flash_message'])) {
@@ -130,4 +130,9 @@ $APP_DIR = $viewData['APP_DIR'];
                 unset($_SESSION['flash_message']);
             }
             ?>
+        </div>
+        <div class="row mt-3">
+            <div>
+                <h3><?php echo $page_title; ?></h3>
+            </div>
         </div>
