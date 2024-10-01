@@ -62,7 +62,9 @@ $num = sizeof($viewData['items']);
 
 <!-- datatables js -->
 <!-- get download package from https://datatables.net/download/ -->
-<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.7/datatables.min.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.7/r-3.0.3/datatables.min.js"
+    integrity="sha256-xRNRfHSAzfeyNtcHElIWRe+lWt+vVVct91efkO7VR9c=" crossorigin="anonymous">
+</script>
 <script>
     let dataTable = new DataTable(' #memberTable', {
         ordering: true, // Enable sorting

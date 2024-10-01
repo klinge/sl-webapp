@@ -65,8 +65,9 @@ $num = sizeof($seglingar);
 
 <!-- datatables js -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-<script src="https://cdn.datatables.net/2.1.5/js/dataTables.min.js" crossorigin="anonymous"></script>
-<script src="https://cdn.datatables.net/2.1.5/js/dataTables.bootstrap5.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.7/r-3.0.3/datatables.min.js"
+    integrity="sha256-xRNRfHSAzfeyNtcHElIWRe+lWt+vVVct91efkO7VR9c=" crossorigin="anonymous">
+</script>
 <script>
     let dataTable = new DataTable('#sailingTable', {
         responsive: true
