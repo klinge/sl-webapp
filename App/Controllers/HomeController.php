@@ -28,4 +28,9 @@ class HomeController
     {
         $this->view->render('404');
     }
+
+    public function technicalError()
+    {
+        $this->view->render('viewTechnicalError');
+    }
 }

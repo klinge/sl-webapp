@@ -10,7 +10,7 @@ include_once "views/_layouts/header.php";
 
 <form class="border border-primary rounded p-3" action="<?= $viewData['formAction'] ?>" method="POST">
     <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
-
+    <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
     <div class="row">
         <div class="col-md-4 mb-3">
             <label for="fornamn" class="form-label">Förnamn</label>
@@ -112,6 +112,7 @@ include_once "views/_layouts/header.php";
 
 <!-- Begin the delete form -->
 <form class="p-3" action="<?= $viewData['deleteAction'] ?>" method="POST">
+    <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
     <input type="hidden" name="id" value="<?= $medlem->id; ?>">
     <button type="submit" class="btn btn-danger">Ta bort medlem</button>
 </form>

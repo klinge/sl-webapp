@@ -53,7 +53,7 @@ class Application
         // Add middlewares here
         $this->addMiddleware(new AuthenticationMiddleware($this, $this->request));
         $this->addMiddleware(new AuthorizationMiddleware($this, $this->request));
-        //$this->addMiddleware(new CsrfMiddleware($this, $this->request));
+        $this->addMiddleware(new CsrfMiddleware($this, $this->request));
     }
 
     /**

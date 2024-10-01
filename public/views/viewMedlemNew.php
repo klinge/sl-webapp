@@ -9,6 +9,7 @@ include_once "views/_layouts/header.php";
 
 <div class="container">
     <form class="border border-primary rounded p-3" action="<?= $viewData['formAction'] ?>" method="POST">
+        <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
         <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
 
         <div class="row">

@@ -39,14 +39,6 @@ class AuthController extends BaseController
     {
         $providedEmail = $_POST['email'];
         $providedPassword = $_POST['password'];
-        $csrfToken = $_POST['csrf_token'] ?? null;
-
-        //Validate csrf token
-        if (!$csrfToken || !$this->validateCsrfToken($csrfToken)) {
-            Session::setFlashMessage('error', 'Tekniskt fel (kunde inte validera csrf token). Försök igen.');
-            $this->view->render('login/viewLogin');
-            exit;
-        }
 
         $result = $this->getMemberByEmail($providedEmail);
 
@@ -286,14 +278,6 @@ class AuthController extends BaseController
         $token = $_POST['token'];
         $password = $_POST['password'];
         $password2 = $_POST['password2'];
-        $csrf_token = $_POST['csrf_token'] ?? null;
-
-        //Validate csrf token
-        if (!$csrf_token || !$this->validateCsrfToken($csrf_token)) {
-            Session::setFlashMessage('error', 'Kunde inte validera csrf token! Försök igen. ');
-            $this->view->render('login/viewLogin');
-            exit;
-        }
 
         //Fail if passwords don't match
         if ($password !== $password2) {

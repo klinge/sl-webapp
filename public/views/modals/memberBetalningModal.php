@@ -9,6 +9,7 @@
                 <!-- Add your form for new payment here -->
                 <form id="addPaymentForm">
                     <input type="hidden" name="medlem_id" value="<?= $medlem->id ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                     <div class="mb-3">
                         <label for="datum" class="form-label">Datum</label>
                         <input type="date" class="form-control" id="datum" name="datum" required>

@@ -29,6 +29,7 @@ include_once "views/_layouts/header.php";
                         </div>
                     </div>
                     <form action="bytlosenord" method="post">
+                        <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                         <div class="row gy-3 gy-md-4 overflow-hidden">
                             <div class="col-12">
                                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>

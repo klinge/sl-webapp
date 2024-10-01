@@ -8,6 +8,7 @@
             <div class="modal-body">
                 <!-- Add your form for new payment here -->
                 <form id="addMemberForm" action="<?= $APP_DIR ?>/segling/medlem" method="post">
+                    <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                     <input type="hidden" name="segling_id" value="<?= $segling->id ?>">
                     <div class="mb-3">
                         <label for="roll-select" class="form-label">Roll</label>

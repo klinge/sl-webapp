@@ -66,6 +66,7 @@ class RouteConfig
 
         $router->map('POST', '/webhooks/git/handle', 'WebhookController#handle', 'git-webhook-listener');
 
+        $router->map('GET', '/error', 'HomeController#technicalError', 'tech-error');
         //Route all other urls to 404
         $router->map('GET|POST', '*', 'HomeController#pageNotFound', '404');
     }

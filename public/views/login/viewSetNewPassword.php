@@ -15,7 +15,7 @@ include_once "views/_layouts/header.php";
             <div class="col-12 col-md-6 bsb-tpl-bg-platinum">
                 <div class="d-flex flex-column justify-content-between h-100 p-3 p-md-4 p-xl-5">
                     <h3 class="m-0">Välkommen!</h3>
-                    <img class="img-fluid rounded mx-auto my-4" loading="lazy" src="<?php echo $BASE_URL ?>/assets/img/sl-logo.png" width="245" height="80" alt="Sofia Linnea Logo">
+                    <img class="img-fluid rounded mx-auto my-4" loading="lazy" src="../assets/img/sl-logo.png" width="245" height="80" alt="Sofia Linnea Logo">
                     <p class="mb-0">Inget konto än? <a href="#!" class="link-secondary text-decoration-none">Registrera dig</a></p>
                 </div>
             </div>
