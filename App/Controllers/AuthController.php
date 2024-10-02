@@ -23,6 +23,10 @@ class AuthController extends BaseController
     private string $siteAddress;
     private string $secret;
 
+    //Messages
+    private const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
+    private const BAD_EMAIL_OR_PASSWORD = 'Felaktig e-postadress eller lösenord';
+
     public function __construct(Application $app, array $request)
     {
         parent::__construct($app, $request);
@@ -41,7 +45,7 @@ class AuthController extends BaseController
     {
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
-            Session::setFlashMessage('error', 'Kunde inte validera recaptcha. Försök igen.');
+            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
             $this->view->render('login/viewLogin');
         }
 
@@ -53,7 +57,7 @@ class AuthController extends BaseController
         //User not found
         if (!$result) {
             $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail);
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
+            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render('login/viewLogin');
             exit;
         }
@@ -69,7 +73,7 @@ class AuthController extends BaseController
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
             $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail);
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
+            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render('login/viewLogin');
             return;
         }
@@ -106,7 +110,7 @@ class AuthController extends BaseController
     {
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
-            Session::setFlashMessage('error', 'Kunde inte validera recaptcha. Försök igen.');
+            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
             $this->view->render('login/viewLogin');
         }
         //Sanitize email and validate passwords
@@ -230,7 +234,7 @@ class AuthController extends BaseController
     {
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
-            Session::setFlashMessage('error', 'Kunde inte validera recaptcha. Försök igen.');
+            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
             $this->view->render('login/viewReqPassword');
         }
         $email = $_POST['email'];
