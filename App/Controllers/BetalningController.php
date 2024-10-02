@@ -38,7 +38,7 @@ class BetalningController extends BaseController
 
     public function getBetalning(array $params): Betalning
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
         $betalning = new Betalning($this->conn);
         $betalning->get($id);
         var_dump($betalning);

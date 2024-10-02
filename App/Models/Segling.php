@@ -52,7 +52,7 @@ class Segling
 
         //if we got a result set object values else return false
         if ($row !== false) {
-            $this->id = $id;
+            $this->id = (int) $id;
             $this->start_dat = $row['startdatum'];
             $this->slut_dat = $row['slutdatum'];
             $this->skeppslag = $row['skeppslag'];

@@ -255,7 +255,7 @@ class Medlem
 
         //If we got a result from db then set values for the object
         if ($row !== false) {
-            $this->id = $id;
+            $this->id = (int) $id;
             $this->fodelsedatum = isset($row['fodelsedatum']) ? $row['fodelsedatum'] : "";
             $this->fornamn = $row['fornamn'];
             $this->efternamn = $row['efternamn'];

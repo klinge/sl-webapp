@@ -49,7 +49,7 @@ class Betalning
         $stmt->execute();
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        $this->id = $id;
+        $this->id = (int) $id;
         $this->belopp = $row['belopp'];
         $this->medlem_id = $row['medlem_id'];
         $this->datum = isset($row['datum']) ? $row['datum'] : "";
