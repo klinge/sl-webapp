@@ -39,6 +39,5 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
                 exit;
             }
         }
-        return;
     }
 }
