@@ -21,12 +21,18 @@ class AuthController extends BaseController
     private ?TokenHandler $tokenHandler = null;
     private View $view;
     private string $siteAddress;
+    private string $secret;
+
+    //Messages
+    private const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
+    private const BAD_EMAIL_OR_PASSWORD = 'Felaktig e-postadress eller lösenord';
 
     public function __construct(Application $app, array $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
         $this->siteAddress = $this->app->getConfig('SITE_ADDRESS');
+        $this->secret = $this->request['RECAPTCHA_SECRET_KEY'];
     }
 
     public function showLogin()
@@ -37,6 +43,12 @@ class AuthController extends BaseController
 
     public function login(): void
     {
+        //First validate recaptcha and send user back to login page if failed
+        if (!$this->validateRecaptcha()) {
+            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
+            $this->view->render('login/viewLogin');
+        }
+
         $providedEmail = $_POST['email'];
         $providedPassword = $_POST['password'];
 
@@ -45,7 +57,7 @@ class AuthController extends BaseController
         //User not found
         if (!$result) {
             $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail);
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
+            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render('login/viewLogin');
             exit;
         }
@@ -61,7 +73,7 @@ class AuthController extends BaseController
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
             $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail);
-            Session::setFlashMessage('error', 'Felaktig e-postadress eller lösenord!');
+            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render('login/viewLogin');
             return;
         }
@@ -96,7 +108,12 @@ class AuthController extends BaseController
 
     public function register(): void
     {
-        //Start by sanitizing email and validating passwords
+        //First validate recaptcha and send user back to login page if failed
+        if (!$this->validateRecaptcha()) {
+            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
+            $this->view->render('login/viewLogin');
+        }
+        //Sanitize email and validate passwords
         $s = new Sanitizer();
         $rules = ['email' => 'email'];
         $cleanValues = $s->sanitize($_POST, $rules);
@@ -215,6 +232,11 @@ class AuthController extends BaseController
 
     public function sendPwdRequestToken()
     {
+        //First validate recaptcha and send user back to login page if failed
+        if (!$this->validateRecaptcha()) {
+            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
+            $this->view->render('login/viewReqPassword');
+        }
         $email = $_POST['email'];
         $member = $this->getMemberByEmail($email);
         //Don't do anything if member doesn't exist
@@ -358,6 +380,17 @@ class AuthController extends BaseController
         } else {
             return false;
         }
+    }
+    private function validateRecaptcha(): bool
+    {
+        $gRecaptchaResponse = $_POST['g-recaptcha-response'];
+        $remoteIp = $_SERVER['REMOTE_ADDR'];
+        $recaptcha = new \ReCaptcha\ReCaptcha($this->secret);
+        $resp = $recaptcha->setExpectedHostname($_SERVER['SERVER_NAME'])
+            ->setScoreThreshold(0.5)
+            ->verify($gRecaptchaResponse, $remoteIp);
+        $this->app->getLogger()->info("Recaptcha: score: " . $resp->getScore() . ", called from: " . $_SERVER['REMOTE_ADDR']);
+        return $resp->isSuccess();
     }
 
     private function validatePassword(string $password, string $email): array

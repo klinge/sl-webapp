@@ -2,8 +2,11 @@
 $APP_DIR = $viewData['APP_DIR'];
 // set page headers
 $page_title = "";
+$grecaptchaSiteKey = $_SERVER['RECAPTCHA_SITE_KEY'];
 include_once "views/_layouts/header.php";
 ?>
+<!--Add google recaptcha script -->
+<script src="https://www.google.com/recaptcha/api.js"></script>
 
 <!-- Login 9 - Bootstrap Brain Component -->
 <section class="bg-primary py-3 py-md-4 py-xl-8 mt-md-4">
@@ -71,7 +74,11 @@ include_once "views/_layouts/header.php";
                                         </div>
                                         <div class="col-12">
                                             <div class="d-grid">
-                                                <button class="btn btn-primary btn-lg" type="submit">Logga in</button>
+                                                <button class="g-recaptcha btn btn-primary btn-lg"
+                                                    data-sitekey="<?php echo $grecaptchaSiteKey ?>"
+                                                    data-callback='onLoginSubmit'
+                                                    data-action='submit'>Logga in
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -124,7 +131,12 @@ include_once "views/_layouts/header.php";
                                         <div id="passwordError" class="alert alert-danger" style="display: none;"></div>
                                         <div class="col-12">
                                             <div class="d-grid">
-                                                <button class="btn btn-primary btn-lg disabled" id="registerSubmit" type="submit">Registrera</button>
+                                                <button class="g-recaptcha btn btn-primary btn-lg disabled"
+                                                    id="registerSubmit"
+                                                    data-sitekey="<?php echo $grecaptchaSiteKey ?>"
+                                                    data-callback='onRegisterSubmit'
+                                                    data-action='submit'>Registrera
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -153,18 +165,6 @@ include_once "views/_layouts/header.php";
             rememberCheckbox.checked = true;
         }
 
-        loginForm.addEventListener('submit', function(e) {
-            const username = usernameInput.value;
-            //Save email to local storage if the user selected that
-            const rememberUsername = rememberCheckbox.checked;
-            if (rememberUsername) {
-                localStorage.setItem('rememberedUsername', username);
-                console.log("Saved username:" + localStorage.getItem('rememberedUsername'));
-            } else {
-                localStorage.removeItem('rememberedUsername');
-            }
-        });
-
         //If the user switches to the register tab, the email from the login form is copied to the register form
         var registerTab = document.getElementById('nav-register-tab');
         registerTab.addEventListener('show.bs.tab', function() {
@@ -176,6 +176,30 @@ include_once "views/_layouts/header.php";
         document.getElementById('registerPasswordRepeat').addEventListener('blur', checkPasswords);
 
     });
+
+    function onLoginSubmit(token) {
+        const loginForm = document.getElementById('loginForm');
+        const rememberUsername = document.getElementById('rememberMe').checked;
+
+        //Save email to local storage if the user selected that
+        if (rememberUsername) {
+            let username = document.getElementById('loginEmail').value;
+            localStorage.setItem('rememberedUsername', username);
+            console.log("Saved username:" + localStorage.getItem('rememberedUsername'));
+        } else {
+            localStorage.removeItem('rememberedUsername');
+        }
+        //And then submit the form
+        loginForm.submit();
+        return true;
+    };
+
+    function onRegisterSubmit(token) {
+        const form = document.getElementById('registerForm');
+        //And then submit the form
+        form.submit();
+        return true;
+    };
 
     function checkPasswords() {
         const password = document.getElementById('registerPassword').value;

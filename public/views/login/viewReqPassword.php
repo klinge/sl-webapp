@@ -1,12 +1,13 @@
 <?php
 
 $APP_DIR = $viewData['APP_DIR'];
-
+$grecaptchaSiteKey = $_SERVER['RECAPTCHA_SITE_KEY'];
 // set page headers
 $page_title = "Begär nytt lösenord";
 include_once "views/_layouts/header.php";
 ?>
-
+<!--Add google recaptcha script -->
+<script src="https://www.google.com/recaptcha/api.js"></script>
 <!-- Password Reset 3 - Bootstrap Brain Component -->
 <section class="p-3 p-md-4 p-xl-5">
     <div class="container">
@@ -28,7 +29,7 @@ include_once "views/_layouts/header.php";
                             </div>
                         </div>
                     </div>
-                    <form action="bytlosenord" method="post">
+                    <form action="bytlosenord" method="post" id="bytlosenForm">
                         <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                         <div class="row gy-3 gy-md-4 overflow-hidden">
                             <div class="col-12">
@@ -37,7 +38,12 @@ include_once "views/_layouts/header.php";
                             </div>
                             <div class="col-12">
                                 <div class="d-grid">
-                                    <button class="btn bsb-btn-xl btn-primary" type="submit">Återställ lösenord</button>
+                                    <button class="g-recaptcha btn bsb-btn-xl btn-primary"
+                                        id="bytlosenSubmit"
+                                        data-sitekey="<?php echo $grecaptchaSiteKey ?>"
+                                        data-callback='onFormSubmit'
+                                        data-action='submit'>Återställ lösenord
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -46,7 +52,7 @@ include_once "views/_layouts/header.php";
                         <div class="col-12">
                             <hr class="mt-5 mb-4 border-secondary-subtle">
                             <div class="text-end">
-                                <a href="#!" class="link-secondary text-decoration-none">Tillbaka till logga in</a>
+                                <a href="/login" class="link-secondary text-decoration-none">Tillbaka till logga in</a>
                             </div>
                         </div>
                     </div>
@@ -55,6 +61,15 @@ include_once "views/_layouts/header.php";
         </div>
     </div>
 </section>
+
+<script>
+    function onFormSubmit(token) {
+        const form = document.getElementById('bytlosenForm');
+        //And then submit the form
+        form.submit();
+        return true;
+    };
+</script>
 
 <?php // footer
 include_once "views/_layouts/footer.php";
