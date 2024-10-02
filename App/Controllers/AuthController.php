@@ -385,6 +385,7 @@ class AuthController extends BaseController
         $resp = $recaptcha->setExpectedHostname($_SERVER['SERVER_NAME'])
             ->setScoreThreshold(0.5)
             ->verify($gRecaptchaResponse, $remoteIp);
+        $this->app->getLogger()->info("Recaptcha: score: " . $resp->getScore() . ", called from: " . $_SERVER['REMOTE_ADDR']);
         return $resp->isSuccess();
     }
 
