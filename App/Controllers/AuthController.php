@@ -27,6 +27,10 @@ class AuthController extends BaseController
     private const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
     private const BAD_EMAIL_OR_PASSWORD = 'Felaktig e-postadress eller lösenord';
 
+    /**
+     * @param Application $app The application instance.
+     * @param array<string, mixed> $request The request data.
+     */
     public function __construct(Application $app, array $request)
     {
         parent::__construct($app, $request);
@@ -35,12 +39,26 @@ class AuthController extends BaseController
         $this->secret = $this->request['RECAPTCHA_SECRET_KEY'];
     }
 
-    public function showLogin()
+    /**
+     * Renders the login view.
+     *
+     * This method sets the CSRF token and then renders the login view template.
+     */
+    public function showLogin(): void
     {
         $this->setCsrfToken();
         $this->view->render('login/viewLogin');
     }
 
+    /**
+     * Handles user login process.
+     *
+     * Validates reCAPTCHA, authenticates user credentials,
+     * and manages session upon successful login.
+     *
+     * @throws Exception If member object creation fails
+     * @return void
+     */
     public function login(): void
     {
         //First validate recaptcha and send user back to login page if failed
@@ -96,6 +114,13 @@ class AuthController extends BaseController
         header('Location: ' . $redirectUrl);
     }
 
+    /**
+     * Handles user logout process.
+     *
+     * Removes user session data and redirects to the login page.
+     *
+     * @return void
+     */
     public function logout(): void
     {
         Session::remove('user_id');
@@ -106,6 +131,14 @@ class AuthController extends BaseController
         return;
     }
 
+    /**
+     * Handles user registration process.
+     *
+     * Validates reCAPTCHA, sanitizes input, checks password requirements,
+     * verifies user eligibility, and sends activation email.
+     *
+     * @return void
+     */
     public function register(): void
     {
         //First validate recaptcha and send user back to login page if failed
@@ -131,6 +164,7 @@ class AuthController extends BaseController
 
         //Then check that it follows some basic rules
         $passwordErrors = $this->validatePassword($password, $email);
+
         if (!empty($passwordErrors)) {
             $message = "<ul>";
             foreach ($passwordErrors as $error) {
@@ -198,6 +232,15 @@ class AuthController extends BaseController
         }
     }
 
+    /**
+     * Activates a user account.
+     *
+     * Validates the activation token, saves the user's password,
+     * and cleans up used and expired tokens.
+     *
+     * @param array $params Contains the activation token
+     * @return void
+     */
     public function activate(array $params)
     {
         $token = $params['token'];
@@ -225,11 +268,24 @@ class AuthController extends BaseController
         return;
     }
 
+    /**
+     * Displays the password request form.
+     *
+     * @return void
+     */
     public function showRequestPwd()
     {
         $this->view->render('login/viewReqPassword');
     }
 
+    /**
+     * Handles password reset request.
+     *
+     * Validates reCAPTCHA, generates a password reset token, saves token,
+     * and sends password reset email if user exists.
+     *
+     * @return void
+     */
     public function sendPwdRequestToken()
     {
         //First validate recaptcha and send user back to login page if failed
@@ -273,6 +329,15 @@ class AuthController extends BaseController
         $this->view->render('login/viewReqPassword');
     }
 
+    /**
+     * Displays the reset password form.
+     *
+     * Validates the reset token and renders the new password form
+     * or redirects to password request page on invalid token.
+     *
+     * @param array $params Contains the password reset token
+     * @return void
+     */
     public function showResetPassword(array $params)
     {
         $token = $params['token'];
@@ -294,6 +359,14 @@ class AuthController extends BaseController
         }
     }
 
+    /**
+     * Resets and saves a new password for the user.
+     *
+     * Validates password match and complexity, updates the password,
+     * deletes the used token, and logs out the user.
+     *
+     * @return void
+     */
     public function resetAndSavePassword()
     {
         $email = $_POST['email'];
@@ -351,6 +424,11 @@ class AuthController extends BaseController
         return;
     }
 
+    /**
+     * Retrieves or initializes the TokenHandler instance.
+     *
+     * @return TokenHandler
+     */
     private function getTokenHandler(): TokenHandler
     {
         if ($this->tokenHandler === null) {
@@ -359,6 +437,12 @@ class AuthController extends BaseController
         return $this->tokenHandler;
     }
 
+    /**
+     * Retrieves member data by email.
+     *
+     * @param string $email The email address of the member
+     * @return array|bool Member data array or false if not found
+     */
     private function getMemberByEmail(string $email): array|bool
     {
         $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
@@ -368,6 +452,13 @@ class AuthController extends BaseController
         return $result;
     }
 
+    /**
+     * Saves a new hashed password for a member.
+     *
+     * @param string $hashedPassword The new hashed password
+     * @param string $email The email address of the member
+     * @return bool True if password was successfully updated, false otherwise
+     */
     private function saveMembersPassword(string $hashedPassword, string $email): bool
     {
         $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
@@ -381,6 +472,15 @@ class AuthController extends BaseController
             return false;
         }
     }
+
+    /**
+     * Validates the reCAPTCHA response.
+     *
+     * Verifies the Google reCAPTCHA response against the expected hostname
+     * and score threshold. Logs the verification result.
+     *
+     * @return bool True if reCAPTCHA verification succeeds, false otherwise
+     */
     private function validateRecaptcha(): bool
     {
         $gRecaptchaResponse = $_POST['g-recaptcha-response'];
@@ -393,6 +493,16 @@ class AuthController extends BaseController
         return $resp->isSuccess();
     }
 
+    /**
+     * Validates a password against complexity requirements.
+     *
+     * Checks if the password meets the minimum length, contains uppercase,
+     * lowercase, numeric characters, and does not include parts of the email.
+     *
+     * @param string $password The password to validate
+     * @param string $email The user's email address
+     * @return array An array of error messages, or an empty array if valid
+     */
     private function validatePassword(string $password, string $email): array
     {
         $errors = [];

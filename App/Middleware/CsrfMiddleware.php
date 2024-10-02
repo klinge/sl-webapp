@@ -6,10 +6,27 @@ namespace App\Middleware;
 
 use App\Utils\Session;
 
+/**
+ * Middleware class for handling CSRF token validation.
+ */
 class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
 {
+    /**
+     * An array of paths that should be excluded from CSRF protection.
+     *
+     * @var string[]
+     */
     private $excludedPaths = ['/webhooks', '/home'];
 
+    /**
+     * Handles the CSRF token validation process.
+     *
+     * Generates a new CSRF token if it doesn't exist, checks if the current path
+     * is excluded from CSRF protection, and validates the CSRF token for POST requests.
+     * If the token is invalid, it sends an appropriate response based on the request type.
+     *
+     * @return void
+     */
     public function handle(): void
     {
         if (!isset($_SESSION['csrf_token'])) {
