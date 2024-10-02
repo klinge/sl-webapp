@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use PDO;
@@ -38,7 +40,7 @@ class Betalning
         }
     }
 
-    public function get($id)
+    public function get(int $id): void
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = ? limit 0,1";
 
@@ -57,16 +59,16 @@ class Betalning
         $this->updated_at = $row['updated_at'];
     }
 
-    public function create()
+    public function create(): array
     {
         try {
             $query = "INSERT INTO " . $this->table_name . " (medlem_id, belopp, datum, avser_ar, kommentar) VALUES (?, ?, ?, ?, ?)";
 
             $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(1, $this->medlem_id);
-            $stmt->bindParam(2, $this->belopp);
-            $stmt->bindParam(3, $this->datum);
-            $stmt->bindParam(4, $this->avser_ar);
+            $stmt->bindParam(1, $this->medlem_id, PDO::PARAM_INT);
+            $stmt->bindParam(2, $this->belopp, PDO::PARAM_STR);
+            $stmt->bindParam(3, $this->datum, PDO::PARAM_STR);
+            $stmt->bindParam(4, $this->avser_ar, PDO::PARAM_INT);
             $stmt->bindValue(5, $this->kommentar, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
@@ -81,7 +83,7 @@ class Betalning
         }
     }
 
-    public function delete()
+    public function delete(): array
     {
         $query = "DELETE FROM " . $this->table_name . " WHERE id = ?";
 

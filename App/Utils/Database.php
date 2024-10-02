@@ -29,7 +29,7 @@ class Database
         return self::$instance;
     }
 
-    private function connect()
+    private function connect(): void
     {
         try {
             $this->conn = new PDO("sqlite:" . $this->dbfile);
@@ -42,17 +42,17 @@ class Database
         }
     }
 
-    public function getConnection()
+    public function getConnection(): PDO
     {
         return $this->conn;
     }
 
-    private function __clone()
+    private function __clone(): void
     {
         // Prevent cloning of the instance
     }
 
-    public function __wakeup()
+    public function __wakeup(): void
     {
         // Prevent unserializing of the instance
     }

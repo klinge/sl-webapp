@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use PDO;
@@ -14,7 +16,7 @@ class BetalningRepository
         $this->conn = $db;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         $betalningar = [];
 
@@ -30,7 +32,7 @@ class BetalningRepository
         return $betalningar;
     }
 
-    public function getBetalningForMedlem(int $medlemId)
+    public function getBetalningForMedlem(int $medlemId): array
     {
         $betalningar = [];
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use PDO;
@@ -22,7 +24,7 @@ class Segling
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db, ?int $id = null, ?string $withdeltagare = null)
+    public function __construct(PDO $db, ?int $id = null, ?string $withdeltagare = null)
     {
         $this->conn = $db;
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use PDO;
@@ -36,7 +38,7 @@ class Medlem
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db, $id = null)
+    public function __construct(PDO $db, $id = null)
     {
         $this->conn = $db;
 
@@ -47,40 +49,6 @@ class Medlem
             } else {
                 throw new Exception("Medlem med id: " . $id . "hittades inte");
             }
-        }
-    }
-
-    private function getDataFromDb($id): bool
-    {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        //If we got a result from db then set values for the object
-        if ($row !== false) {
-            $this->id = $id;
-            $this->fodelsedatum = isset($row['fodelsedatum']) ? $row['fodelsedatum'] : "";
-            $this->fornamn = $row['fornamn'];
-            $this->efternamn = $row['efternamn'];
-            $this->email = $row['email'];
-            $this->mobil = isset($row['mobil']) ? $row['mobil'] : "";
-            $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
-            $this->adress = isset($row['gatuadress']) ? $row['gatuadress'] : "";
-            $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
-            $this->postort = isset($row['postort']) ? $row['postort'] : "";
-            $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
-            $this->godkant_gdpr = isset($row['godkant_gdpr']) ? $row['godkant_gdpr'] : "";
-            $this->pref_kommunikation = isset($row['pref_kommunikation']) ? $row['pref_kommunikation'] : "";
-            $this->password = isset($row['password']) ? $row['password'] : "";
-            $this->isAdmin = $row['isAdmin'];
-            $this->created_at = $row['created_at'];
-            $this->updated_at = $row['updated_at'];
-            return true;
-        } else {
-            return false;
         }
     }
 
@@ -274,5 +242,39 @@ class Medlem
         };
 
         return in_array($searchRole, array_map($extractRollId, $this->roller));
+    }
+
+    private function getDataFromDb($id): bool
+    {
+        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        //If we got a result from db then set values for the object
+        if ($row !== false) {
+            $this->id = $id;
+            $this->fodelsedatum = isset($row['fodelsedatum']) ? $row['fodelsedatum'] : "";
+            $this->fornamn = $row['fornamn'];
+            $this->efternamn = $row['efternamn'];
+            $this->email = $row['email'];
+            $this->mobil = isset($row['mobil']) ? $row['mobil'] : "";
+            $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
+            $this->adress = isset($row['gatuadress']) ? $row['gatuadress'] : "";
+            $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
+            $this->postort = isset($row['postort']) ? $row['postort'] : "";
+            $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
+            $this->godkant_gdpr = isset($row['godkant_gdpr']) ? $row['godkant_gdpr'] : "";
+            $this->pref_kommunikation = isset($row['pref_kommunikation']) ? $row['pref_kommunikation'] : "";
+            $this->password = isset($row['password']) ? $row['password'] : "";
+            $this->isAdmin = $row['isAdmin'];
+            $this->created_at = $row['created_at'];
+            $this->updated_at = $row['updated_at'];
+            return true;
+        } else {
+            return false;
+        }
     }
 }

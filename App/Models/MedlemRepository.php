@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use PDO;
@@ -79,7 +81,7 @@ class MedlemRepository
     //NOT USED?
     //Returns an array with member data and roles
     //Use getAll() instead as it returns proper member objects including roles..
-    public function getAllWithRoles()
+    public function getAllWithRoles(): array
     {
         $query = "SELECT m.*, GROUP_CONCAT(r.roll_namn, ', ') AS roller
             FROM Medlem m

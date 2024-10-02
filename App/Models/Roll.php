@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use PDO;
@@ -17,12 +19,12 @@ class Roll
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db,)
+    public function __construct(PDO $db,)
     {
         $this->conn = $db;
     }
 
-    public function getAll()
+    public function getAll(): array
     {
         $query = "SELECT * FROM " . $this->table_name;
         $stmt = $this->conn->prepare($query);
