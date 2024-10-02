@@ -54,19 +54,26 @@ include_once "views/_layouts/header.php";
                                     <div class=" row gy-3 overflow-hidden">
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
-                                                <input type="email" class="form-control" name="email" id="loginEmail" placeholder="name@example.com" required>
+                                                <input type="email" class="form-control"
+                                                    name="email" id="loginEmail"
+                                                    placeholder="name@example.com"
+                                                    tabindex="1" required autofocus>
                                                 <label for="loginEmail" class="form-label">Mail</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
-                                                <input type="password" class="form-control" name="password" id="password" value="" placeholder="Password" required>
+                                                <input type="password" class="form-control"
+                                                    name="password" id="password" value="" placeholder="Password"
+                                                    tabindex="2" required>
                                                 <label for="password" class="form-label">Lösenord</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" value="" name="rememberMe" id="rememberMe">
+                                                <input class="form-check-input" type="checkbox"
+                                                    value="" name="rememberMe"
+                                                    id="rememberMe" tabindex="3">
                                                 <label class="form-check-label text-secondary" for="rememberMe">
                                                     Kom ihåg mitt användarnamn
                                                 </label>
@@ -77,7 +84,7 @@ include_once "views/_layouts/header.php";
                                                 <button class="g-recaptcha btn btn-primary btn-lg"
                                                     data-sitekey="<?php echo $grecaptchaSiteKey ?>"
                                                     data-callback='onLoginSubmit'
-                                                    data-action='submit'>Logga in
+                                                    data-action='submit' tabindex="4">Logga in
                                                 </button>
                                             </div>
                                         </div>
@@ -86,7 +93,7 @@ include_once "views/_layouts/header.php";
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="d-flex gap-2 gap-md-4 flex-column flex-md-row justify-content-md-end mt-4">
-                                            <a href="auth/bytlosenord">Glömt lösenord</a>
+                                            <a href="auth/bytlosenord" tabindex="5">Glömt lösenord</a>
                                         </div>
                                     </div>
                                 </div>
@@ -111,20 +118,26 @@ include_once "views/_layouts/header.php";
                                     <div class="row gy-3 overflow-hidden">
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
-                                                <input type="email" class="form-control" name="email" id="registerEmail" placeholder="name@example.com" required>
+                                                <input type="email" class="form-control"
+                                                    name="email" id="registerEmail" placeholder="name@example.com"
+                                                    tabindex="1" required autofocus>
                                                 <label for="RegisterEmail" class="form-label">Mail</label>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
-                                                <input type="password" class="form-control" name="password" id="registerPassword" value="" placeholder="Password" describedBy="passwordHelp" required>
+                                                <input type="password" class="form-control" name="password" id="registerPassword"
+                                                    value="" placeholder="Password" describedBy="passwordHelp"
+                                                    tabindex="2" required>
                                                 <label for="registerPassword" class="form-label">Lösenord</label>
                                                 <small id="passwordHelp" class="form-text text-muted">Lösenordet måste vara 8 tecken och innehålla minst en stor bokstav, en liten bokstav och en siffra.</small>
                                             </div>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating mb-3">
-                                                <input type="password" class="form-control" name="passwordRepeat" id="registerPasswordRepeat" value="" placeholder="Password" required>
+                                                <input type="password" class="form-control" name="passwordRepeat" id="registerPasswordRepeat"
+                                                    value="" placeholder="Password"
+                                                    tabindex="3" required>
                                                 <label for="registerPasswordRepeat" class="form-label">Repetera lösenord</label>
                                             </div>
                                         </div>
@@ -135,7 +148,8 @@ include_once "views/_layouts/header.php";
                                                     id="registerSubmit"
                                                     data-sitekey="<?php echo $grecaptchaSiteKey ?>"
                                                     data-callback='onRegisterSubmit'
-                                                    data-action='submit'>Registrera
+                                                    data-action='submit'
+                                                    tabindex="4">Registrera
                                                 </button>
                                             </div>
                                         </div>
@@ -169,7 +183,9 @@ include_once "views/_layouts/header.php";
         var registerTab = document.getElementById('nav-register-tab');
         registerTab.addEventListener('show.bs.tab', function() {
             const loginEmailValue = document.getElementById('loginEmail').value;
-            document.getElementById('registerEmail').value = loginEmailValue;
+            let emailField = document.getElementById('registerEmail');
+            emailField.value = loginEmailValue;
+            emailField.focus();
         });
 
         document.getElementById('registerPassword').addEventListener('blur', checkPasswords);
