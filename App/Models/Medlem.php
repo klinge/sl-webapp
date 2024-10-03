@@ -19,29 +19,32 @@ class Medlem
 
     // Class properties
     public int $id;
-    public string|null $fodelsedatum;
-    public string $fornamn;
+    public ?string $fodelsedatum;
+    public ?string $fornamn;
     public string $efternamn;
-    public string|null $email;
-    public string|null $mobil;
-    public string|null $telefon;
-    public string|null $adress;
-    public string|null $postnummer;
-    public string|null $postort;
-    public string|null $kommentar;
-    // User preferences
-    public int $godkant_gdpr;
-    public int $pref_kommunikation;
+    public ?string $email;
+    public ?string $mobil;
+    public ?string $telefon;
+    public ?string $adress;
+    public ?string $postnummer;
+    public ?string $postort;
+    public ?string $kommentar;
+    // User preferences all booleans
+    public bool $godkant_gdpr;
+    public bool $pref_kommunikation;
+    public bool $foretag;
+    public bool $standig_medlem;
+    public bool $skickat_valkomstbrev;
+    public bool $isAdmin;
     // User login
-    public string|null $password;
-    public int $isAdmin;
+    public ?string $password;
     //Fetched from Roller table
-    public array $roller = [];
+    public ?array $roller = [];
     // Timestamps
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, Logger $logger, $id = null)
+    public function __construct(PDO $db, Logger $logger, int $id = null)
     {
         $this->conn = $db;
         $this->logger = $logger;
@@ -277,10 +280,15 @@ class Medlem
             $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
             $this->postort = isset($row['postort']) ? $row['postort'] : "";
             $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
-            $this->godkant_gdpr = isset($row['godkant_gdpr']) ? $row['godkant_gdpr'] : "";
-            $this->pref_kommunikation = isset($row['pref_kommunikation']) ? $row['pref_kommunikation'] : "";
-            $this->password = isset($row['password']) ? $row['password'] : "";
+            //All bools have default values in the db so can never be empty
+            $this->godkant_gdpr = $row['godkant_gdpr'];
+            $this->pref_kommunikation = $row['pref_kommunikation'];
+            $this->foretag = $row['foretag'];
+            $this->standig_medlem = $row['standig_medlem'];
+            $this->skickat_valkomstbrev = $row['skickat_valkomstbrev'];
             $this->isAdmin = $row['isAdmin'];
+            //End bools
+            $this->password = isset($row['password']) ? $row['password'] : "";
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
             return true;

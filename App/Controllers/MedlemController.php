@@ -200,7 +200,7 @@ class MedlemController extends BaseController
     {
         $errors = [];
         $requiredFields = ['fornamn', 'efternamn', 'fodelsedatum'];
-        $checkboxFields = ['godkant_gdpr', 'pref_kommunikation', 'isAdmin'];
+        $booleanFields = ['godkant_gdpr', 'pref_kommunikation', 'isAdmin', 'foretag', 'standig_medlem', 'skickat_valkomstbrev'];
 
         //Sanitize user input
         $sanitizer = new Sanitizer();
@@ -230,15 +230,15 @@ class MedlemController extends BaseController
 
         //Loop over everything in POST and set values on the Medlem object
         foreach ($cleanValues as $key => $value) {
-            if (property_exists($medlem, $key) && !in_array($key, $checkboxFields)) {
+            if (property_exists($medlem, $key) && !in_array($key, $booleanFields)) {
                 // Assign value to corresponding property, checkoxes are handled below
                 $medlem->$key = $value;
             }
         }
 
         // If checkboxes are not checked they don't exist in $_POST so set to False/0
-        foreach ($checkboxFields as $field) {
-            $medlem->$field = isset($cleanValues[$field]) ? 1 : 0;
+        foreach ($booleanFields as $field) {
+            $medlem->$field = isset($cleanValues[$field]) ? true : false;
         }
 
         //Update the medlem's roles
