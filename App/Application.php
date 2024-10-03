@@ -195,7 +195,7 @@ class Application
         if ($appEnv === 'DEV') {
             $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
         } else {
-            $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', Level::Debug));
+            $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', Level::Info));
         }
     }
 
