@@ -20,8 +20,8 @@ DROP INDEX IF EXISTS idx_batsman_id;
 DROP INDEX IF EXISTS idx_kock_id;
 
 CREATE TABLE Medlem (
-	"id" INTEGER PRIMARY KEY AUTOINCREMENT,
-  "fodelsedatum" VARCHAR(10), 
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "fodelsedatum" VARCHAR(10), 
 	"fornamn" VARCHAR(50),
 	"efternamn" VARCHAR(100) NOT NULL,
 	"gatuadress" VARCHAR(100),
@@ -31,12 +31,15 @@ CREATE TABLE Medlem (
 	"telefon" VARCHAR(20),
 	"email" VARCHAR(50) UNIQUE,
 	"kommentar" VARCHAR(500),
-  "godkant_gdpr" BOOLEAN,
-  "pref_kommunikation" BOOLEAN,
-  "password" VARCHAR(50),
-  "isAdmin" BOOLEAN DEFAULT 0, 
-  "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    "godkant_gdpr" BOOLEAN DEFAULT 0,
+    "pref_kommunikation" BOOLEAN DEFAULT 1,
+    "foretag" BOOLEAN DEFAULT 0, 
+    "standig_medlem" BOOLEAN DEFAULT 0,
+    "skickat_valkomstbrev" BOOLEAN DEFAULT 1,
+    "password" VARCHAR(50),
+    "isAdmin" BOOLEAN DEFAULT 0, 
+    "created_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE Betalning (
@@ -151,13 +154,13 @@ END;
 --INSERT SOME TEST DATA
 --
 
-INSERT INTO Medlem (fodelsedatum, fornamn, efternamn, email, mobil, godkant_gdpr, pref_kommunikation, password, isAdmin) 
+INSERT INTO Medlem (fodelsedatum, fornamn, efternamn, email, mobil, godkant_gdpr, pref_kommunikation, foretag, standig_medlem, skickat_valkomstbrev, password, isAdmin) 
 VALUES 
-  ('1965-04-19', 'Johan', 'Klinge', 'johan@dev.null', '070-123456', '1', '1', '$2y$10$cPJspNy1ar8ARNYlgUehvuJ6Z1P.Jq.iqGjz97k7aUwW4d6zVkN4S', '1'),
-  ('1212-12-12', 'Måns', 'Klinge', 'mans@dev.null', '', '0', '1', '', '0'),
-  ('1212-12-12', 'Emma', 'Klinge', 'emma@dev.null', '', '1', '0', '', '0'),
-  ('1212-12-12', 'Anders', 'Jansson', 'anders@dev.null', '074-654321', '1', '1', '$2y$10$WJrBbzgtnfwBXwlTznc2yegfDXWxHw7ReWmyVQK9DO0W4o4IEoHlS', '1'),
-  ('1212-12-12', 'Medlem', 'Medlemsson', 'medlem@dev.null', '', '1', '1', '', '0');
+  ('1965-04-19', 'Johan', 'Klinge', 'johan@dev.null', '070-123456', '1', '1', 0, 0, 1, '$2y$10$cPJspNy1ar8ARNYlgUehvuJ6Z1P.Jq.iqGjz97k7aUwW4d6zVkN4S', '1'),
+  ('1212-12-12', 'Måns', 'Klinge', 'mans@dev.null', '', '0', '1', 0, 0, 0, '', '0'),
+  ('1212-12-12', 'Emma', 'Klinge', 'emma@dev.null', '', '1', '0', 0, 0, 0, '', '0'),
+  ('1212-12-12', 'Anders', 'Jansson', 'anders@dev.null', '074-654321', '1', '1', 0, 1, 0, '$2y$10$WJrBbzgtnfwBXwlTznc2yegfDXWxHw7ReWmyVQK9DO0W4o4IEoHlS', '1'),
+  ('1212-12-12', 'Medlem', 'Medlemsson', 'medlem@dev.null', '', '1', '1', 1, 0, 0, '', '0');
 
 INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) 
 VALUES 
