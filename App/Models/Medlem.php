@@ -219,7 +219,10 @@ class Medlem
             "kommentar",
             "godkant_gdpr",
             "pref_kommunikation",
-            "isAdmin"
+            "isAdmin",
+            'foretag',
+            'standig_medlem',
+            'skickat_valkomstbrev'
         ];
 
         if ($operation === 'INSERT') {
@@ -259,6 +262,9 @@ class Medlem
             $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr, PDO::PARAM_BOOL);
             $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation, PDO::PARAM_BOOL);
             $stmt->bindParam(':isAdmin', $this->isAdmin, PDO::PARAM_BOOL);
+            $stmt->bindParam(':foretag', $this->foretag, PDO::PARAM_BOOL);
+            $stmt->bindParam(':standig_medlem', $this->standig_medlem, PDO::PARAM_BOOL);
+            $stmt->bindParam(':skickat_valkomstbrev', $this->skickat_valkomstbrev, PDO::PARAM_BOOL);
             if ($operation === 'UPDATE') {
                 $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
             }
