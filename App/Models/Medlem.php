@@ -68,33 +68,30 @@ class Medlem
 
     public function save(): int
     {
-        try {
-            $this->persistToDatabase('UPDATE');
-            $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . " uppdaterad av användare: " . Session::get('user_id'));
-            return (int) $this->id;
-        } catch (PDOException $e) {
-            $this->logger->error("Fel vid uppdatering av medlem: " . $this->fornamn . " " . $this->efternamn . " av användare: " . Session::get('user_id'));
-            return 0;
-        } catch (InvalidArgumentException $e) {
-            $this->logger->error("Misslyckades att uppdatera medlem: " . $this->fornamn . " " . $this->efternamn
-                . ". Användare: " . Session::get('user_id') . ". Felmeddelande: " . $e->getMessage());
-            return 0;
-        }
+        return $this->saveOrCreate('UPDATE');
     }
 
     public function create(): int
     {
+        return $this->saveOrCreate('INSERT');
+    }
+
+    private function saveOrCreate(string $operation): int
+    {
+        $successVerb = $operation === 'INSERT' ? 'skapad' : 'uppdaterad';
+        $errorVerb = $operation === 'INSERT' ? 'skapande' : 'uppdatering';
+        $successMessage = "Medlem: " . $this->fornamn . " " . $this->efternamn . " " . $successVerb . " av användare: " . Session::get('user_id');
+        $errorMessage = "Fel vid " . $errorVerb . " av medlem: " . $this->fornamn . " " . $this->efternamn . ". Användare: " . Session::get('user_id') . ". Felmeddelande: ";
+
         try {
-            $this->persistToDatabase("INSERT");
-            $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . " skapad av användare: " . Session::get('user_id'));
+            $this->persistToDatabase($operation);
+            $this->logger->info($successMessage);
             return (int) $this->id;
         } catch (PDOException $e) {
-            $this->logger->error("Misslyckades att skapa medlem: " . $this->fornamn . " "
-                . $this->efternamn . ". Användare: " . Session::get('user_id') . ". Felmeddelande: " . $e->getMessage());
+            $this->logger->error($errorMessage . $e->getMessage());
             return 0;
         } catch (InvalidArgumentException $e) {
-            $this->logger->error("Misslyckades att skapa medlem: " . $this->fornamn . " "
-                . $this->efternamn . ". Användare: " . Session::get('user_id') . ". Felmeddelande: " . $e->getMessage());
+            $this->logger->error($errorMessage . $e->getMessage());
             return 0;
         }
     }
@@ -179,7 +176,7 @@ class Medlem
         }
     }
 
-    public function updateMedlemRoles($newRoleIds)
+    public function updateMedlemRoles(array $newRoleIds): void
     {
         //first remove roles from that no longer exist
         $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
