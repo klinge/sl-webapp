@@ -188,11 +188,15 @@ $roller = $viewData['roles'];
         if (confirm('Are you sure you want to delete this segling?')) {
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '<?php echo $APP_DIR ?>/segling/delete/' + seglingId, true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
             xhr.onload = function() {
                 window.location = '<?php echo $APP_DIR ?>/segling';
             };
-            xhr.send();
+
+            var csrfToken = '<?php echo $viewData["csrf_token"]; ?>';
+            xhr.send('csrf_token=' + encodeURIComponent(csrfToken));
         }
     }
 </script>

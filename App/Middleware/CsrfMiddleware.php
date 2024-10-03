@@ -44,8 +44,12 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
 
         if ($this->request['REQUEST_METHOD'] === 'POST') {
             $token = $_POST['csrf_token'] ?? '';
+            $this->app->getLogger()->debug('In csrf middleware. Token in POST was: ' . $token);
+
             if (!hash_equals($_SESSION['csrf_token'], $token)) {
-                $this->app->getLogger()->warning('CSRF token mismatch. Uri was: ' . $currentPath . "Called by; " . $this->request['REMOTE_ADDR']);
+                $this->app->getLogger()->warning('CSRF token mismatch. Uri was: ' . $currentPath
+                    . ' Token in POST was: ' . $token
+                    . ' Called by: ' . $this->request['REMOTE_ADDR']);
                 //Set different responses depending on if it was an ajax request or not
                 if ($this->isAjaxRequest()) {
                     $this->sendJsonResponse(['status' => 'error', 'message' => 'Error validating csrf token'], 401);

@@ -7,12 +7,15 @@ namespace App\Models;
 use PDO;
 use PDOException;
 use Exception;
+use Monolog\Logger;
+use App\Utils\Session;
 
 class Medlem
 {
     // database connection and table name
     private $conn;
     private $table_name = "Medlem";
+    private $logger;
 
     // Class properties
     public int $id;
@@ -38,9 +41,10 @@ class Medlem
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, $id = null)
+    public function __construct(PDO $db, Logger $logger, $id = null)
     {
         $this->conn = $db;
+        $this->logger = $logger;
 
         if (isset($id)) {
             $result = $this->getDataFromDb($id);
@@ -60,6 +64,8 @@ class Medlem
 
     public function save(): void
     {
+        $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . " uppdaterad av användare: " . Session::get('user_id'));
+
         $query = "UPDATE $this->table_name SET 
         fodelsedatum = :fodelsedatum,
         fornamn = :fornamn, 
@@ -112,12 +118,14 @@ class Medlem
 
     public function delete(): void
     {
+        $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . "borttagen av användare: " . Session::get('user_id'));
+
         $query = 'DELETE FROM Medlem WHERE id = ?; ';
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(1, $this->id);
         $stmt->execute();
-
+        //Also remove all roles
         $this->roller = [];
         $this->saveRoles();
     }
@@ -147,15 +155,18 @@ class Medlem
 
             $stmt->execute();
 
-            $this->id = $this->conn->lastInsertId();
+            $this->id = (int) $this->conn->lastInsertId();
             $this->saveRoles();
             $this->getDataFromDb($this->id);
+
+            $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . "skapad av användare: " . Session::get('user_id'));
+
             return $this->id;
         } catch (PDOException $e) {
+            $this->logger->warning("PDOException in Medlem::create. Error: " . $e->getMessage());
             if ($e->getCode() == '23000') {
-                //For troubleshooting csv import
-                //error_log("UNIQUE constraint violation for email: " . $this->email);
-                //error_log("SQL: " . $stmt->queryString);
+                //For troubleshooting csv import and handling trouble with null vs empty strings in email field
+                $this->logger->debug("UNIQUE constraint violation for email: " . $this->email);
             }
             throw $e; // Re-throw the exception if you want to handle it further up the call stack
         }

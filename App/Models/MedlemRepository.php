@@ -6,16 +6,19 @@ namespace App\Models;
 
 use PDO;
 use Exception;
+use App\Application;
 
 class MedlemRepository
 {
     // database connection and table name
     private $conn;
+    private $app;
     public $medlemmar;
 
-    public function __construct($db)
+    public function __construct(PDO $db, Application $app)
     {
         $this->conn = $db;
+        $this->app = $app;
     }
 
 
@@ -38,7 +41,7 @@ class MedlemRepository
 
         foreach ($members as $member) {
             try {
-                $medlem = new Medlem($this->conn, $member['id']);
+                $medlem = new Medlem($this->conn, $this->app->getLogger(), $member['id']);
                 $medlemmar[] = $medlem;
             } catch (Exception $e) {
                 //Do nothing right now..

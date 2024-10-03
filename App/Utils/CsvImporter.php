@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 
 use PDO;
 use PDOException;
+use App\Application;
 use App\Models\Medlem;
 use App\Utils\DateFormatter;
 use InvalidArgumentException;
@@ -21,9 +22,11 @@ class CsvImporter
     private $csvfile = '/var/www/html/sl-webapp/db/csv-data/medlemmar-cleaned.csv';
     public $csvRowsNotImported = [];
     public $dbRowsNotCreated = [];
+    public Application $app;
 
     public function __construct()
     {
+        $this->app = new Application();
         $this->data = $this->readCsv();
         try {
             $this->connect();
@@ -62,7 +65,7 @@ class CsvImporter
 
         foreach ($this->data as $row) {
             //First populate a member object with the row data and save it
-            $member = new Medlem($this->conn);
+            $member = new Medlem($this->conn, $this->app->getLogger());
             $birthdate = DateFormatter::formatDateWithHms($row['Födelsedatum']);
             $member->fodelsedatum = $birthdate ?: "";
             if (!empty($this->fodelsedatum)) {

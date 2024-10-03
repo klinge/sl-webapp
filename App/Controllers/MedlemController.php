@@ -44,7 +44,7 @@ class MedlemController extends BaseController
 
     public function list(): void
     {
-        $medlemRepo = new MedlemRepository($this->conn);
+        $medlemRepo = new MedlemRepository($this->conn, $this->app);
         $result = $medlemRepo->getAll();
 
         //Put everyting in the data variable that is used by the view
@@ -58,7 +58,7 @@ class MedlemController extends BaseController
 
     public function listJson(): void
     {
-        $medlemRepo = new MedlemRepository($this->conn);
+        $medlemRepo = new MedlemRepository($this->conn, $this->app);
         $result = $medlemRepo->getAll();
         $this->jsonResponse($result);
         exit;
@@ -70,7 +70,7 @@ class MedlemController extends BaseController
 
         //Fetch member data
         try {
-            $medlem = new Medlem($this->conn, $id);
+            $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
             $roll = new Roll($this->conn);
             //Fetch roles and seglingar to use in the view
             $roller = $roll->getAll();
@@ -103,7 +103,7 @@ class MedlemController extends BaseController
     public function save(array $params): void
     {
         $id = (int) $params['id'];
-        $medlem = new Medlem($this->conn, $id);
+        $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
         $postData = $_POST;
 
         $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
@@ -148,7 +148,7 @@ class MedlemController extends BaseController
 
     public function insertNew(): void
     {
-        $medlem = new Medlem($this->conn);
+        $medlem = new Medlem($this->conn, $this->app->getLogger());
         $postData = $_POST;
 
         $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
@@ -181,7 +181,7 @@ class MedlemController extends BaseController
     {
         $id = $_POST['id'];
         try {
-            $medlem = new Medlem($this->conn, $id);
+            $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
             $medlem->delete();
             $_SESSION['flash_message'] = ['type' => 'ok', 'message' => 'Medlem borttagen!'];
             // Set the URL and redirect

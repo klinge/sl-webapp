@@ -74,7 +74,7 @@ class SeglingController extends BaseController
         $roller = $roll->getAll();
 
         //Fetch lists of persons who has a role to populate select boxes
-        $medlemmar = new MedlemRepository($this->conn);
+        $medlemmar = new MedlemRepository($this->conn, $this->app);
         $allaSkeppare = $medlemmar->getMembersByRollName('Skeppare');
         $allaBatsman = $medlemmar->getMembersByRollName('Båtsman');
         $allaKockar = $medlemmar->getMembersByRollName('Kock');
@@ -127,13 +127,15 @@ class SeglingController extends BaseController
 
     public function delete(array $params)
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
         $segling = new Segling($this->conn, $id);
         if ($segling->delete()) {
             Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
+            $this->app->getLogger()->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' . Session::get('user_id'));
             exit;
         } else {
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
+            $this->app->getLogger()->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag . '  User: ' . Session::get('user_id'));
             exit;
         }
     }

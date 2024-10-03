@@ -81,7 +81,7 @@ class AuthController extends BaseController
         }
         //Catch exception if medlem not found, should not happen since we already checked for it
         try {
-            $medlem = new Medlem($this->conn, $result['id']);
+            $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
         } catch (Exception $e) {
             $this->app->getLogger()->error("Technical error. Could not create member object for member id: " . $result['id']);
             Session::setFlashMessage('error', 'Tekniskt fel. Försök igen eller kontakta en administratör!');
@@ -186,7 +186,7 @@ class AuthController extends BaseController
             return;
         }
 
-        $medlem = new Medlem($this->conn, $result['id']);
+        $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
 
         //Fail if user already has a password
         if ($medlem->password) {

@@ -33,7 +33,7 @@ class RollController extends BaseController
     public function membersInRole(array $params)
     {
         $rollId = (int) $params['id'];
-        $medlemRepo = new MedlemRepository($this->conn);
+        $medlemRepo = new MedlemRepository($this->conn, $this->app);
         $result = $medlemRepo->getMembersByRollId($rollId);
         $this->jsonResponse($result);
         exit;

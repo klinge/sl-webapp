@@ -129,7 +129,7 @@ class Segling
 
         //If all is okay exactly one row should have been inserted
         if ($stmt->rowCount() == 1) {
-            $this->id = $this->conn->lastInsertId();
+            $this->id = (int) $this->conn->lastInsertId();
             return $this->id;
             // You can use $lastInsertId if you need the ID of the newly inserted row
         } else {
