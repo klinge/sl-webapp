@@ -74,7 +74,7 @@ class AuthController extends BaseController
 
         //User not found
         if (!$result) {
-            $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail);
+            $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->request['REMOTE_ADDR']);
             Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render('login/viewLogin');
             exit;
@@ -90,13 +90,13 @@ class AuthController extends BaseController
         }
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
-            $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail);
+            $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->request['REMOTE_ADDR']);
             Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render('login/viewLogin');
             return;
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
-        $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email);
+        $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->request['REMOTE_ADDR']);
         Session::regenerateId();
         Session::set('user_id', $medlem->id);
         Session::set('fornamn', $medlem->fornamn);
