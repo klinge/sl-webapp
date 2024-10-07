@@ -37,9 +37,12 @@ class MedlemController extends BaseController
         'postnummer' => 'string',
         'postort' => 'string',
         'kommentar' => 'string',
-        'godkant_gdpr' => 'string',
-        'pref_kommunikation' => 'string',
-        'isAdmin' => 'string',
+        'godkant_gdpr' => 'bool',
+        'pref_kommunikation' => 'bool',
+        'isAdmin' => 'bool',
+        'foretag' => 'bool',
+        'standig_medlem' => 'bool',
+        'skickat_valkomstbrev' => 'bool',
     ];
 
     public function list(): void

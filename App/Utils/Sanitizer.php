@@ -18,6 +18,7 @@ class Sanitizer
         'int' => FILTER_SANITIZE_NUMBER_INT,
         'float' => FILTER_SANITIZE_NUMBER_FLOAT,
         'url' => FILTER_SANITIZE_URL,
+        'bool' => FILTER_VALIDATE_BOOLEAN,
         'date' => 'sanitizeDate',
     ];
 
