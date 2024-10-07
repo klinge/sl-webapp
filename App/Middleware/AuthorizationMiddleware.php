@@ -9,15 +9,28 @@ use App\Config\RouteConfig;
 
 class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterface
 {
+    /**
+     * Middleware that handles authorization for incoming requests.
+     *
+     * This method checks if the current user has the necessary permissions to access
+     * the requested route. It performs the following checks:
+     * 1. If the user is an admin
+     * 2. If the route doesn't require login
+     * 3. If it's a user-specific route
+     *
+     * If none of these conditions are met, it handles the unauthorized access by either:
+     * - Sending a JSON response for AJAX requests
+     * - Setting a flash message and redirecting for regular requests
+     *
+     * @return void
+     */
     public function handle(): void
     {
         $match = $this->app->getRouter()->match();
         if ($match) {
             $routeName = $match['name'];
-            // Check 1. that route exists, 2. that it's not in routes that not require login
-            // 3. that it's not a user route and 4. that user is not an admin
-            // If all are true redirect to a page saying user can't access the required page
-            if (!in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !$this->isUserRoute($routeName) && !Session::get('is_admin')) {
+            // Deny access if NOT: user is admin OR route does not require login OR it's a user route
+            if (!(Session::get('is_admin') || in_array($routeName, RouteConfig::$noLoginRequiredRoutes) || $this->isUserRoute($routeName))) {
                 if ($this->isAjaxRequest()) {
                     $this->sendJsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.']);
                 } else {
