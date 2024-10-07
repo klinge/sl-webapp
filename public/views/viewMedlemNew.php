@@ -84,11 +84,10 @@ include_once "views/_layouts/header.php";
                 </div>
                 <br />
                 <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="checkbox" id="inlineCheckbox5" name="standig_medlem" value="1">>
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox5" name="standig_medlem" value="1">
                     <label class="form-check-label" for="inlineCheckbox5">Ständig medlem</label>
                 </div>
                 <div class="form-check form-check-inline">
-                    <?php $checked = $medlem->foretag ? 'checked' : ''; ?>
                     <input class="form-check-input" type="checkbox" id="inlineCheckbox5" name="foretag" value="1">
                     <label class="form-check-label" for="inlineCheckbox6">Företag</label>
                 </div>
