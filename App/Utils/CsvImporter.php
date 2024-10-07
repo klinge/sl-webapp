@@ -81,9 +81,9 @@ class CsvImporter
             $member->postnummer = isset($row['Postnr']) ? $row['Postnr'] : "";
             $member->postort = isset($row['Ort']) ? $row['Ort'] : "";
             $member->kommentar = isset($row['Kommentar']) ? $row['Kommentar'] : "";
-            $member->pref_kommunikation = (isset($row['EjUtskick']) &&  $row['EjUtskick'] === "Nej") ? 0 : 1;
-            $member->godkant_gdpr = 0;
-            $member->isAdmin = 0;
+            $member->pref_kommunikation = (isset($row['EjUtskick']) &&  $row['EjUtskick'] === "Nej") ? false : true;
+            $member->godkant_gdpr = false;
+            $member->isAdmin = false;
             //$member->created_at = $row['created_at'];
             //$member->updated_at = $row['updated_at'];
             try {

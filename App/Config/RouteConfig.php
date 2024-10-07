@@ -26,12 +26,12 @@ class RouteConfig
     {
         $router->map('GET', '/', 'HomeController#index', 'home');
 
-        $router->map('GET', '/medlem', 'MedlemController#list', 'medlem-list');
+        $router->map('GET', '/medlem', 'MedlemController#listAll', 'medlem-list');
         $router->map('GET', '/medlem/json', 'MedlemController#listJson', 'medlem-list-json');
         $router->map('GET', '/medlem/[i:id]', 'MedlemController#edit', 'medlem-edit');
-        $router->map('POST', '/medlem/[i:id]', 'MedlemController#save', 'medlem-save');
-        $router->map('GET', '/medlem/new', 'MedlemController#new', 'medlem-new');
-        $router->map('POST', '/medlem/new', 'MedlemController#insertNew', 'medlem-create');
+        $router->map('POST', '/medlem/[i:id]', 'MedlemController#update', 'medlem-update');
+        $router->map('GET', '/medlem/new', 'MedlemController#showNewForm', 'medlem-new');
+        $router->map('POST', '/medlem/new', 'MedlemController#create', 'medlem-create');
         $router->map('POST', '/medlem/delete', 'MedlemController#delete', 'medlem-delete');
 
         $router->map('GET', '/betalning', 'BetalningController#list', 'betalning-list');

@@ -14,10 +14,26 @@ use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Application;
 
+/**
+ * MedlemController handles operations related to members (medlemmar).
+ *
+ * This controller manages CRUD operations for members, including listing,
+ * editing, creating, and deleting member records. It also handles related
+ * operations such as managing roles and payments for members.
+ */
 class MedlemController extends BaseController
 {
+    /**
+     * @var View The view object for rendering templates
+     */
     private View $view;
 
+    /**
+     * Constructs a new MedlemController instance.
+     *
+     * @param Application $app The application instance
+     * @param array $request The request data
+     */
     public function __construct(Application $app, array $request)
     {
         parent::__construct($app, $request);
@@ -37,12 +53,20 @@ class MedlemController extends BaseController
         'postnummer' => 'string',
         'postort' => 'string',
         'kommentar' => 'string',
-        'godkant_gdpr' => 'string',
-        'pref_kommunikation' => 'string',
-        'isAdmin' => 'string',
+        'godkant_gdpr' => 'bool',
+        'pref_kommunikation' => 'bool',
+        'isAdmin' => 'bool',
+        'foretag' => 'bool',
+        'standig_medlem' => 'bool',
+        'skickat_valkomstbrev' => 'bool',
     ];
 
-    public function list(): void
+    /**
+     * Lists all members.
+     *
+     * Fetches all members from the repository and renders them in a view.
+     */
+    public function listAll(): void
     {
         $medlemRepo = new MedlemRepository($this->conn, $this->app);
         $result = $medlemRepo->getAll();
@@ -64,6 +88,14 @@ class MedlemController extends BaseController
         exit;
     }
 
+    /**
+     * Edits a specific member.
+     *
+     * Fetches member data, roles, sailings, and payments for the specified member ID
+     * and renders them in an edit view.
+     *
+     * @param array $params The route parameters, must contain 'id'
+     */
     public function edit(array $params): void
     {
         $id = (int) $params['id'];
@@ -86,7 +118,7 @@ class MedlemController extends BaseController
                 'seglingar' => $seglingar,
                 'betalningar' => $betalningar,
                 //Used in the view to set the proper action url for the form
-                'formAction' => $this->app->getRouter()->generate('medlem-save', ['id' => $id]),
+                'formAction' => $this->app->getRouter()->generate('medlem-update', ['id' => $id]),
                 'createBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
                 'listBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
                 'deleteAction' => $this->app->getRouter()->generate('medlem-delete')
@@ -100,7 +132,14 @@ class MedlemController extends BaseController
         }
     }
 
-    public function save(array $params): void
+    /**
+     * Saves changes to a member.
+     *
+     * Sanitizes input data, updates the member record, and redirects to the member list.
+     *
+     * @param array $params The route parameters, must contain 'id'
+     */
+    public function update(array $params): void
     {
         $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
@@ -132,7 +171,17 @@ class MedlemController extends BaseController
         exit;
     }
 
-    public function new(): void
+    /**
+     * Prepares and displays the form for adding a new member.
+     *
+     * This method:
+     * 1. Retrieves all available roles from the Roll model.
+     * 2. Prepares data for the view
+     * 3. Renders the 'viewMedlemNew' template with the prepared data.
+     *
+     * @return void
+     */
+    public function showNewForm(): void
     {
         $roll = new Roll($this->conn);
         $roller = $roll->getAll();
@@ -146,7 +195,21 @@ class MedlemController extends BaseController
         $this->view->render('viewMedlemNew', $data);
     }
 
-    public function insertNew(): void
+    /**
+     * Inserts a new member into the system.
+     *
+     * This method handles the creation of a new member based on submitted POST data.
+     * It performs the following steps:
+     * 1. Creates a new Medlem object.
+     * 2. Prepares and sanitizes the submitted member data.
+     * 3. Attempts to create the new member record in the database.
+     * 4. Sets a flash message indicating the result of the operation.
+     * 5. Redirects to the member list page.
+     *
+     * @return void
+     * @throws Exception If there's an error during the member creation process
+     */
+    public function create(): void
     {
         $medlem = new Medlem($this->conn, $this->app->getLogger());
         $postData = $_POST;
@@ -176,7 +239,15 @@ class MedlemController extends BaseController
         exit;
     }
 
-
+    /**
+     * Deletes a member from the system.
+     *
+     * This method handles the deletion of a member based on the provided ID.
+     * It attempts to delete the member and sets a flash message indicating
+     * the result of the operation. After deletion, it redirects to the member list.
+     *
+     * @throws Exception If there's an error during the deletion process
+     */
     public function delete(): void
     {
         $id = $_POST['id'];
@@ -196,11 +267,20 @@ class MedlemController extends BaseController
         exit;
     }
 
+    /**
+     * Prepares and sanitizes member data from POST input.
+     *
+     * Validates required fields, sanitizes input, and sets values on the Medlem object.
+     *
+     * @param Medlem $medlem The member object to update
+     * @param array $postData The POST data to process
+     * @return bool True if preparation was successful, false otherwise
+     */
     private function prepareAndSanitizeMedlemData(Medlem $medlem, array $postData): bool
     {
         $errors = [];
         $requiredFields = ['fornamn', 'efternamn', 'fodelsedatum'];
-        $checkboxFields = ['godkant_gdpr', 'pref_kommunikation', 'isAdmin'];
+        $booleanFields = ['godkant_gdpr', 'pref_kommunikation', 'isAdmin', 'foretag', 'standig_medlem', 'skickat_valkomstbrev'];
 
         //Sanitize user input
         $sanitizer = new Sanitizer();
@@ -230,15 +310,15 @@ class MedlemController extends BaseController
 
         //Loop over everything in POST and set values on the Medlem object
         foreach ($cleanValues as $key => $value) {
-            if (property_exists($medlem, $key) && !in_array($key, $checkboxFields)) {
+            if (property_exists($medlem, $key) && !in_array($key, $booleanFields)) {
                 // Assign value to corresponding property, checkoxes are handled below
                 $medlem->$key = $value;
             }
         }
 
         // If checkboxes are not checked they don't exist in $_POST so set to False/0
-        foreach ($checkboxFields as $field) {
-            $medlem->$field = isset($cleanValues[$field]) ? 1 : 0;
+        foreach ($booleanFields as $field) {
+            $medlem->$field = isset($cleanValues[$field]) ? true : false;
         }
 
         //Update the medlem's roles

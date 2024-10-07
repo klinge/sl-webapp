@@ -85,6 +85,22 @@ include_once "views/_layouts/header.php";
                 <input class="form-check-input" type="checkbox" id="inlineCheckbox4" name="isAdmin" value="1" <?= $checked ?>>
                 <label class="form-check-label" for="inlineCheckbox4">Admin</label>
             </div>
+            <br />
+            <div class="form-check form-check-inline">
+                <?php $checked = $medlem->standig_medlem ? 'checked' : ''; ?>
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox5" name="standig_medlem" value="1" <?= $checked ?>>
+                <label class="form-check-label" for="inlineCheckbox5">Ständig medlem</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <?php $checked = $medlem->foretag ? 'checked' : ''; ?>
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox6" name="foretag" value="1" <?= $checked ?>>
+                <label class="form-check-label" for="inlineCheckbox6">Företag</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <?php $checked = $medlem->skickat_valkomstbrev ? 'checked' : ''; ?>
+                <input class="form-check-input" type="checkbox" id="inlineCheckbox7" name="skickat_valkomstbrev" value="1" <?= $checked ?>>
+                <label class="form-check-label" for="inlineCheckbox7">Välkomstbrev skickat </label>
+            </div>
         </div>
     </div>
 

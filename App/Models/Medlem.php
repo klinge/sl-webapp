@@ -9,6 +9,7 @@ use PDOException;
 use Exception;
 use Monolog\Logger;
 use App\Utils\Session;
+use InvalidArgumentException;
 
 class Medlem
 {
@@ -19,29 +20,32 @@ class Medlem
 
     // Class properties
     public int $id;
-    public string|null $fodelsedatum;
-    public string $fornamn;
+    public ?string $fodelsedatum;
+    public ?string $fornamn;
     public string $efternamn;
-    public string|null $email;
-    public string|null $mobil;
-    public string|null $telefon;
-    public string|null $adress;
-    public string|null $postnummer;
-    public string|null $postort;
-    public string|null $kommentar;
-    // User preferences
-    public int $godkant_gdpr;
-    public int $pref_kommunikation;
+    public ?string $email;
+    public ?string $mobil;
+    public ?string $telefon;
+    public ?string $adress;
+    public ?string $postnummer;
+    public ?string $postort;
+    public ?string $kommentar;
+    // User preferences all booleans
+    public bool $godkant_gdpr;
+    public bool $pref_kommunikation;
+    public bool $foretag;
+    public bool $standig_medlem;
+    public bool $skickat_valkomstbrev;
+    public bool $isAdmin;
     // User login
-    public string|null $password;
-    public int $isAdmin;
+    public ?string $password;
     //Fetched from Roller table
-    public array $roller = [];
+    public ?array $roller = [];
     // Timestamps
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, Logger $logger, $id = null)
+    public function __construct(PDO $db, Logger $logger, int $id = null)
     {
         $this->conn = $db;
         $this->logger = $logger;
@@ -62,58 +66,34 @@ class Medlem
         return $namn;
     }
 
-    public function save(): void
+    public function save(): int
     {
-        $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . " uppdaterad av användare: " . Session::get('user_id'));
-
-        $query = "UPDATE $this->table_name SET 
-        fodelsedatum = :fodelsedatum,
-        fornamn = :fornamn, 
-        efternamn = :efternamn,
-        email = :email,
-        gatuadress = :gatuadress,
-        postnummer = :postnummer, 
-        postort = :postort, 
-        mobil = :mobil, 
-        telefon = :telefon, 
-        kommentar = :kommentar,
-        godkant_gdpr = :godkant_gdpr,
-        pref_kommunikation = :pref_kommunikation,
-        isAdmin = :isAdmin
-        WHERE id = :id;";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':fodelsedatum', $this->fodelsedatum);
-        $stmt->bindParam(':fornamn', $this->fornamn);
-        $stmt->bindParam(':efternamn', $this->efternamn);
-        $email = $this->email ?: null; //Make sure empty emails is stored as null
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':gatuadress', $this->adress);
-        $stmt->bindParam(':postnummer', $this->postnummer);
-        $stmt->bindParam(':postort', $this->postort);
-        $stmt->bindParam(':mobil', $this->mobil);
-        $stmt->bindParam(':telefon', $this->telefon);
-        $stmt->bindParam(':kommentar', $this->kommentar);
-        $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr);
-        $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation);
-        $stmt->bindParam(':isAdmin', $this->isAdmin);
-        $stmt->bindParam(':id', $this->id);
-
-        $stmt->execute();
-
-        $this->saveRoles();
+        return $this->saveOrCreate('UPDATE');
     }
 
-    public function saveUserProvidedPassword(): void
+    public function create(): int
     {
-        $password = password_hash($this->password, PASSWORD_DEFAULT);
+        return $this->saveOrCreate('INSERT');
+    }
 
-        $query = 'UPDATE $this->table_name SET password = ? WHERE id = ?; ';
+    private function saveOrCreate(string $operation): int
+    {
+        $successVerb = $operation === 'INSERT' ? 'skapad' : 'uppdaterad';
+        $errorVerb = $operation === 'INSERT' ? 'skapande' : 'uppdatering';
+        $successMessage = "Medlem: " . $this->fornamn . " " . $this->efternamn . " " . $successVerb . " av användare: " . Session::get('user_id');
+        $errorMessage = "Fel vid " . $errorVerb . " av medlem: " . $this->fornamn . " " . $this->efternamn . ". Användare: " . Session::get('user_id') . ". Felmeddelande: ";
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $password);
-        $stmt->bindParam(2, $this->id);
-        $stmt->execute();
+        try {
+            $this->persistToDatabase($operation);
+            $this->logger->info($successMessage);
+            return (int) $this->id;
+        } catch (PDOException $e) {
+            $this->logger->error($errorMessage . $e->getMessage());
+            return 0;
+        } catch (InvalidArgumentException $e) {
+            $this->logger->error($errorMessage . $e->getMessage());
+            return 0;
+        }
     }
 
     public function delete(): void
@@ -130,48 +110,17 @@ class Medlem
         $this->saveRoles();
     }
 
-    public function create(): int
+    public function saveUserProvidedPassword(): void
     {
-        $query = 'INSERT INTO Medlem 
-            (fodelsedatum, fornamn, efternamn, email, gatuadress, postnummer, postort, mobil, telefon, kommentar, godkant_gdpr, pref_kommunikation, isAdmin) 
-            VALUES (:fodelsedatum, :fornamn, :efternamn, :email, :gatuadress, :postnummer, :postort, :mobil, :telefon, :kommentar, :godkant_gdpr, :pref_kommunikation, :isAdmin); ';
+        $password = password_hash($this->password, PASSWORD_DEFAULT);
+
+        $query = 'UPDATE $this->table_name SET password = ? WHERE id = ?; ';
+
         $stmt = $this->conn->prepare($query);
-        try {
-            $stmt->bindParam(':fodelsedatum', $this->fodelsedatum, PDO::PARAM_STR);
-            $stmt->bindParam(':fornamn', $this->fornamn, PDO::PARAM_STR);
-            $stmt->bindParam(':efternamn', $this->efternamn, PDO::PARAM_STR);
-            //If email is empty make sure to save it as null, to avoid UNIQUE issues
-            $email = $this->email ?: null;
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->bindParam(':gatuadress', $this->adress, PDO::PARAM_STR);
-            $stmt->bindParam(':postnummer', $this->postnummer, PDO::PARAM_STR);
-            $stmt->bindParam(':postort', $this->postort, PDO::PARAM_STR);
-            $stmt->bindParam(':mobil', $this->mobil, PDO::PARAM_STR);
-            $stmt->bindParam(':telefon', $this->telefon, PDO::PARAM_STR);
-            $stmt->bindParam(':kommentar', $this->kommentar, PDO::PARAM_STR);
-            $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr, PDO::PARAM_BOOL);
-            $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation, PDO::PARAM_BOOL);
-            $stmt->bindParam(':isAdmin', $this->isAdmin, PDO::PARAM_BOOL);
-
-            $stmt->execute();
-
-            $this->id = (int) $this->conn->lastInsertId();
-            $this->saveRoles();
-            $this->getDataFromDb($this->id);
-
-            $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . "skapad av användare: " . Session::get('user_id'));
-
-            return $this->id;
-        } catch (PDOException $e) {
-            $this->logger->warning("PDOException in Medlem::create. Error: " . $e->getMessage());
-            if ($e->getCode() == '23000') {
-                //For troubleshooting csv import and handling trouble with null vs empty strings in email field
-                $this->logger->debug("UNIQUE constraint violation for email: " . $this->email);
-            }
-            throw $e; // Re-throw the exception if you want to handle it further up the call stack
-        }
+        $stmt->bindParam(1, $password);
+        $stmt->bindParam(2, $this->id);
+        $stmt->execute();
     }
-
 
     //find Seglingar a Medlem has participated in..
     public function getSeglingar(): array
@@ -227,7 +176,7 @@ class Medlem
         }
     }
 
-    public function updateMedlemRoles($newRoleIds)
+    public function updateMedlemRoles(array $newRoleIds): void
     {
         //first remove roles from that no longer exist
         $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
@@ -255,6 +204,88 @@ class Medlem
         return in_array($searchRole, array_map($extractRollId, $this->roller));
     }
 
+    private function persistToDatabase(string $operation): bool
+    {
+        $params = [
+            "fodelsedatum",
+            "fornamn",
+            "efternamn",
+            "email",
+            "gatuadress",
+            "postnummer",
+            "postort",
+            "mobil",
+            "telefon",
+            "kommentar",
+            "godkant_gdpr",
+            "pref_kommunikation",
+            "isAdmin",
+            'foretag',
+            'standig_medlem',
+            'skickat_valkomstbrev'
+        ];
+
+        if ($operation === 'INSERT') {
+            $sql = "INSERT INTO Medlem (" . implode(', ', $params) . ") VALUES (";
+            $sql .= implode(', ', array_map(function ($param) {
+                return ':' . $param;
+            }, $params));
+            $sql .= ")";
+        } elseif ($operation === 'UPDATE') {
+            $sql = "UPDATE $this->table_name SET ";
+            foreach ($params as $param) {
+                $sql .= "$param = :$param, ";
+            }
+            $sql = rtrim($sql, ', ');
+            $sql .= " WHERE id = :id;";
+        } else {
+            throw new InvalidArgumentException("Invalid operation: " . $operation);
+        }
+
+        $this->logger->debug("In persistToDatabase: SQL Query: $sql");
+
+        try {
+            $stmt = $this->conn->prepare($sql);
+
+            $stmt->bindParam(':fodelsedatum', $this->fodelsedatum, PDO::PARAM_STR);
+            $stmt->bindParam(':fornamn', $this->fornamn, PDO::PARAM_STR);
+            $stmt->bindParam(':efternamn', $this->efternamn, PDO::PARAM_STR);
+            //If email is empty make sure to save it as null, to avoid UNIQUE issues
+            $email = $this->email ?: null;
+            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
+            $stmt->bindParam(':gatuadress', $this->adress, PDO::PARAM_STR);
+            $stmt->bindParam(':postnummer', $this->postnummer, PDO::PARAM_STR);
+            $stmt->bindParam(':postort', $this->postort, PDO::PARAM_STR);
+            $stmt->bindParam(':mobil', $this->mobil, PDO::PARAM_STR);
+            $stmt->bindParam(':telefon', $this->telefon, PDO::PARAM_STR);
+            $stmt->bindParam(':kommentar', $this->kommentar, PDO::PARAM_STR);
+            $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr, PDO::PARAM_BOOL);
+            $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation, PDO::PARAM_BOOL);
+            $stmt->bindParam(':isAdmin', $this->isAdmin, PDO::PARAM_BOOL);
+            $stmt->bindParam(':foretag', $this->foretag, PDO::PARAM_BOOL);
+            $stmt->bindParam(':standig_medlem', $this->standig_medlem, PDO::PARAM_BOOL);
+            $stmt->bindParam(':skickat_valkomstbrev', $this->skickat_valkomstbrev, PDO::PARAM_BOOL);
+            if ($operation === 'UPDATE') {
+                $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
+            }
+            $stmt->execute();
+        } catch (PDOException $e) {
+            $this->logger->warning("PDOException in Medlem::persistToDatabase. Error: " . $e->getMessage());
+            if ($e->getCode() == '23000') {
+                //For troubleshooting csv import and handling trouble with null vs empty strings in email field
+                $this->logger->debug("UNIQUE constraint violation for email: " . $this->email);
+            }
+            throw $e; // Re-throw the exception if you want to handle it further up the call stack
+        }
+
+        if ($operation === 'INSERT') {
+            $this->id = (int) $this->conn->lastInsertId();
+            $this->getDataFromDb($this->id);
+        }
+        $this->saveRoles();
+        return true;
+    }
+
     private function getDataFromDb($id): bool
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
@@ -277,10 +308,15 @@ class Medlem
             $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
             $this->postort = isset($row['postort']) ? $row['postort'] : "";
             $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
-            $this->godkant_gdpr = isset($row['godkant_gdpr']) ? $row['godkant_gdpr'] : "";
-            $this->pref_kommunikation = isset($row['pref_kommunikation']) ? $row['pref_kommunikation'] : "";
+            //Sqlite stores bool as 0/1 so convert to proper bools
+            $this->godkant_gdpr = $row['godkant_gdpr'] === 0 ? false : true;
+            $this->pref_kommunikation = $row['pref_kommunikation'] === 0 ? false : true;
+            $this->foretag = $row['foretag'] === 0 ? false : true;
+            $this->standig_medlem = $row['standig_medlem'] === 0 ? false : true;
+            $this->skickat_valkomstbrev = $row['skickat_valkomstbrev'] === 0 ? false : true;
+            $this->isAdmin = $row['isAdmin'] === 0 ? false : true;
+            //End bools
             $this->password = isset($row['password']) ? $row['password'] : "";
-            $this->isAdmin = $row['isAdmin'];
             $this->created_at = $row['created_at'];
             $this->updated_at = $row['updated_at'];
             return true;
