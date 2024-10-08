@@ -82,17 +82,23 @@ class CsvImporter
             $member->postort = isset($row['Ort']) ? $row['Ort'] : "";
             $member->kommentar = isset($row['Kommentar']) ? $row['Kommentar'] : "";
             $member->pref_kommunikation = (isset($row['EjUtskick']) &&  $row['EjUtskick'] === "Nej") ? false : true;
+            $member->foretag = (empty($row['Företag']) ? false : true);
             $member->godkant_gdpr = false;
             $member->isAdmin = false;
+            $member->skickat_valkomstbrev = false;
+            //if B24 = SM then it's a lifetime member who don't need to pay yearly membership if not set betalning
+            if ($row['B24'] === "SM") {
+                $member->standig_medlem = true;
+            } else {
+                $member->standig_medlem = false;
+            }
             //$member->created_at = $row['created_at'];
             //$member->updated_at = $row['updated_at'];
             try {
                 $insertedId = $member->create();
                 $member->id = $insertedId;
                 $countUpdated++;
-                //Add roller to Medlem
-                $this->addRolesForMember($member->id, $row['BesättningRoll'], $row['UnderhållRoll'], $allRoles);
-
+                //Add betalningar for member
                 $betalningar = array_filter([
                     '2024' => DateFormatter::formatDateWithHms($row['B24']),
                     '2023' => DateFormatter::formatDateWithHms($row['B23']),
@@ -101,7 +107,8 @@ class CsvImporter
                 if (!empty($betalningar)) {
                     $this->addPaymentsForMember($member->id, $betalningar);
                 }
-
+                //Add roller to Medlem
+                $this->addRolesForMember($member->id, $row['BesättningRoll'], $row['UnderhållRoll'], $allRoles);
                 //Finish off by returning if it went well or not
             } catch (PDOException $e) {
                 $countNotUpdated++;
@@ -109,7 +116,7 @@ class CsvImporter
             }
         }
         $countTotal = $countUpdated + $countNotUpdated;
-        echo "------------LADDAT DATABBAS-----------" . PHP_EOL;
+        echo "------------LADDAT DATABAS-----------" . PHP_EOL;
         echo "Totalt antal rader: " . $countTotal . PHP_EOL;
         echo "Antal rader sparade: " . $countUpdated . PHP_EOL;
         echo "Antal rader ej sparade: " . $countNotUpdated . PHP_EOL;
@@ -271,6 +278,8 @@ class CsvImporter
 }
 
 $importer = new CsvImporter();
+//$result =  $importer->findMembersInCsv('B24', 'SM');
+//print_r($result);
 
 $importer->deleteMedlemmar();
 $updatedRows = $importer->insertToDb();

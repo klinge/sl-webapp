@@ -30,13 +30,13 @@ class Medlem
     public ?string $postnummer;
     public ?string $postort;
     public ?string $kommentar;
-    // User preferences all booleans
-    public bool $godkant_gdpr;
-    public bool $pref_kommunikation;
-    public bool $foretag;
-    public bool $standig_medlem;
-    public bool $skickat_valkomstbrev;
-    public bool $isAdmin;
+    // User preferences all booleans with default values
+    public bool $godkant_gdpr = false;
+    public bool $pref_kommunikation = true;
+    public bool $foretag = false;
+    public bool $standig_medlem = false;
+    public bool $skickat_valkomstbrev = false;
+    public bool $isAdmin = false;
     // User login
     public ?string $password;
     //Fetched from Roller table
@@ -242,7 +242,7 @@ class Medlem
             throw new InvalidArgumentException("Invalid operation: " . $operation);
         }
 
-        $this->logger->debug("In persistToDatabase: SQL Query: $sql");
+        //$this->logger->debug("In persistToDatabase: SQL Query: $sql");
 
         try {
             $stmt = $this->conn->prepare($sql);
