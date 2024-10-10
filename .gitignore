@@ -3,6 +3,7 @@
 *.xlsx
 *.txt
 *.log
+*.bak
 /scripts/*.sh
 .vscode/
 *-TEST
