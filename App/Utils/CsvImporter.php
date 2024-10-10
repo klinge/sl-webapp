@@ -12,22 +12,25 @@ use App\Application;
 use App\Models\Medlem;
 use App\Utils\DateFormatter;
 use InvalidArgumentException;
-use Datetime;
 
 class CsvImporter
 {
-    public $data = [];
-    private $conn = null;
-    private $dbfile = '/var/www/html/sl-webapp/db/sldb-prod.sqlite';
-    private $csvfile = '/var/www/html/sl-webapp/db/csv-data/medlemmar-cleaned.csv';
-    public $csvRowsNotImported = [];
-    public $dbRowsNotCreated = [];
+    public array $data = [];
+    private PDO $conn;
+    private string $dbfile;
+    private string $csvfile;
+    public array $csvRowsNotImported = [];
+    public array $dbRowsNotCreated = [];
     public Application $app;
 
-    public function __construct()
+    public function __construct(string $dbFilename)
     {
         $this->app = new Application();
+        $this->dbfile = $this->app->getRootDir() . '/db/' . $dbFilename;
+        $this->csvfile = $this->app->getRootDir() . '/db/csv-data/medlemmar-cleaned.csv';
+
         $this->data = $this->readCsv();
+
         try {
             $this->connect();
         } catch (PDOException $e) {
@@ -163,6 +166,18 @@ class CsvImporter
         echo "Totalt antal rader: " . $totalRows . PHP_EOL;
         echo "Giltiga rader: " . $validRows . PHP_EOL;
         echo "Ogiltiga rader: " . $inValidRows . PHP_EOL;
+
+        //Print $inValidRows to a file
+        $errorFile = $this->app->getRootDir() . '/db/csv-data/csvRowsNotImported.csv';
+        if (file_exists($errorFile)) {
+            unlink($errorFile);
+        }
+        $file = fopen($errorFile, 'w');
+        foreach ($this->csvRowsNotImported as $row) {
+            fputcsv($file, [$row]);
+        }
+        fclose($file);
+
         return $data;
     }
 
@@ -277,7 +292,7 @@ class CsvImporter
     }
 }
 
-$importer = new CsvImporter();
+$importer = new CsvImporter('sldb-prod.sqlite');
 //$result =  $importer->findMembersInCsv('B24', 'SM');
 //print_r($result);
 
