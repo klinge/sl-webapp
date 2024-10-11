@@ -220,6 +220,7 @@ class AuthController extends BaseController
 
         try {
             $mailer->send(EmailType::VERIFICATION, $email, data: $data);
+            $this->app->getLogger()->info("Sent activation mail to member with email: " . $email);
             Session::setFlashMessage(
                 'success',
                 'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'
@@ -227,6 +228,7 @@ class AuthController extends BaseController
             $this->view->render('login/viewLogin');
             return;
         } catch (Exception $e) {
+            $this->app->getLogger()->info("Failed sending mail with activation link to member: " . $email);
             Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen. (' . $e->getMessage() . ')');
             $this->view->render('login/viewLogin');
             return;
