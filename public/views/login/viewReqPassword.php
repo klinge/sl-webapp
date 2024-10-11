@@ -7,7 +7,7 @@ $page_title = "Begär nytt lösenord";
 include_once "views/_layouts/header.php";
 ?>
 <!--Add Cloudflare Turnstile script -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
 
 <!-- Password Reset 3 - Bootstrap Brain Component -->
 <section class="p-3 p-md-4 p-xl-5">

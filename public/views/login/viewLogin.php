@@ -7,7 +7,8 @@ $turnstileSiteKey = $_SERVER['TURNSTILE_SITE_KEY'];
 include_once "views/_layouts/header.php";
 ?>
 <!--Add Cloudflare Turnstile script -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+<!-- SRI via https://www.srihash.org/ -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
 
 <!-- Login 9 - Bootstrap Brain Component -->
 <section class="bg-primary py-3 py-md-4 py-xl-8 mt-md-4">
