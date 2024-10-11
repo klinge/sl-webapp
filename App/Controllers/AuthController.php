@@ -15,13 +15,14 @@ use App\Utils\View;
 use App\Application;
 use PDO;
 use PHPMailer\PHPMailer\Exception;
+use andkab\Turnstile\Turnstile;
 
 class AuthController extends BaseController
 {
     private ?TokenHandler $tokenHandler = null;
     private View $view;
     private string $siteAddress;
-    private string $secret;
+    private string $turnstileSecret;
 
     //Messages
     private const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
@@ -36,7 +37,7 @@ class AuthController extends BaseController
         parent::__construct($app, $request);
         $this->view = new View($this->app);
         $this->siteAddress = $this->app->getConfig('SITE_ADDRESS');
-        $this->secret = $this->request['RECAPTCHA_SECRET_KEY'];
+        $this->turnstileSecret = $this->app->getConfig('TURNSTILE_SECRET_KEY');
     }
 
     /**
@@ -483,6 +484,12 @@ class AuthController extends BaseController
      */
     private function validateRecaptcha(): bool
     {
+        //Validate turnstile recaptcha and send user back to login page if failed
+        $turnstile = new Turnstile($this->turnstileSecret);
+        $verifyResponse = $turnstile->verify($_POST['cf-turnstile-response'], $_SERVER['REMOTE_ADDR']);
+        return $verifyResponse->isSuccess();
+
+        /* TODO -- REMOVE OLD CODE FOR GOOGLE RECAPTCHA
         $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = $_SERVER['REMOTE_ADDR'];
         $recaptcha = new \ReCaptcha\ReCaptcha($this->secret);
@@ -491,6 +498,7 @@ class AuthController extends BaseController
             ->verify($gRecaptchaResponse, $remoteIp);
         $this->app->getLogger()->info("Recaptcha: score: " . $resp->getScore() . ", called from: " . $_SERVER['REMOTE_ADDR']);
         return $resp->isSuccess();
+        */
     }
 
     /**

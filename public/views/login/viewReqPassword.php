@@ -1,13 +1,14 @@
 <?php
 
 $APP_DIR = $viewData['APP_DIR'];
-$grecaptchaSiteKey = $_SERVER['RECAPTCHA_SITE_KEY'];
+$turnstileSiteKey = $_SERVER['TURNSTILE_SITE_KEY'];
 // set page headers
 $page_title = "Begär nytt lösenord";
 include_once "views/_layouts/header.php";
 ?>
-<!--Add google recaptcha script -->
-<script src="https://www.google.com/recaptcha/api.js"></script>
+<!--Add Cloudflare Turnstile script -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+
 <!-- Password Reset 3 - Bootstrap Brain Component -->
 <section class="p-3 p-md-4 p-xl-5">
     <div class="container">
@@ -38,11 +39,12 @@ include_once "views/_layouts/header.php";
                             </div>
                             <div class="col-12">
                                 <div class="d-grid">
+                                    <!-- The following line controls and configures the Turnstile widget. -->
+                                    <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="dark"></div>
+                                    <!-- end. -->
                                     <button class="g-recaptcha btn bsb-btn-xl btn-primary"
                                         id="bytlosenSubmit"
-                                        data-sitekey="<?php echo $grecaptchaSiteKey ?>"
-                                        data-callback='onFormSubmit'
-                                        data-action='submit'>Återställ lösenord
+                                        onclick="onFormSubmit()">Återställ lösenord
                                     </button>
                                 </div>
                             </div>
@@ -63,7 +65,7 @@ include_once "views/_layouts/header.php";
 </section>
 
 <script>
-    function onFormSubmit(token) {
+    function onFormSubmit() {
         const form = document.getElementById('bytlosenForm');
         //And then submit the form
         form.submit();

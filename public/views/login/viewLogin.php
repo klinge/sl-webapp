@@ -2,11 +2,12 @@
 $APP_DIR = $viewData['APP_DIR'];
 // set page headers
 $page_title = "";
-$grecaptchaSiteKey = $_SERVER['RECAPTCHA_SITE_KEY'];
+$turnstileSiteKey = $_SERVER['TURNSTILE_SITE_KEY'];
+
 include_once "views/_layouts/header.php";
 ?>
-<!--Add google recaptcha script -->
-<script src="https://www.google.com/recaptcha/api.js"></script>
+<!--Add Cloudflare Turnstile script -->
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
 
 <!-- Login 9 - Bootstrap Brain Component -->
 <section class="bg-primary py-3 py-md-4 py-xl-8 mt-md-4">
@@ -81,10 +82,12 @@ include_once "views/_layouts/header.php";
                                         </div>
                                         <div class="col-12">
                                             <div class="d-grid">
-                                                <button class="g-recaptcha btn btn-primary btn-lg"
-                                                    data-sitekey="<?php echo $grecaptchaSiteKey ?>"
-                                                    data-callback='onLoginSubmit'
-                                                    data-action='submit' tabindex="4">Logga in
+                                                <!-- The following line controls and configures the Turnstile widget. -->
+                                                <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="dark"></div>
+                                                <!-- end. -->
+                                                <button class="btn btn-primary btn-lg"
+                                                    onclick="onLoginSubmit()"
+                                                    tabindex="4">Logga in
                                                 </button>
                                             </div>
                                         </div>
@@ -144,11 +147,12 @@ include_once "views/_layouts/header.php";
                                         <div id="passwordError" class="alert alert-danger" style="display: none;"></div>
                                         <div class="col-12">
                                             <div class="d-grid">
+                                                <!-- The following line controls and configures the Turnstile widget. -->
+                                                <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="dark"></div>
+                                                <!-- end. -->
                                                 <button class="g-recaptcha btn btn-primary btn-lg disabled"
                                                     id="registerSubmit"
-                                                    data-sitekey="<?php echo $grecaptchaSiteKey ?>"
-                                                    data-callback='onRegisterSubmit'
-                                                    data-action='submit'
+                                                    onclick="onRegisterSubmit()"
                                                     tabindex="4">Registrera
                                                 </button>
                                             </div>
@@ -193,7 +197,7 @@ include_once "views/_layouts/header.php";
 
     });
 
-    function onLoginSubmit(token) {
+    function onLoginSubmit() {
         const loginForm = document.getElementById('loginForm');
         const rememberUsername = document.getElementById('rememberMe').checked;
 
@@ -210,7 +214,7 @@ include_once "views/_layouts/header.php";
         return true;
     };
 
-    function onRegisterSubmit(token) {
+    function onRegisterSubmit() {
         const form = document.getElementById('registerForm');
         //And then submit the form
         form.submit();
