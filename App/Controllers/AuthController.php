@@ -108,6 +108,7 @@ class AuthController extends BaseController
             $redirectUrl = Session::get('redirect_url') ?? $this->app->getRouter()->generate('home');
             Session::remove('redirect_url');
         } else {
+            Session::set('is_admin', false);
             //if user is not an admin send them to the user part of the site
             $redirectUrl = $this->app->getRouter()->generate('user-home');
             Session::remove('redirect_url');

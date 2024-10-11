@@ -19,9 +19,16 @@ class HomeController
         $this->view = new View($this->app);
     }
 
-    public function index()
+    public function index(): void
     {
-        $this->view->render('home');
+        //if user is not logged in show login page, if user is logged in redirect to admin or user homepage
+        if (!Session::isLoggedIn()) {
+            $this->view->render('login/viewLogin');
+        } elseif (Session::isAdmin()) {
+            $this->view->render('home');
+        } else {
+            $this->view->render('user/index');
+        }
     }
 
     public function pageNotFound()

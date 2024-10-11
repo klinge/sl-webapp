@@ -51,7 +51,7 @@ class Session
 
     public static function isAdmin(): bool
     {
-        return isset($_SESSION['isAdmin']) && $_SESSION['isAdmin'] === true;
+        return isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
     }
 
     public static function getSessionDataForViews(): array
