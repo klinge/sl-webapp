@@ -58,8 +58,6 @@ $num = sizeof($viewData['items']);
     </div>
 </div>
 
-<script src="assets/js/site.js"></script>
-
 <!-- datatables js -->
 <!-- get download package from https://datatables.net/download/ -->
 <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.7/r-3.0.3/datatables.min.js"

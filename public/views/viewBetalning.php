@@ -48,8 +48,6 @@ if (isset($data['items'])) {
     </tbody>
 </table>
 
-<script src="assets/js/site.js"></script>
-
 <!-- datatables js -->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.1.7/r-3.0.3/datatables.min.js"

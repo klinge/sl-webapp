@@ -11,17 +11,17 @@ include_once "views/_layouts/header.php";
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
 
 <!-- Login 9 - Bootstrap Brain Component -->
-<section class="bg-primary py-3 py-md-4 py-xl-8 mt-md-4">
+<section class="py-3 py-md-4 py-xl-8 mt-md-4">
     <div class="container">
 
         <div class="row gy-4 align-items-center">
             <div class="col-12 col-md-6 col-xl-6">
-                <div class="d-flex justify-content-center text-bg-primary">
+                <div class="d-flex justify-content-center">
                     <div class="col-12 col-xl-9">
                         <img class="img-fluid rounded mb-4" loading="lazy" src="./assets/img/sl-logo.png" width="245" height="80" alt="BootstrapBrain Logo">
                         <hr class="border-primary-subtle mb-4">
-                        <h2 class="h1 mb-4">Medlemsregister</h2>
-                        <p class="lead mb-5">Ett medlems- och seglingsregister för Sofia Linnea.</p>
+                        <h2 class="h1 mb-4">Medlemssidorna</h2>
+                        <p class="lead mb-5">Här kan du som är medlem i föreningen logga in.</p>
                         <div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-grip-horizontal h2" viewBox="0 0 16 16">
                                 <path d="M2 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm3 3a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm0-3a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
@@ -38,15 +38,15 @@ include_once "views/_layouts/header.php";
                         <button class="nav-link" id="nav-register-tab" data-bs-toggle="tab" data-bs-target="#nav-register" type="button" role="tab" aria-controls="nav-register" aria-selected="false">Registrera dig</button>
                     </div>
                 </nav>
-                <div class="tab-content" id="nav-tabContent">
+                <div class="tab-content border-1" id="nav-tabContent">
                     <!-- Inloggning -->
                     <div class="tab-pane fade show active" id="nav-login" role="tabpanel" aria-labelledby="nav-login-tab">
-                        <div class="card border-0 rounded-0">
+                        <div class="card border-1 rounded-0">
                             <div class="card-body p-3 p-md-4 p-xl-5">
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="mb-4">
-                                            <h3>Logga in</h3>
+                                            <h3>Välkommen tillbaka</h3>
                                             <p>Har du inget konto? <a href="#nav-register" data-bs-toggle="tab">Registrera dig</a></p>
                                         </div>
                                     </div>
@@ -84,7 +84,7 @@ include_once "views/_layouts/header.php";
                                         <div class="col-12">
                                             <div class="d-grid">
                                                 <!-- The following line controls and configures the Turnstile widget. -->
-                                                <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="dark"></div>
+                                                <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
                                                 <!-- end. -->
                                                 <button class="btn btn-primary btn-lg"
                                                     onclick="onLoginSubmit()"
@@ -149,7 +149,7 @@ include_once "views/_layouts/header.php";
                                         <div class="col-12">
                                             <div class="d-grid">
                                                 <!-- The following line controls and configures the Turnstile widget. -->
-                                                <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="dark"></div>
+                                                <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
                                                 <!-- end. -->
                                                 <button class="g-recaptcha btn btn-primary btn-lg disabled"
                                                     id="registerSubmit"
@@ -173,9 +173,12 @@ include_once "views/_layouts/header.php";
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
         const loginForm = document.getElementById('loginForm');
         const usernameInput = document.getElementById('loginEmail');
         const rememberCheckbox = document.getElementById('rememberMe');
+
+        updateTurnstileTheme();
 
         // Check if there's a stored username and populate the input field
         const storedUsername = localStorage.getItem('rememberedUsername');
@@ -197,50 +200,6 @@ include_once "views/_layouts/header.php";
         document.getElementById('registerPasswordRepeat').addEventListener('blur', checkPasswords);
 
     });
-
-    function onLoginSubmit() {
-        const loginForm = document.getElementById('loginForm');
-        const rememberUsername = document.getElementById('rememberMe').checked;
-
-        //Save email to local storage if the user selected that
-        if (rememberUsername) {
-            let username = document.getElementById('loginEmail').value;
-            localStorage.setItem('rememberedUsername', username);
-            console.log("Saved username:" + localStorage.getItem('rememberedUsername'));
-        } else {
-            localStorage.removeItem('rememberedUsername');
-        }
-        //And then submit the form
-        loginForm.submit();
-        return true;
-    };
-
-    function onRegisterSubmit() {
-        const form = document.getElementById('registerForm');
-        //And then submit the form
-        form.submit();
-        return true;
-    };
-
-    function checkPasswords() {
-        const password = document.getElementById('registerPassword').value;
-        const repeatPassword = document.getElementById('registerPasswordRepeat').value;
-        const submitButton = document.getElementById('registerSubmit');
-        const errorElement = document.getElementById('passwordError');
-
-        if (password === repeatPassword && password !== '') {
-            submitButton.classList.remove('disabled');
-            errorElement.style.display = 'none';
-        } else {
-            submitButton.classList.add('disabled');
-            if (repeatPassword !== '') {
-                errorElement.textContent = 'Lösenorden matchar inte!';
-                errorElement.style.display = 'block';
-            } else {
-                errorElement.style.display = 'none';
-            }
-        }
-    }
 </script>
 
 <?php

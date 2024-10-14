@@ -77,16 +77,17 @@ $APP_DIR = $viewData['APP_DIR'];
 
             <div class="collapse navbar-collapse" id="slNavbar">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
-                        <a class="nav-link <?= $isActive('/medlem') ?>" aria-current="page" href="<?php echo $APP_DIR ?>/medlem">Medlemmar</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $isActive('/segling') ?>" href="<?php echo $APP_DIR ?>/segling">Seglingar</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $isActive('/betalning') ?>" href="<?php echo $APP_DIR ?>/betalning">Betalningar</a>
-                    </li>
-
+                    <?php if (isset($viewData) && $viewData['isLoggedIn']) : ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= $isActive('/medlem') ?>" aria-current="page" href="<?php echo $APP_DIR ?>/medlem">Medlemmar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= $isActive('/segling') ?>" href="<?php echo $APP_DIR ?>/segling">Seglingar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?= $isActive('/betalning') ?>" href="<?php echo $APP_DIR ?>/betalning">Betalningar</a>
+                        </li>
+                    <?php endif; ?>
                     <?php if (isset($viewData) && $viewData['isLoggedIn']) : ?>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="dropdown05" data-bs-toggle="dropdown" aria-expanded="false">

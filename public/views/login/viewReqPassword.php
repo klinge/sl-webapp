@@ -40,7 +40,7 @@ include_once "views/_layouts/header.php";
                             <div class="col-12">
                                 <div class="d-grid">
                                     <!-- The following line controls and configures the Turnstile widget. -->
-                                    <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="dark"></div>
+                                    <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
                                     <!-- end. -->
                                     <button class="g-recaptcha btn bsb-btn-xl btn-primary"
                                         id="bytlosenSubmit"
@@ -65,12 +65,9 @@ include_once "views/_layouts/header.php";
 </section>
 
 <script>
-    function onFormSubmit() {
-        const form = document.getElementById('bytlosenForm');
-        //And then submit the form
-        form.submit();
-        return true;
-    };
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTurnstileTheme();
+    });
 </script>
 
 <?php // footer
