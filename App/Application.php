@@ -272,7 +272,7 @@ class Application
      *
      * @throws Exception If the controller class is not found
      */
-    private function dispatch(array $match, array $request): void
+    private function dispatch(array $match, ServerRequest $request): void
     {
         //If we have a string with a # then it's a controller action pair
         if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
@@ -321,7 +321,7 @@ class Application
             echo "404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!";
             // here you can handle 404
         } else {
-            $this->dispatch($match, $this->request);
+            $this->dispatch($match, $this->psrRequest);
         }
     }
 }
