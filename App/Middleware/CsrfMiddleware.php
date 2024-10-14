@@ -34,7 +34,7 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
         }
 
         // Check if the current path is in the excluded list
-        $currentPath = parse_url($this->request['REQUEST_URI'], PHP_URL_PATH);
+        $currentPath =  $this->request->getUri()->getPath();
         foreach ($this->excludedPaths as $excludedPath) {
             if (strpos($currentPath, $excludedPath) === 0) {
                 $this->app->getLogger()->debug('Call to a path that excludes csrf protection: ' . $currentPath);
@@ -42,7 +42,7 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
             }
         }
 
-        if ($this->request['REQUEST_METHOD'] === 'POST') {
+        if ($this->request->getMethod() === 'POST') {
             $token = $_POST['csrf_token'] ?? '';
             $this->app->getLogger()->debug('In csrf middleware. Token in POST was: ' . $token);
 

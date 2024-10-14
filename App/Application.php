@@ -16,6 +16,8 @@ use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\Diactoros\ServerRequest;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
@@ -36,6 +38,7 @@ class Application
     private array $middlewares = [];
     private string $rootDir = '';
     private array $request = [];
+    private ServerRequest $psrRequest;
     private Logger $logger;
 
     public function __construct()
@@ -47,13 +50,14 @@ class Application
         $this->setupRouter();
         $this->setupLogger($this->getAppEnv());
         $this->setupSession();
-        //TODO In the future maybe add PSR-7 Request and Response objects
+        // TODO remove old request once PSR7 is in place
         $this->request = $_SERVER;
+        $this->psrRequest = ServerRequestFactory::fromGlobals();
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this, $this->request));
-        $this->addMiddleware(new AuthorizationMiddleware($this, $this->request));
-        $this->addMiddleware(new CsrfMiddleware($this, $this->request));
+        $this->addMiddleware(new AuthenticationMiddleware($this, $this->psrRequest));
+        $this->addMiddleware(new AuthorizationMiddleware($this, $this->psrRequest));
+        $this->addMiddleware(new CsrfMiddleware($this, $this->psrRequest));
     }
 
     /**

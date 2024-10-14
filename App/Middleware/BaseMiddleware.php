@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Application;
+use Laminas\Diactoros\ServerRequest;
 
 class BaseMiddleware
 {
-    protected $app;
-    protected $request;
+    protected Application $app;
+    protected ServerRequest $request;
 
-    public function __construct(Application $app, array $request)
+    public function __construct(Application $app, ServerRequest $request)
     {
         $this->app = $app;
         $this->request = $request;
@@ -26,8 +27,11 @@ class BaseMiddleware
     }
 
     protected function isAjaxRequest(): bool
-    {
-        if (isset($this->request['HTTP_X_REQUESTED_WITH']) && strtolower($this->request['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    {;
+        if (
+            $this->request->hasHeader('HTTP_X_REQUESTED_WITH')
+            && strtolower($this->request->getHeader('HTTP_X_REQUESTED_WITH')[0]) === 'xmlhttprequest'
+        ) {
             return true;
         } else {
             return false;
