@@ -9,6 +9,7 @@ class RouteConfig
     //Used by middleware to know what pages does not require login
     public static $noLoginRequiredRoutes = [
         'show-login',
+        'show-register',
         'login',
         'register',
         'register-activate',
@@ -55,8 +56,9 @@ class RouteConfig
         $router->map('GET', '/login', 'AuthController#showLogin', 'show-login');
         $router->map('POST', '/login', 'AuthController#login', 'login');
         $router->map('GET', '/logout', 'AuthController#logout', 'logout');
-        $router->map('POST', '/register', 'AuthController#register', 'register');
-        $router->map('GET', '/register/[a:token]', 'AuthController#activate', 'register-activate');
+        $router->map('GET', '/auth/register', 'AuthController#showRegister', 'show-register');
+        $router->map('POST', '/auth/register', 'AuthController#register', 'register');
+        $router->map('GET', '/auth/register/[a:token]', 'AuthController#activate', 'register-activate');
         $router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
         $router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
         $router->map('GET', '/auth/bytlosenord/[a:token]', 'AuthController#showResetPassword', 'show-reset-password');

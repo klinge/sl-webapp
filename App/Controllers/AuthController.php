@@ -28,6 +28,11 @@ class AuthController extends BaseController
     private const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
     private const BAD_EMAIL_OR_PASSWORD = 'Felaktig e-postadress eller lösenord';
 
+    //View links
+    private const LOGIN_VIEW = 'login/viewLogin';
+    private const REGISTER_VIEW = 'login/viewRegisterAccount';
+    private const NEWPASSWORD_VIEW = 'login/viewReqPassword';
+
     /**
      * @param Application $app The application instance.
      * @param array<string, mixed> $request The request data.
@@ -48,9 +53,8 @@ class AuthController extends BaseController
     public function showLogin(): void
     {
         $this->setCsrfToken();
-        $this->view->render('login/viewLogin');
+        $this->view->render(self::LOGIN_VIEW);
     }
-
     /**
      * Handles user login process.
      *
@@ -65,7 +69,7 @@ class AuthController extends BaseController
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
             Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::LOGIN_VIEW);
         }
 
         $providedEmail = $_POST['email'];
@@ -77,7 +81,7 @@ class AuthController extends BaseController
         if (!$result) {
             $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->request['REMOTE_ADDR']);
             Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::LOGIN_VIEW);
             exit;
         }
         //Catch exception if medlem not found, should not happen since we already checked for it
@@ -86,14 +90,14 @@ class AuthController extends BaseController
         } catch (Exception $e) {
             $this->app->getLogger()->error("Technical error. Could not create member object for member id: " . $result['id']);
             Session::setFlashMessage('error', 'Tekniskt fel. Försök igen eller kontakta en administratör!');
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::LOGIN_VIEW);
             return;
         }
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
             $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->request['REMOTE_ADDR']);
             Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::LOGIN_VIEW);
             return;
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
@@ -134,6 +138,17 @@ class AuthController extends BaseController
     }
 
     /**
+     * Shows the user registration form.
+     *
+     * @return void
+     */
+    public function showRegister(): void
+    {
+        $this->setCsrfToken();
+        $this->view->render(self::REGISTER_VIEW);
+    }
+
+    /**
      * Handles user registration process.
      *
      * Validates reCAPTCHA, sanitizes input, checks password requirements,
@@ -146,7 +161,7 @@ class AuthController extends BaseController
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
             Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::REGISTER_VIEW);
         }
         //Sanitize email and validate passwords
         $s = new Sanitizer();
@@ -155,16 +170,36 @@ class AuthController extends BaseController
 
         $email = $cleanValues['email'];
         $password = $_POST['password'];
-        $repeatPassword = $_POST['passwordRepeat'];
+        $repeatPassword = $_POST['verifyPassword'];
 
-        //First validate that the passwords match
-        if ($password != $repeatPassword) {
-            Session::setFlashMessage('error', 'Lösenorden matchar inte!');
-            $this->view->render('login/viewLogin');
+        //First check if the user exists and already has a password
+        $result = $this->getMemberByEmail($email);
+        //Fail if user does not exist
+        if (!$result) {
+            $this->app->getLogger()->info("Register member: Failed to register new member. Email does not exist: " . $email);
+            Session::setFlashMessage('error', 'Det finns ingen medlem med den emailadressen. Du måste vara medlem för att kunna registrera dig.');
+            $this->view->render(self::REGISTER_VIEW);
             return;
         }
 
-        //Then check that it follows some basic rules
+        $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
+
+        //Fail if user already has a password
+        if ($medlem->password) {
+            $this->app->getLogger()->info("Register member: Failed to register new member. Account already activated: " . $email);
+            Session::setFlashMessage('error', 'Ditt konto är redan redan registrerat. Har du glömt ditt lösenord? Prova att byta lösenord.');
+            $this->view->render(self::LOGIN_VIEW);
+            return;
+        }
+
+        //Then validate that the passwords match
+        if ($password != $repeatPassword) {
+            Session::setFlashMessage('error', 'Lösenorden matchar inte!');
+            $this->view->render(self::REGISTER_VIEW);
+            return;
+        }
+
+        //Then check that it follows some basic rules and fail if not
         $passwordErrors = $this->validatePassword($password, $email);
 
         if (!empty($passwordErrors)) {
@@ -174,30 +209,11 @@ class AuthController extends BaseController
             }
             $message = $message . "</ul>";
             Session::setFlashMessage('error', $message);
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::REGISTER_VIEW);
             return;
         }
 
-        //Then check if the user exists and already has a password
-        $result = $this->getMemberByEmail($email);
-        //Fail if user does not exist
-        if (!$result) {
-            $this->app->getLogger()->info("Register member: Failed to register new member. Email does not exist: " . $email);
-            Session::setFlashMessage('error', 'Det finns ingen medlem med den emailadressen. Du måste vara medlem för att kunna registrera dig.');
-            $this->view->render('login/viewLogin');
-            return;
-        }
-
-        $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
-
-        //Fail if user already has a password
-        if ($medlem->password) {
-            $this->app->getLogger()->info("Register member: Failed to register new member. Account already activated: " . $email);
-            Session::setFlashMessage('error', 'Ditt konto är redan redan registrerat. Har du glömt dit lösenord? Prova att byta lösenord.');
-            $this->view->render('login/viewLogin');
-            return;
-        }
-        //Save hashed password and generate a token to be sent by mail to the user
+        //All guard-clauses done, save hashed password and generate a token to be sent by mail to the user
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         $token = $this->getTokenHandler()->generateToken();
@@ -207,7 +223,7 @@ class AuthController extends BaseController
         if (!$result) {
             $this->app->getLogger()->error("Register member: could not save token for member:" . $email);
             Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen.');
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::REGISTER_VIEW);
             return;
         }
 
@@ -226,12 +242,12 @@ class AuthController extends BaseController
                 'success',
                 'E-post med verifieringslänk har skickats till din e-postadress. Klicka på länken i e-posten för att aktivera ditt konto.'
             );
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::LOGIN_VIEW);
             return;
         } catch (Exception $e) {
             $this->app->getLogger()->info("Failed sending mail with activation link to member: " . $email);
             Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen. (' . $e->getMessage() . ')');
-            $this->view->render('login/viewLogin');
+            $this->view->render(self::REGISTER_VIEW);
             return;
         }
     }
@@ -279,7 +295,7 @@ class AuthController extends BaseController
      */
     public function showRequestPwd()
     {
-        $this->view->render('login/viewReqPassword');
+        $this->view->render(self::NEWPASSWORD_VIEW);
     }
 
     /**
@@ -295,7 +311,7 @@ class AuthController extends BaseController
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
             Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
-            $this->view->render('login/viewReqPassword');
+            $this->view->render(self::NEWPASSWORD_VIEW);
         }
         $email = $_POST['email'];
         $member = $this->getMemberByEmail($email);
@@ -307,7 +323,7 @@ class AuthController extends BaseController
 
             if (!$result) {
                 Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
-                $this->view->render('login/viewReqPassword');
+                $this->view->render(self::NEWPASSWORD_VIEW);
                 return;
             }
 
@@ -322,7 +338,7 @@ class AuthController extends BaseController
                 $mailer->send(EmailType::PASSWORD_RESET, $email, data: $data);
             } catch (Exception $e) {
                 Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ') Länk: ' . $data['pwd_reset_link']);
-                $this->view->render('login/viewReqPassword');
+                $this->view->render(self::NEWPASSWORD_VIEW);
                 return;
             }
         } else {
@@ -330,7 +346,7 @@ class AuthController extends BaseController
         }
         //Set the same message disregarding if user existed or not
         Session::setFlashMessage('success', 'Om du har ett konto får du strax ett mail med en återställningslänk till din e-postadress.');
-        $this->view->render('login/viewReqPassword');
+        $this->view->render(self::NEWPASSWORD_VIEW);
     }
 
     /**

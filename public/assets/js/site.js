@@ -37,7 +37,7 @@ function onLoginSubmit() {
 
     //Save email to local storage if the user selected that
     if (rememberUsername) {
-        let username = document.getElementById('loginEmail').value;
+        let username = document.getElementById('email').value;
         localStorage.setItem('rememberedUsername', username);
         console.log("Saved username:" + localStorage.getItem('rememberedUsername'));
     } else {
@@ -63,9 +63,9 @@ function onFormSubmit() {
 };
 
 function checkPasswords() {
-    const password = document.getElementById('registerPassword').value;
-    const repeatPassword = document.getElementById('registerPasswordRepeat').value;
-    const submitButton = document.getElementById('registerSubmit');
+    const password = document.getElementById('password').value;
+    const repeatPassword = document.getElementById('verifyPassword').value;
+    const submitButton = document.getElementById('submit');
     const errorElement = document.getElementById('passwordError');
 
     if (password === repeatPassword && password !== '') {
