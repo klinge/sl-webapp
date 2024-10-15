@@ -11,13 +11,15 @@ use App\Models\BetalningRepository;
 use App\Models\Medlem;
 use App\Utils\Sanitizer;
 use App\Utils\View;
+use App\Utils\Session;
 use App\Application;
+use Psr\Http\Message\ServerRequestInterface;
 
 class BetalningController extends BaseController
 {
     private View $view;
 
-    public function __construct(Application $app, array $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
@@ -72,9 +74,10 @@ class BetalningController extends BaseController
     public function createBetalning(array $params): void
     {
         $betalning = new Betalning($this->conn);
+        $parsedBody = $this->request->getParsedBody();
 
         //Check for mandatory fields
-        if (empty($_POST['belopp']) || empty($_POST['datum']) || empty($_POST['avser_ar'])) {
+        if (empty($parsedBody['belopp']) || empty($parsedBody['datum']) || empty($parsedBody['avser_ar'])) {
             // Handle missing values, e.g., return an error message or redirect to the form
             $this->jsonResponse(['success' => false, 'message' => 'Belopp, datum, and avser_ar are required fields.']);
         }
@@ -88,7 +91,7 @@ class BetalningController extends BaseController
             'belopp' => 'float',
             'kommentar' => 'string',
         ];
-        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+        $cleanValues = $sanitizer->sanitize($parsedBody, $rules);
 
         $betalning->medlem_id = (int) $cleanValues['medlem_id'];
         $betalning->datum = $cleanValues['datum'];
@@ -105,8 +108,10 @@ class BetalningController extends BaseController
         // Create the betalning
         try {
             $result = $betalning->create();
+            $this->app->getLogger()->info('Betalning created successfully. Id of betalning: ' . $result['id'] . '. Registered by: ' . Session::get('user_id'));
             $this->jsonResponse(['success' => true, 'message' => 'Betalning created successfully. Id of betalning: ' . $result['id']]);
         } catch (Exception $e) {
+            $this->app->getLogger()->warning('Error creating Betalning: ' . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => 'Error creating Betalning: ' . $e->getMessage()]);
         }
     }
@@ -119,7 +124,8 @@ class BetalningController extends BaseController
         try {
             $betalning->delete();
         } catch (Exception $e) {
-            //TODO: Handle exception
+            $this->app->getLogger()->warning('Error deleting Betalning: ' . $e->getMessage());
+            $this->jsonResponse(['success' => false, 'message' => 'Error deleting Betalning: ' . $e->getMessage()]);
         }
     }
 }

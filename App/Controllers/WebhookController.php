@@ -8,21 +8,24 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 use App\Application;
+use Psr\Http\Message\ServerRequestInterface;
 
 class WebhookController extends BaseController
 {
     private string $githubSecret = '';
+    private string $remoteIp;
     private const REPOSITORY_ID = 781366756;
 
-    public function __construct(Application $app, array $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->githubSecret = $this->app->getConfig('GITHUB_WEBHOOK_SECRET');
+        $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
     }
 
     public function handle(): void
     {
-        $this->app->getLogger()->info('Starting to process webhook call from: ' . $this->request['REMOTE_ADDR'], ['class' => __CLASS__, 'function' => __FUNCTION__]);
+        $this->app->getLogger()->info('Starting to process webhook call from: ' . $this->remoteIp, ['class' => __CLASS__, 'function' => __FUNCTION__]);
 
         $payload = $this->verifyRequest();
 
@@ -59,12 +62,12 @@ class WebhookController extends BaseController
         $event = '';
 
         // Verify that it's a github webhook request
-        if (!isset($this->request['HTTP_X_GITHUB_EVENT'])) {
+        if (!$this->request->hasHeader('HTTP_X_GITHUB_EVENT')) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
             $this->app->getLogger()->warning("Missing X_GITHUB_EVENT header");
             return $payload;
         } else {
-            $event = $this->request['HTTP_X_GITHUB_EVENT'];
+            $event = $this->request->getHeader('HTTP_X_GITHUB_EVENT')[0];
         }
         // Validate that it's ping or a push
         if (!empty($event) && $event !== 'push' && $event !== 'ping') {
@@ -73,13 +76,13 @@ class WebhookController extends BaseController
             return $payload;
         }
         // Validate the signature using the github secret
-        if (!isset($this->request['HTTP_X_HUB_SIGNATURE_256'])) {
+        if ($this->request->hasHeader('HTTP_X_HUB_SIGNATURE_256')) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
             $this->app->getLogger()->warning("Github signature header missing");
             return $payload;
         }
         // Validate signature header format
-        $signature = $this->request['HTTP_X_HUB_SIGNATURE_256'];
+        $signature = $this->request->getHeader('HTTP_X_HUB_SIGNATURE_256')[0];
         $signature_parts = explode('=', $signature);
 
         if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
@@ -88,7 +91,7 @@ class WebhookController extends BaseController
             return $payload;
         }
         //All is well so far - get the request body and validate the signature
-        $rawBody = file_get_contents('php://input');
+        $rawBody = (string) $this->request->getBody();
 
         $signatureResult = $this->validateSignature($rawBody, $signature_parts[1], $this->githubSecret);
 

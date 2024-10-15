@@ -16,12 +16,13 @@ use App\Application;
 use Exception;
 use PDO;
 use PDOException;
+use Psr\Http\Message\ServerRequestInterface;
 
 class SeglingController extends BaseController
 {
     private View $view;
 
-    public function __construct(Application $app, array $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
@@ -104,7 +105,7 @@ class SeglingController extends BaseController
             'skeppslag' => 'string',
             'kommentar' => 'string',
         ];
-        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+        $cleanValues = $sanitizer->sanitize($this->request->getParsedBody(), $rules);
 
         //Store sanitized values
         $segling->start_dat = $cleanValues['startdat'];
@@ -159,7 +160,7 @@ class SeglingController extends BaseController
             'skeppslag' => 'string',
             'kommentar' => 'string',
         ];
-        $cleanValues = $sanitizer->sanitize($_POST, $rules);
+        $cleanValues = $sanitizer->sanitize($this->request->getParsedBody(), $rules);
 
         //Check if requires indata is there, fail otherwise
         if (empty($cleanValues['startdat']) || empty($cleanValues['slutdat']) || empty($cleanValues['skeppslag'])) {
@@ -187,12 +188,14 @@ class SeglingController extends BaseController
     }
 
     /*
-    * FUNCTIONS THAT HANDLES MEMBERS ON A Segling
+    * FUNCTIONS THAT HANDLE Members on a Segling
+    * called from ajax calls in the client to return json data
     */
-    public function saveMedlem()
+    public function saveMedlem(): array
     {
+        $parsedBody = $this->request->getParsedBody();
         //validate input
-        if (!isset($_POST['segling_id']) || !isset($_POST['segling_person'])) {
+        if (!isset($parsedBody['segling_id']) || !isset($parsedBody['segling_person'])) {
             $return = ['success' => false, 'message' => "Missing input"];
             $this->jsonResponse($return);
             exit;
@@ -200,8 +203,8 @@ class SeglingController extends BaseController
         //check if Medlem is already on the segling
         $query = "SELECT * FROM Segling_Medlem_Roll WHERE segling_id = :segling_id AND medlem_id = :medlem_id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':segling_id', $_POST['segling_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':medlem_id', $_POST['segling_person'], PDO::PARAM_INT);
+        $stmt->bindParam(':segling_id', $parsedBody['segling_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':medlem_id', $parsedBody['segling_person'], PDO::PARAM_INT);
         $stmt->execute();
         $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -214,17 +217,17 @@ class SeglingController extends BaseController
 
         //If not, insert the row, don't forget if roll was set or not..
         //First check if the role field was set or not, value 999 means that no role was selected
-        $hasRole = ($_POST['segling_roll'] == 999) ? false : true;
+        $hasRole = ($parsedBody['segling_roll'] == 999) ? false : true;
         if ($hasRole) {
             $query = "INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id, roll_id) VALUES (:segling_id, :medlem_id, :roll_id)";
         } else {
             $query = "INSERT INTO Segling_Medlem_Roll (segling_id, medlem_id) VALUES (:segling_id, :medlem_id)";
         }
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':segling_id', $_POST['segling_id'], PDO::PARAM_INT);
-        $stmt->bindParam(':medlem_id', $_POST['segling_person'], PDO::PARAM_INT);
+        $stmt->bindParam(':segling_id', $parsedBody['segling_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':medlem_id', $parsedBody['segling_person'], PDO::PARAM_INT);
         if ($hasRole) {
-            $stmt->bindParam(':roll_id', $_POST['segling_roll'], PDO::PARAM_INT);
+            $stmt->bindParam(':roll_id', $parsedBody['segling_roll'], PDO::PARAM_INT);
         }
         //Then try to update anc catch PDO exceptions..
         try {
