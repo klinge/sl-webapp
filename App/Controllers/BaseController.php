@@ -9,17 +9,17 @@ use App\Utils\Session;
 use App\Utils\Database;
 use PDO;
 use PDOException;
-use Laminas\Diactoros\ServerRequest;
+use Psr\Http\Message\ServerRequestInterface;
 
 class BaseController
 {
     protected PDO $conn;
-    protected ServerRequest $request;
+    protected ServerRequestInterface $request;
     protected array $sessionData;
     protected Application $app;
     private const JSON_CONTENT_TYPE = 'application/json';
 
-    public function __construct(Application $app, ServerRequest $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         $this->app = $app;
         $this->request = $request;

@@ -16,8 +16,8 @@ use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
+use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\ServerRequest;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
@@ -37,8 +37,7 @@ class Application
     private ?AltoRouter $router = null;
     private array $middlewares = [];
     private string $rootDir = '';
-    private array $request = [];
-    private ServerRequest $psrRequest;
+    private ServerRequestInterface $psrRequest;
     private Logger $logger;
 
     public function __construct()
@@ -50,8 +49,6 @@ class Application
         $this->setupRouter();
         $this->setupLogger($this->getAppEnv());
         $this->setupSession();
-        // TODO remove old request once PSR7 is in place
-        $this->request = $_SERVER;
         $this->psrRequest = ServerRequestFactory::fromGlobals();
 
         // Add middlewares here
@@ -266,13 +263,13 @@ class Application
      * with the provided parameters.
      *
      * @param array $match The matched route information
-     * @param array $request The current request object
+     * @param ServerRequestInterface $request The current request object
      *
      * @return void
      *
      * @throws Exception If the controller class is not found
      */
-    private function dispatch(array $match, ServerRequest $request): void
+    private function dispatch(array $match, ServerRequestInterface $request): void
     {
         //If we have a string with a # then it's a controller action pair
         if (is_string($match['target']) && strpos($match['target'], "#") !== false) {

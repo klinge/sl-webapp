@@ -8,7 +8,7 @@ include_once "views/_layouts/header.php";
 <div class="d-flex align-items-center justify-content-center section-notfound">
     <div class="text-center">
         <p class="fs-3">
-            <img src="assets/img/errors/404.png" class="img-fluid" alt="image">
+            <img src="/assets/img/errors/404.png" class="img-fluid" alt="image">
         </p>
         <h1 class="display-1 fw-bold">404</h1>
         <p class="fs-3"> <span class="text-danger">Oops!</span> Page not found</p>

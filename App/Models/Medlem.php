@@ -14,9 +14,9 @@ use InvalidArgumentException;
 class Medlem
 {
     // database connection and table name
-    private $conn;
-    private $table_name = "Medlem";
-    private $logger;
+    private PDO $conn;
+    private string $table_name = "Medlem";
+    private Logger $logger;
 
     // Class properties
     public int $id;

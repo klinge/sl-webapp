@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Application;
-use Laminas\Diactoros\ServerRequest;
+use Psr\Http\Message\ServerRequestInterface;
 
 class BaseMiddleware
 {
     protected Application $app;
-    protected ServerRequest $request;
+    protected ServerRequestInterface $request;
 
-    public function __construct(Application $app, ServerRequest $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         $this->app = $app;
         $this->request = $request;

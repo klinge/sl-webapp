@@ -12,7 +12,9 @@ use App\Models\Roll;
 use App\Models\BetalningRepository;
 use App\Utils\Sanitizer;
 use App\Utils\View;
+use App\Utils\Session;
 use App\Application;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * MedlemController handles operations related to members (medlemmar).
@@ -32,9 +34,9 @@ class MedlemController extends BaseController
      * Constructs a new MedlemController instance.
      *
      * @param Application $app The application instance
-     * @param array $request The request data
+     * @param ServerRequestInterface $request The request object
      */
-    public function __construct(Application $app, array $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
@@ -143,7 +145,7 @@ class MedlemController extends BaseController
     {
         $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
-        $postData = $_POST;
+        $postData = $this->request->getParsedBody();
 
         $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
 
@@ -154,6 +156,7 @@ class MedlemController extends BaseController
 
         try {
             $medlem->save();
+            $this->app->getLogger()->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad av ' . $_SESSION['user']->fornamn . ' ' . Session::get('user_id'));
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'message' => 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
@@ -212,7 +215,7 @@ class MedlemController extends BaseController
     public function create(): void
     {
         $medlem = new Medlem($this->conn, $this->app->getLogger());
-        $postData = $_POST;
+        $postData = $this->request->getParsedBody();
 
         $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
         //If the sanitize function returns false, we have an error, just exit
@@ -250,16 +253,18 @@ class MedlemController extends BaseController
      */
     public function delete(): void
     {
-        $id = $_POST['id'];
+        $id = $this->request->getParsedBody()['id'];
         try {
             $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
             $medlem->delete();
             $_SESSION['flash_message'] = ['type' => 'ok', 'message' => 'Medlem borttagen!'];
+            $this->app->getLogger()->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' borttagen av: ' . Session::get('user_id'));
             // Set the URL and redirect
             $redirectUrl = $this->app->getRouter()->generate('medlem-list');
             header('Location: ' . $redirectUrl);
             exit;
         } catch (Exception $e) {
+            $this->app->getLogger()->warning('Kunde inte ta bort medlem: ' . $e->getMessage());
             $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Kunde inte ta bort medlem!'];
             $redirectUrl = $this->app->getRouter()->generate('medlem-list');
         }

@@ -127,6 +127,7 @@ $APP_DIR = $viewData['APP_DIR'];
                 } else {
                     echo '<div class="alert alert-success alert-dismissible fade show" role="alert">';
                 }
+                echo '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
                 echo $_SESSION['flash_message']['message'];
                 echo '</div>';
 

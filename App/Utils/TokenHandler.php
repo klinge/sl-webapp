@@ -6,15 +6,18 @@ namespace App\Utils;
 
 use PDO;
 use PDOException;
+use App\Application;
 use App\Utils\TokenType;
 
 class TokenHandler
 {
     private PDO $conn;
+    private Application $app;
 
-    public function __construct(PDO $conn)
+    public function __construct(PDO $conn, Application $app)
     {
         $this->conn = $conn;
+        $this->app = $app;
     }
 
     public function generateToken(): string
@@ -35,6 +38,7 @@ class TokenHandler
         } elseif ($tokenType === TokenType::RESET) {
             $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)");
         } else {
+            $this->app->getLogger()->error("TokenHandler::Invalid token type: " . $tokenType->value);
             return false;
         }
 
@@ -49,6 +53,7 @@ class TokenHandler
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
+            $this->app->getLogger()->error("TokenHandler::Error saving token to database: " . $e->getMessage());
             return false;
         }
     }
@@ -85,6 +90,7 @@ class TokenHandler
             $stmt->execute();
             return true;
         } catch (PDOException $e) {
+            $this->app->getLogger()->error("TokenHandler::Error deleting token from database: " . $e->getMessage());
             return false;
         }
     }
@@ -94,6 +100,7 @@ class TokenHandler
         $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE created_at < datetime('now', '-1 hour')");
         $stmt->execute();
         //Return number of deleted rows
+        $this->app->getLogger()->info("TokenHandler::Deleted " . $stmt->rowCount() . " expired tokens");
         return $stmt->rowCount();
     }
 }
