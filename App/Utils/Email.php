@@ -81,12 +81,13 @@ class Email
             }
             $this->mailer->Subject = $templateSubject;
             $this->mailer->Body = $template;
-
+            $this->app->getLogger()->info("Email::{$type->value} email sent to: {$to}.");
             $this->mailer->send();
 
             unset($this->mailer);
             return true;
         } catch (Exception $e) {
+            $this->app->getLogger()->warning("Email::{$type->value} email could not be sent to: {$to}. Email body: {$template}");
             throw new Exception("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }
