@@ -12,7 +12,10 @@ use App\Models\Medlem;
 use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Utils\Session;
+use App\Utils\Email;
+use App\Utils\EmailType;
 use App\Application;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use Psr\Http\Message\ServerRequestInterface;
 
 class BetalningController extends BaseController
@@ -108,6 +111,7 @@ class BetalningController extends BaseController
         // Create the betalning
         try {
             $result = $betalning->create();
+            $sentMail = $this->sendWelcomeEmailOnFirstPayment($betalning->medlem_id);
             $this->app->getLogger()->info('Betalning created successfully. Id of betalning: ' . $result['id'] . '. Registered by: ' . Session::get('user_id'));
             $this->jsonResponse(['success' => true, 'message' => 'Betalning created successfully. Id of betalning: ' . $result['id']]);
         } catch (Exception $e) {
@@ -126,6 +130,40 @@ class BetalningController extends BaseController
         } catch (Exception $e) {
             $this->app->getLogger()->warning('Error deleting Betalning: ' . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => 'Error deleting Betalning: ' . $e->getMessage()]);
+        }
+    }
+
+    private function sendWelcomeEmailOnFirstPayment(int $memberId): bool
+    {
+        //Try to create a member frrom the id, fail if not found
+        try {
+            $member = new Medlem($this->conn, $this->app->getLogger(), $memberId);
+        } catch (Exception $e) {
+            $this->app->getLogger()->warning('sendWelcomeEmailonFirstPaymen: Member not found. MemberId: ' . $memberId);
+            return false;
+        }
+        //Quit early if the member has already received the welcome mail
+        if ($member->skickat_valkomstbrev) {
+            return false;
+        }
+        //Fail if we don't have an email adress for the member
+        if (empty($member->email)) {
+            $this->app->getLogger()->warning('sendWelcomeEmailonFirstPaymen: No email adress for member. MemberId: ' . $memberId);
+            return false;
+        }
+        //No welcome mail was sent and we have an email adress for the member
+        $data = ['fornamn' => $member->fornamn, 'efternamn' => $member->efternamn];
+        $email = new Email($this->app);
+        try {
+            $email->send(EmailType::WELCOME, $member->email, 'Välkommen till föreningen Sofia Linnea', $data);
+            $this->app->getLogger()->info('sendWelcomeEmailOnFirstPayment: Welcome email sent to: ' . $member->email);
+            //Update the status on the member
+            $member->skickat_valkomstbrev = true;
+            $member->save();
+            return true;
+        } catch (PHPMailerException $e) {
+            $this->app->getLogger()->warning('sendWelcomeEmailOnFirstPayment: Failed to send welcome email. Error: ' . $e->getMessage());
+            return false;
         }
     }
 }
