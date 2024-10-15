@@ -30,11 +30,11 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
     public function handle(): void
     {
         if (!isset($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+            Session::set('csrf_token', bin2hex(random_bytes(32)));
         }
 
         // Check if the current path is in the excluded list
-        $currentPath = parse_url($this->request['REQUEST_URI'], PHP_URL_PATH);
+        $currentPath =  $this->request->getUri()->getPath();
         foreach ($this->excludedPaths as $excludedPath) {
             if (strpos($currentPath, $excludedPath) === 0) {
                 $this->app->getLogger()->debug('Call to a path that excludes csrf protection: ' . $currentPath);
@@ -42,14 +42,14 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
             }
         }
 
-        if ($this->request['REQUEST_METHOD'] === 'POST') {
-            $token = $_POST['csrf_token'] ?? '';
+        if ($this->request->getMethod() === 'POST') {
+            $token = $this->request->getParsedBody()['csrf_token'] ?? '';
             $this->app->getLogger()->debug('In csrf middleware. Token in POST was: ' . $token);
 
-            if (!hash_equals($_SESSION['csrf_token'], $token)) {
+            if (!hash_equals(Session::get('csrf_token'), $token)) {
                 $this->app->getLogger()->warning('CSRF token mismatch. Uri was: ' . $currentPath
                     . ' Token in POST was: ' . $token
-                    . ' Called by: ' . $this->request['REMOTE_ADDR']);
+                    . ' Called by: ' . $this->request->getServerParams()['REMOTE_ADDR']);
                 //Set different responses depending on if it was an ajax request or not
                 if ($this->isAjaxRequest()) {
                     $this->sendJsonResponse(['status' => 'error', 'message' => 'Error validating csrf token'], 401);

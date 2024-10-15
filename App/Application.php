@@ -16,6 +16,8 @@ use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
+use Psr\Http\Message\ServerRequestInterface;
+use Laminas\Diactoros\ServerRequestFactory;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
@@ -35,7 +37,7 @@ class Application
     private ?AltoRouter $router = null;
     private array $middlewares = [];
     private string $rootDir = '';
-    private array $request = [];
+    private ServerRequestInterface $psrRequest;
     private Logger $logger;
 
     public function __construct()
@@ -47,13 +49,12 @@ class Application
         $this->setupRouter();
         $this->setupLogger($this->getAppEnv());
         $this->setupSession();
-        //TODO In the future maybe add PSR-7 Request and Response objects
-        $this->request = $_SERVER;
+        $this->psrRequest = ServerRequestFactory::fromGlobals();
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this, $this->request));
-        $this->addMiddleware(new AuthorizationMiddleware($this, $this->request));
-        $this->addMiddleware(new CsrfMiddleware($this, $this->request));
+        $this->addMiddleware(new AuthenticationMiddleware($this, $this->psrRequest));
+        $this->addMiddleware(new AuthorizationMiddleware($this, $this->psrRequest));
+        $this->addMiddleware(new CsrfMiddleware($this, $this->psrRequest));
     }
 
     /**
@@ -262,13 +263,13 @@ class Application
      * with the provided parameters.
      *
      * @param array $match The matched route information
-     * @param array $request The current request object
+     * @param ServerRequestInterface $request The current request object
      *
      * @return void
      *
      * @throws Exception If the controller class is not found
      */
-    private function dispatch(array $match, array $request): void
+    private function dispatch(array $match, ServerRequestInterface $request): void
     {
         //If we have a string with a # then it's a controller action pair
         if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
@@ -287,14 +288,15 @@ class Application
                 $controllerInstance = new $controllerClass($this, $request);
                 $controllerInstance->{$action}($params);
             } else {
-                echo 'Error: can not call ' . $controller . '#' . $action;
-                //possibly throw a 404 error
+                //Maybe also throw a 404 error here?
+                $this->logger->error('Error: can not call ' . $controller . '#' . $action);
             }
         } elseif (is_array($match) && is_callable($match['target'])) {
             //Handle the case then the target is a closure
             call_user_func_array($match['target'], $match['params']);
         } else {
-            header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+            $this->logger->error('Invalid call to dispatch(). $match was: ' . json_encode($match, JSON_PRETTY_PRINT));
+            header($this->psrRequest->getServerParams()['SERVER_PROTOCOL'] . ' 404 Not Found');
         }
     }
 
@@ -317,7 +319,7 @@ class Application
             echo "404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!";
             // here you can handle 404
         } else {
-            $this->dispatch($match, $this->request);
+            $this->dispatch($match, $this->psrRequest);
         }
     }
 }

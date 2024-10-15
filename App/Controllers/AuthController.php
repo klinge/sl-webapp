@@ -7,22 +7,25 @@ namespace App\Controllers;
 use App\Models\Medlem;
 use App\Utils\Sanitizer;
 use App\Utils\TokenHandler;
+use App\Utils\TokenType;
 use App\Utils\Session;
 use App\Utils\Email;
 use App\Utils\EmailType;
-use App\Utils\TokenType;
 use App\Utils\View;
 use App\Application;
 use PDO;
+use PDOException;
 use PHPMailer\PHPMailer\Exception;
 use andkab\Turnstile\Turnstile;
+use Psr\Http\Message\ServerRequestInterface;
 
 class AuthController extends BaseController
 {
-    private ?TokenHandler $tokenHandler = null;
     private View $view;
+    private ?TokenHandler $tokenHandler = null;
     private string $siteAddress;
     private string $turnstileSecret;
+    private string $remoteIp;
 
     //Messages
     private const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
@@ -35,14 +38,15 @@ class AuthController extends BaseController
 
     /**
      * @param Application $app The application instance.
-     * @param array<string, mixed> $request The request data.
+     * @param ServerRequestInterface $request The request data.
      */
-    public function __construct(Application $app, array $request)
+    public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
         $this->siteAddress = $this->app->getConfig('SITE_ADDRESS');
         $this->turnstileSecret = $this->app->getConfig('TURNSTILE_SECRET_KEY');
+        $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
     }
 
     /**
@@ -72,14 +76,21 @@ class AuthController extends BaseController
             $this->view->render(self::LOGIN_VIEW);
         }
 
-        $providedEmail = $_POST['email'];
-        $providedPassword = $_POST['password'];
+        $providedEmail = $this->request->getParsedBody()['email'] ?? '';
+        $providedPassword = $this->request->getParsedBody()['password'] ?? '';
+
+        if (empty($providedEmail) || empty($providedPassword)) {
+            $this->app->getLogger()->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
+            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
+            $this->view->render(self::LOGIN_VIEW);
+            exit;
+        }
 
         $result = $this->getMemberByEmail($providedEmail);
 
         //User not found
         if (!$result) {
-            $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->request['REMOTE_ADDR']);
+            $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
             Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render(self::LOGIN_VIEW);
             exit;
@@ -95,13 +106,13 @@ class AuthController extends BaseController
         }
         //Fail if passwork did not verify
         if (!password_verify($providedPassword, $medlem->password)) {
-            $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->request['REMOTE_ADDR']);
+            $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->remoteIp);
             Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
             $this->view->render(self::LOGIN_VIEW);
             return;
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
-        $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->request['REMOTE_ADDR']);
+        $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->remoteIp);
         Session::regenerateId();
         Session::set('user_id', $medlem->id);
         Session::set('fornamn', $medlem->fornamn);
@@ -166,11 +177,11 @@ class AuthController extends BaseController
         //Sanitize email and validate passwords
         $s = new Sanitizer();
         $rules = ['email' => 'email'];
-        $cleanValues = $s->sanitize($_POST, $rules);
+        $cleanValues = $s->sanitize($this->request->getParsedBody(), $rules);
 
         $email = $cleanValues['email'];
-        $password = $_POST['password'];
-        $repeatPassword = $_POST['verifyPassword'];
+        $password = $this->request->getParsedBody()['password'];
+        $repeatPassword = $this->request->getParsedBody()['verifyPassword'];
 
         //First check if the user exists and already has a password
         $result = $this->getMemberByEmail($email);
@@ -221,7 +232,6 @@ class AuthController extends BaseController
 
         //Fail if we couldn't save token
         if (!$result) {
-            $this->app->getLogger()->error("Register member: could not save token for member:" . $email);
             Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen.');
             $this->view->render(self::REGISTER_VIEW);
             return;
@@ -245,8 +255,9 @@ class AuthController extends BaseController
             $this->view->render(self::LOGIN_VIEW);
             return;
         } catch (Exception $e) {
-            $this->app->getLogger()->info("Failed sending mail with activation link to member: " . $email);
-            Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen. (' . $e->getMessage() . ')');
+            $this->app->getLogger()->warning("Failed sending mail with activation link to member: " . $email);
+            $this->app->getLogger()->warning("Error: " . $e->getMessage() . ". Link: " . $data['activate_url']);
+            Session::setFlashMessage('error', 'Kunde inte skicka mail med aktiveringslänk. Försök igen.');
             $this->view->render(self::REGISTER_VIEW);
             return;
         }
@@ -267,7 +278,7 @@ class AuthController extends BaseController
         $token_result = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
 
         if (!$token_result['success']) {
-            $this->app->getLogger()->warning("Activate account: failed to activate account. Token given was" . $token . ". Remote IP: " . $this->request['REMOTE_ADDR']);
+            $this->app->getLogger()->warning("Activate account: failed to activate account. Token given was" . $token . ". Remote IP: " . $this->remoteIp);
             Session::setFlashMessage('error', $token_result['message']);
             header('Location: ' . $this->app->getRouter()->generate('login'));
             return;
@@ -282,7 +293,7 @@ class AuthController extends BaseController
         $this->getTokenHandler()->deleteExpiredTokens();
 
         Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
-        $this->app->getLogger()->info("Activated account for member: " . $member['email'] . ". IP: " . $this->request['REMOTE_ADDR']);
+        $this->app->getLogger()->info("Activated account for member: " . $member['email'] . ". IP: " . $this->remoteIp);
         header('Location: ' . $this->app->getRouter()->generate('login'));
         //TODO Send a welcome mail on successful activation
         return;
@@ -313,15 +324,16 @@ class AuthController extends BaseController
             Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
             $this->view->render(self::NEWPASSWORD_VIEW);
         }
-        $email = $_POST['email'];
+        $email =  $this->request->getParsedBody()['email'] ?? '';
         $member = $this->getMemberByEmail($email);
         //Don't do anything if member doesn't exist
         if ($member) {
             $token = $this->getTokenHandler()->generateToken();
             $result = $this->getTokenHandler()->saveToken($token, TokenType::RESET, $email);
-            $this->app->getLogger()->info("Reset password called for user: " . $email . ". Remote IP: " . $this->request['REMOTE_ADDR']);
+            $this->app->getLogger()->info("Reset password called for user: " . $email . ". Remote IP: " . $this->remoteIp);
 
             if (!$result) {
+                $this->app->getLogger()->error("Reset password: could not save token for member:" . $email);
                 Session::setFlashMessage('error', 'Kunde inte skapa token. Försök igen.');
                 $this->view->render(self::NEWPASSWORD_VIEW);
                 return;
@@ -337,12 +349,14 @@ class AuthController extends BaseController
             try {
                 $mailer->send(EmailType::PASSWORD_RESET, $email, data: $data);
             } catch (Exception $e) {
-                Session::setFlashMessage('error', 'Något gick fel vid registreringen. Försök igen. (' . $e->getMessage() . ') Länk: ' . $data['pwd_reset_link']);
+                $this->app->getLogger()->info('Failed sending mail with reset password link to member: ' . $email .
+                    '. Error:' . $e->getMessage() . '. Länk: ' . $data['pwd_reset_link']);
+                Session::setFlashMessage('error', 'Kunde inte skicka mail med återställningslänk. Försök igen.');
                 $this->view->render(self::NEWPASSWORD_VIEW);
                 return;
             }
         } else {
-            $this->app->getLogger()->warning("Reset password called for non-existing user: " . $email . ". Remote IP: " . $this->request['REMOTE_ADDR']);
+            $this->app->getLogger()->warning("Reset password called for non-existing user: " . $email . ". Remote IP: " . $this->remoteIp);
         }
         //Set the same message disregarding if user existed or not
         Session::setFlashMessage('success', 'Om du har ett konto får du strax ett mail med en återställningslänk till din e-postadress.');
@@ -389,10 +403,10 @@ class AuthController extends BaseController
      */
     public function resetAndSavePassword()
     {
-        $email = $_POST['email'];
-        $token = $_POST['token'];
-        $password = $_POST['password'];
-        $password2 = $_POST['password2'];
+        $email =  $this->request->getParsedBody()['email'];
+        $token =  $this->request->getParsedBody()['token'];
+        $password =  $this->request->getParsedBody()['password'];
+        $password2 =  $this->request->getParsedBody()['password2'];
 
         //Fail if passwords don't match
         if ($password !== $password2) {
@@ -427,6 +441,7 @@ class AuthController extends BaseController
 
         //Fail if member doesn't exist, should never happen
         if (!$member) {
+            $this->app->getLogger()->warning("AuthController::resetAndSavePassword::Could not find member:" . $email);
             Session::setFlashMessage('error', 'OJ! Nu blev det ett tekniskt fel. Användaren finns inte..');
             header('Location: ' . $this->app->getRouter()->generate('show-request-password'));
             return;
@@ -452,7 +467,7 @@ class AuthController extends BaseController
     private function getTokenHandler(): TokenHandler
     {
         if ($this->tokenHandler === null) {
-            $this->tokenHandler = new TokenHandler($this->conn);
+            $this->tokenHandler = new TokenHandler($this->conn, $this->app);
         }
         return $this->tokenHandler;
     }
@@ -482,13 +497,15 @@ class AuthController extends BaseController
     private function saveMembersPassword(string $hashedPassword, string $email): bool
     {
         $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
-        $stmt->bindParam(':password', $hashedPassword);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
+        try {
+            $stmt->bindParam(':password', $hashedPassword);
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
 
-        if ($stmt->rowCount() == 1) {
+            $this->app->getLogger()->info("AuthController::saveMembersPassword::Password updated for member:" . $email);
             return true;
-        } else {
+        } catch (PDOException $e) {
+            $this->app->getLogger()->error("AuthController::saveMembersPassword::Error updating password for member:" . $email . " Error: " . $e->getMessage());
             return false;
         }
     }
@@ -505,19 +522,8 @@ class AuthController extends BaseController
     {
         //Validate turnstile recaptcha and send user back to login page if failed
         $turnstile = new Turnstile($this->turnstileSecret);
-        $verifyResponse = $turnstile->verify($_POST['cf-turnstile-response'], $_SERVER['REMOTE_ADDR']);
+        $verifyResponse = $turnstile->verify($this->request->getParsedBody()['cf-turnstile-response'], $this->remoteIp);
         return $verifyResponse->isSuccess();
-
-        /* TODO -- REMOVE OLD CODE FOR GOOGLE RECAPTCHA
-        $gRecaptchaResponse = $_POST['g-recaptcha-response'];
-        $remoteIp = $_SERVER['REMOTE_ADDR'];
-        $recaptcha = new \ReCaptcha\ReCaptcha($this->secret);
-        $resp = $recaptcha->setExpectedHostname($_SERVER['SERVER_NAME'])
-            ->setScoreThreshold(0.5)
-            ->verify($gRecaptchaResponse, $remoteIp);
-        $this->app->getLogger()->info("Recaptcha: score: " . $resp->getScore() . ", called from: " . $_SERVER['REMOTE_ADDR']);
-        return $resp->isSuccess();
-        */
     }
 
     /**

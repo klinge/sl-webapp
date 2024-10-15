@@ -72,7 +72,7 @@ class View
      * @param string $key The variable name
      * @param mixed $value The variable value
      */
-    public function assign(string $key, $value): void
+    public function assign(string $key, mixed $value): void
     {
         $this->data[$key] = $value;
     }

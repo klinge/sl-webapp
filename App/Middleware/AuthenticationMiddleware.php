@@ -21,7 +21,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
         } elseif ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
             // Store the current URL in the session, this is used by AuthController::login() to redirect the user back
             // to the page they wanted after login
-            Session::set('redirect_url', $_SERVER['REQUEST_URI']);
+            Session::set('redirect_url', $this->request->getUri()->__toString());
             //Then require login
             Session::setFlashMessage('error', 'Du måste vara inloggad för att se denna sida.');
             header('Location: ' . $this->app->getRouter()->generate('show-login'));
