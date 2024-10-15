@@ -79,6 +79,13 @@ class AuthController extends BaseController
         $providedEmail = $this->request->getParsedBody()['email'] ?? '';
         $providedPassword = $this->request->getParsedBody()['password'] ?? '';
 
+        if (empty($providedEmail) || empty($providedPassword)) {
+            $this->app->getLogger()->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
+            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
+            $this->view->render(self::LOGIN_VIEW);
+            exit;
+        }
+
         $result = $this->getMemberByEmail($providedEmail);
 
         //User not found
