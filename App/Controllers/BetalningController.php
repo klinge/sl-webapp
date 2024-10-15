@@ -50,7 +50,7 @@ class BetalningController extends BaseController
 
     public function getMedlemBetalning(array $params): void
     {
-        $id = $params['id'];
+        $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
         $namn = $medlem->getNamn();
         $repo = new BetalningRepository($this->conn);

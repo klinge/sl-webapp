@@ -61,8 +61,8 @@
     min-height: 100vh;
 }
 
-/* Make links in tables have the default  color also fix table links in dark mode*/
-td a {
+/* Make links in tables have the default color also fix table links in dark mode*/
+td > a:not(.btn) {
     color: var(--bs-primary-text-emphasis) !important;
 }
 [data-bs-theme="dark"] td a {
