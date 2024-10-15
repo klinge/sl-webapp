@@ -27,14 +27,8 @@ class BaseMiddleware
     }
 
     protected function isAjaxRequest(): bool
-    {;
-        if (
-            $this->request->hasHeader('HTTP_X_REQUESTED_WITH')
-            && strtolower($this->request->getHeader('HTTP_X_REQUESTED_WITH')[0]) === 'xmlhttprequest'
-        ) {
-            return true;
-        } else {
-            return false;
-        }
+    {
+        $isAjax = $this->request->hasHeader('HTTP_X_REQUESTED_WITH') && strtolower($this->request->getHeader('HTTP_X_REQUESTED_WITH')[0]) === 'xmlhttprequest';
+        return $isAjax;
     }
 }
