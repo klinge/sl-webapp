@@ -288,14 +288,15 @@ class Application
                 $controllerInstance = new $controllerClass($this, $request);
                 $controllerInstance->{$action}($params);
             } else {
-                echo 'Error: can not call ' . $controller . '#' . $action;
-                //possibly throw a 404 error
+                //Maybe also throw a 404 error here?
+                $this->logger->error('Error: can not call ' . $controller . '#' . $action);
             }
         } elseif (is_array($match) && is_callable($match['target'])) {
             //Handle the case then the target is a closure
             call_user_func_array($match['target'], $match['params']);
         } else {
-            header($_SERVER["SERVER_PROTOCOL"] . ' 404 Not Found');
+            $this->logger->error('Invalid call to dispatch(). $match was: ' . json_encode($match, JSON_PRETTY_PRINT));
+            header($this->psrRequest->getServerParams()['SERVER_PROTOCOL'] . ' 404 Not Found');
         }
     }
 
