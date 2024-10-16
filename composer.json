@@ -22,5 +22,15 @@
         "psr-4": {
             "Tests\\": "tests/"
         }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "test-unit": "phpunit --testsuite unit",
+        "test-integration": "phpunit --testsuite integration",
+        "test-coverage": "phpunit --coverage-html coverage",
+        "test-all": [
+            "@test-unit",
+            "@test-integration"
+        ]
     }
 }

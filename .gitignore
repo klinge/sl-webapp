@@ -4,6 +4,7 @@
 *.txt
 *.log
 *.bak
+*.cache
 /scripts/*.sh
 .vscode/
 *-TEST
