@@ -42,6 +42,7 @@ class BaseController
         try {
             return Database::getInstance($this->app)->getConnection();
         } catch (PDOException $e) {
+            $this->app->getLogger()->error('Failed to connect to database: ' . $e->getMessage(), ['class' => __CLASS__, 'method' => __METHOD__]);
             Session::setFlashMessage('error', 'Tekniskt fel. Kunde inte öppna databas. Fel: ' . $e->getMessage());
             header("Location: " . $this->createUrl('home'));
             return false;

@@ -49,7 +49,12 @@ class Application
         $this->setupRouter();
         $this->setupLogger($this->getAppEnv());
         $this->setupSession();
-        $this->psrRequest = ServerRequestFactory::fromGlobals();
+        $this->psrRequest = ServerRequestFactory::fromGlobals(
+            $_SERVER,
+            $_GET,
+            $_POST,
+            $_COOKIE
+        );
 
         // Add middlewares here
         $this->addMiddleware(new AuthenticationMiddleware($this, $this->psrRequest));

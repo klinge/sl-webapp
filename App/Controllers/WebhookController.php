@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -14,6 +11,7 @@ class WebhookController extends BaseController
 {
     private string $githubSecret = '';
     private string $remoteIp;
+
     private const REPOSITORY_ID = 781366756;
 
     public function __construct(Application $app, ServerRequestInterface $request)
@@ -26,6 +24,8 @@ class WebhookController extends BaseController
     public function handle(): void
     {
         $this->app->getLogger()->info('Starting to process webhook call from: ' . $this->remoteIp, ['class' => __CLASS__, 'function' => __FUNCTION__]);
+        $this->app->getLogger()->debug('Headers: ' . json_encode($this->request->getHeaders()), ['class' => __CLASS__, 'function' => __FUNCTION__]);
+        $this->app->getLogger()->debug('Payload: ' . json_encode($this->request->getParsedBody()), ['class' => __CLASS__, 'function' => __FUNCTION__]);
 
         $payload = $this->verifyRequest();
 
@@ -41,7 +41,7 @@ class WebhookController extends BaseController
             exit;
         } else {
             $this->jsonResponse(['status' => 'success', 'message' => 'Successfully received a push on the release branch']);
-            $this->app->getLogger()->debug('Received a push on the release branch. Continuing to deploy.. ');
+            $this->app->getLogger()->info('Received a push on the release branch. Continuing to deploy.. ');
         }
         $repoUrl = $payload['repository']['clone_url'];
         $result = $this->handleRepositoryOperations($branch, $repoUrl);
@@ -52,7 +52,7 @@ class WebhookController extends BaseController
             );
             exit;
         }
-        //Finally deploy the repository to the web server
+        //Finally schedule the deploy of the repository to the web server
         $this->scheduleDeployment();
     }
 
@@ -62,27 +62,27 @@ class WebhookController extends BaseController
         $event = '';
 
         // Verify that it's a github webhook request
-        if (!$this->request->hasHeader('HTTP_X_GITHUB_EVENT')) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
-            $this->app->getLogger()->warning("Missing X_GITHUB_EVENT header");
+        if (!$this->request->hasHeader('X-GitHub-Event')) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'Missing event header'], 400);
+            $this->app->getLogger()->warning("Missing X-GitHub-Event header. Headers was: " . json_encode($this->request->getHeaders()));
             return $payload;
         } else {
-            $event = $this->request->getHeader('HTTP_X_GITHUB_EVENT')[0];
+            $event = $this->request->getHeader('X-GitHub-Event')[0];
         }
-        // Validate that it's ping or a push
+        // Verify that it's ping or a push
         if (!empty($event) && $event !== 'push' && $event !== 'ping') {
             $this->jsonResponse(['status' => 'error', 'message' => 'Event not supported'], 400);
             $this->app->getLogger()->warning("Github event was not push or ping");
             return $payload;
         }
-        // Validate the signature using the github secret
-        if ($this->request->hasHeader('HTTP_X_HUB_SIGNATURE_256')) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'Missing header'], 400);
+        // Verify that the signature header is there
+        if (!$this->request->hasHeader('X-Hub-Signature-256')) {
+            $this->jsonResponse(['status' => 'error', 'message' => 'Missing signature header'], 400);
             $this->app->getLogger()->warning("Github signature header missing");
             return $payload;
         }
-        // Validate signature header format
-        $signature = $this->request->getHeader('HTTP_X_HUB_SIGNATURE_256')[0];
+        // Verify signature header format
+        $signature = $this->request->getHeader('X-Hub-Signature-256')[0];
         $signature_parts = explode('=', $signature);
 
         if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
@@ -107,8 +107,7 @@ class WebhookController extends BaseController
         if ($payload['repository']['id'] !== self::REPOSITORY_ID) {
             $this->jsonResponse(['status' => 'ignored', 'message' => "Not handling requests for this repo, {$payload['repository']['full_name']}"], 200);
             $this->app->getLogger()->warning("Repository Id in the request was not correct");
-            $payload = [];
-            return $payload;
+            return [];
         }
 
         //Handle the ping event here, just send a pong back
