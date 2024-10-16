@@ -19,6 +19,9 @@ class Database
     {
         $this->app = $app;
         $this->dbfile = $app->getConfig('DB_PATH');
+        if ($this->dbfile !== ':memory:' && !file_exists($this->dbfile)) {
+            throw new PDOException("Database file not found: {$this->dbfile}");
+        }
         //$this->dbfile = "slask";
         $this->connect();
     }
@@ -26,7 +29,12 @@ class Database
     public static function getInstance(Application $app): Database
     {
         if (self::$instance === null) {
-            self::$instance = new self($app);
+            try {
+                self::$instance = new self($app);
+            } catch (PDOException $e) {
+                $app->getLogger()->error("Could not connect to the database. Error: {$e}");
+                throw new PDOException($e->getMessage(), (int) $e->getCode());
+            }
         }
         return self::$instance;
     }
@@ -44,7 +52,7 @@ class Database
         }
     }
 
-    public function getConnection(): PDO
+    public function getConnection(): ?PDO
     {
         return $this->conn;
     }
