@@ -37,11 +37,7 @@ All items moved to Github issues
 * DONE Security: move all public files to a "public" folder so the document root for the web server don't have access to application files
 
 ## TODO (v0.98) - The testing milestone: 
-* Testing: install PHPUnit
-* Testing: add unit tests for all Controllers
-* Testing: add unit tests for Models
-* Testing: add unit tests for Middlewares
-* Testing: add unit tests for remaining classes
+* All testing tasks moved to issues
 * DONE: Refactor: add logging and a logging library
 
 ## TODO (v1.0): 
