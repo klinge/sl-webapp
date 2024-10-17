@@ -36,7 +36,7 @@ class Segling
             }
 
             if (!$result) {
-                throw new Exception("Segling med id: " . $id . "hittades inte");
+                throw new Exception("Segling med id: " . $id . " hittades inte");
             }
         }
     }

@@ -39,14 +39,17 @@ class BaseMiddlewareTest extends TestCase
         $this->assertFalse($result);
     }
 
-    public function testSendJsonResponseSetsCorrectStatusCode()
+    public function testSendJsonResponseSetsCorrectMessageAndStatusCode()
     {
         $data = ['key' => 'value'];
         $statusCode = 201;
 
+        ob_start();
         $returnedStatusCode = $this->callProtectedMethod($this->middleware, 'sendJsonResponse', [$data, $statusCode]);
+        $output = ob_get_clean();
 
         $this->assertEquals($statusCode, $returnedStatusCode);
+        $this->assertEquals(json_encode($data), $output);
     }
 
     public function testSendJsonResponseUsesDefaultStatusCode()
