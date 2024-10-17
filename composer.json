@@ -27,7 +27,7 @@
         "test": "phpunit",
         "test-unit": "phpunit --testsuite unit",
         "test-integration": "phpunit --testsuite integration",
-        "test-coverage": "phpunit --coverage-html coverage",
+        "test-coverage": "phpunit --coverage-html tests/coverage",
         "test-all": [
             "@test-unit",
             "@test-integration"

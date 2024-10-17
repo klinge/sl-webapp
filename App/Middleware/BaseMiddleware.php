@@ -18,12 +18,12 @@ class BaseMiddleware
         $this->request = $request;
     }
 
-    protected function sendJsonResponse(array $data, int $statusCode = 200): void
+    protected function sendJsonResponse(array $data, int $statusCode = 200): int
     {
         header('Content-Type: application/json');
         http_response_code($statusCode);
         echo json_encode($data);
-        exit;
+        return $statusCode;
     }
 
     protected function isAjaxRequest(): bool
