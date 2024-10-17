@@ -204,7 +204,7 @@ class Medlem
         return in_array($searchRole, array_map($extractRollId, $this->roller));
     }
 
-    private function persistToDatabase(string $operation): bool
+    protected function persistToDatabase(string $operation): bool
     {
         $params = [
             "fodelsedatum",
@@ -286,7 +286,7 @@ class Medlem
         return true;
     }
 
-    private function getDataFromDb($id): bool
+    protected function getDataFromDb($id): bool
     {
         $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
 

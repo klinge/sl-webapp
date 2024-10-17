@@ -23,12 +23,12 @@ class Betalning
     public string $created_at;
     public string $updated_at;
 
-    public function __construct($db, $paymentData = null)
+    public function __construct(PDO $db, array $paymentData = [])
     {
         $this->conn = $db;
 
         //if created with paymentsData set the properties
-        if ($paymentData !== null) {
+        if ($paymentData !== []) {
             $this->id = $paymentData['id'];
             $this->belopp = $paymentData['belopp'];
             $this->medlem_id = $paymentData['medlem_id'];
