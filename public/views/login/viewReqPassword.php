@@ -13,14 +13,14 @@ include_once "views/_layouts/header.php";
 <section class="p-3 p-md-4 p-xl-5">
     <div class="container">
         <div class="row">
-            <div class="col-12 col-md-6 bsb-tpl-bg-platinum">
+            <div class="col-12 col-md-6 bg-dark">
                 <div class="d-flex flex-column justify-content-between h-100 p-3 p-md-4 p-xl-5">
                     <h3 class="m-0">Välkommen!</h3>
                     <img class="img-fluid rounded mx-auto my-4" loading="lazy" src="../assets/img/sl-logo.png" width="245" height="80" alt="Sofia Linnea Logo">
                     <p class="mb-0">Inget konto än? <a href="#!" class="link-secondary text-decoration-none">Registrera dig</a></p>
                 </div>
             </div>
-            <div class="col-12 col-md-6 bsb-tpl-bg-lotion">
+            <div class="col-12 col-md-6">
                 <div class="p-3 p-md-4 p-xl-5">
                     <div class="row">
                         <div class="col-12">
@@ -42,7 +42,7 @@ include_once "views/_layouts/header.php";
                                     <!-- The following line controls and configures the Turnstile widget. -->
                                     <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
                                     <!-- end. -->
-                                    <button class="g-recaptcha btn bsb-btn-xl btn-primary"
+                                    <button class="btn btn-lg btn-primary"
                                         id="bytlosenSubmit"
                                         onclick="onFormSubmit()">Återställ lösenord
                                     </button>

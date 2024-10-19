@@ -16,9 +16,9 @@ include_once "views/_layouts/header.php";
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
                 <div class="card border border-light-subtle rounded-3 shadow-sm">
-                    <div class="card-body p-3 p-md-4 p-xl-5">
+                    <div class="card-body p-2 p-md-3 p-xl-4">
                         <div class="text-center mb-3">
-                            <img class="img-fluid" src="../assets/img/sl-logo.png" alt="Sofia Linnea Logo" width="50%">
+                            <img class="img-fluid" src="../assets/img/sl-logo.png" alt="Sofia Linnea Logo" width="75%">
                         </div>
                         <h2 class="fw-normal text-center mb-4">Skapa nytt konto</h2>
                         <p class="text-center mb-4">
@@ -46,7 +46,7 @@ include_once "views/_layouts/header.php";
                                     <div id="passwordError" class="alert alert-danger" style="display: none;"></div>
                                 </div>
                                 <div class="col-12">
-                                    <div class="d-grid my-3">
+                                    <div class="d-grid mb-3">
                                         <!-- The following line controls and configures the Turnstile widget. -->
                                         <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
                                         <!-- end. -->

@@ -30,34 +30,35 @@ function onLoginSubmit() {
 
 function onRegisterSubmit() {
     const form = document.getElementById('registerForm');
-    //And then submit the form
     form.submit();
     return true;
 }
 
 function onFormSubmit() {
     const form = document.getElementById('bytlosenForm');
-    //And then submit the form
     form.submit();
     return true;
 }
 
 function checkPasswords() {
     const password = document.getElementById('password').value;
-    const repeatPassword = document.getElementById('verifyPassword').value;
-    const submitButton = document.getElementById('submit');
+    const repeatPassword = document.getElementById('password2').value;
+    const submitButton = document.getElementById('submitBtn');
     const errorElement = document.getElementById('passwordError');
 
     if (password === repeatPassword && password !== '') {
         submitButton.classList.remove('disabled');
-        errorElement.style.display = 'none';
+        errorElement.classList.add('d-none');
+        return true;
     } else {
         submitButton.classList.add('disabled');
         if (repeatPassword !== '') {
             errorElement.textContent = 'Lösenorden matchar inte!';
-            errorElement.style.display = 'block';
+            errorElement.classList.remove('d-none');
+            return false;
         } else {
-            errorElement.style.display = 'none';
+            errorElement.classList.add('d-none');
+            return false;
         }
     }
 }

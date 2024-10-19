@@ -29,11 +29,11 @@ include_once "views/_layouts/header.php";
                         </div>
                         <div class="col-12 col-md-6 d-flex align-items-center justify-content-center">
                             <div class="col-12 col-lg-11 col-xl-10">
-                                <div class="card-body p-3 p-md-4 p-xl-5">
+                                <div class="card-body p-2 p-md-3 p-xl-4">
                                     <div class="row">
                                         <div class="col-12">
-                                            <div class="mb-5">
-                                                <div class="text-center mb-4">
+                                            <div class="mb-4">
+                                                <div class="text-center mb-3">
                                                     <img class="img-fluid" src="../assets/img/sl-logo.png" alt="Sofia Linnea Logo">
                                                 </div>
                                                 <h3 class="text-center">Välkommen tillbaka!</h3>
@@ -44,13 +44,13 @@ include_once "views/_layouts/header.php";
                                         <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
                                         <div class="row gy-3 overflow-hidden">
                                             <div class="col-12">
-                                                <div class="form-floating mb-3">
+                                                <div class="form-floating mb-2">
                                                     <input type="email" class="form-control" name="email" id="email" placeholder="name@example.com" tabindex="1" required autofocus>
                                                     <label for="email" class="form-label">Email</label>
                                                 </div>
                                             </div>
                                             <div class="col-12">
-                                                <div class="form-floating mb-3">
+                                                <div class="form-floating mb-2">
                                                     <input type="password" class="form-control" name="password" id="password" value="" placeholder="Lösenord" tabindex="2" required>
                                                     <label for="password" class="form-label">Lösenord</label>
                                                 </div>
@@ -66,7 +66,7 @@ include_once "views/_layouts/header.php";
                                             <div class="col-12">
                                                 <div class="d-grid">
                                                     <!-- The following line controls and configures the Turnstile widget. -->
-                                                    <div class="cf-turnstile mb-3" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
+                                                    <div class="cf-turnstile mb-2" data-sitekey="<?php echo $turnstileSiteKey ?>" data-size="flexible" data-theme="light"></div>
                                                     <!-- end. -->
                                                     <button class="btn btn-primary btn-lg"
                                                         onclick="onLoginSubmit();"

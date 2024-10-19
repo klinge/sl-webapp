@@ -57,8 +57,14 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
                     Session::setFlashMessage('error', 'Kunde inte validera CSFR-token..');
                     header('Location: ' . $this->app->getRouter()->generate('tech-error'));
                 }
-                exit;
+                $this->exit();
             }
         }
+    }
+
+    //Putting the call to exit in a function that can be overridden in tests
+    protected function exit(): void
+    {
+        exit;
     }
 }
