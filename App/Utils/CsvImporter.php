@@ -13,6 +13,9 @@ use App\Models\Medlem;
 use App\Utils\DateFormatter;
 use InvalidArgumentException;
 
+/**
+ * @deprecated This class will is just for initial database import and will be deprecated in upcoming releases.
+ */
 class CsvImporter
 {
     public array $data = [];
