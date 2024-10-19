@@ -10,10 +10,10 @@ include_once "views/_layouts/header.php";
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
 
 <!-- Password Reset 3 - Bootstrap Brain Component -->
-<section class="p-3 p-md-4 p-xl-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 col-md-6 bg-dark">
+<section class="p-2 p-md-3 p-xl-4">
+    <div class="container col-6">
+        <div class="row auth-bg">
+            <div class="col-12 col-md-6">
                 <div class="d-flex flex-column justify-content-between h-100 p-3 p-md-4 p-xl-5">
                     <h3 class="m-0">Välkommen!</h3>
                     <img class="img-fluid rounded mx-auto my-4" loading="lazy" src="../assets/img/sl-logo.png" width="245" height="80" alt="Sofia Linnea Logo">

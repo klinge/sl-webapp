@@ -11,12 +11,12 @@ include_once "views/_layouts/header.php";
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
 
 <!-- Login 13 - Bootstrap Brain Component -->
-<section class="py-3 py-md-5">
+<section class="py-1 py-md-3">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 col-xxl-4">
                 <div class="card border border-light-subtle rounded-3 shadow-sm">
-                    <div class="card-body p-2 p-md-3 p-xl-4">
+                    <div class="card-body p-2 p-md-3 p-xl-4 auth-bg">
                         <div class="text-center mb-3">
                             <img class="img-fluid" src="../assets/img/sl-logo.png" alt="Sofia Linnea Logo" width="75%">
                         </div>
