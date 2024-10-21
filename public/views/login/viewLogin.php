@@ -8,7 +8,7 @@ include_once "views/_layouts/header.php";
 
 <!--Add Cloudflare Turnstile script -->
 <!-- SRI via https://www.srihash.org/ -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-ztFLr92O7w7dOlmjOTuEGzcXpUsRKoAe0is03lxXyeYuXAfkccNA3rY0U0HWyuo0" crossorigin="anonymous" defer></script>
 
 <!-- Login 8 - Bootstrap Brain Component -->
 <section class="p-3 p-md-3 p-xl-4">
