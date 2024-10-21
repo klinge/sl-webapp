@@ -48,7 +48,8 @@ class SeglingTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage("Segling med id: 999 hittades inte");
 
-        new Segling($this->mockPDO, 999);
+        $segling = new Segling($this->mockPDO, 999);
+        $this->assertNull($segling->id);
     }
 
     public function testSaveMethod()
