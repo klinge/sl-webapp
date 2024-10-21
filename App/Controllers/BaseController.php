@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Application;
+use App\Traits\JsonResponder;
 use App\Utils\Session;
 use App\Utils\Database;
 use PDO;
@@ -13,6 +14,9 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class BaseController
 {
+    //Add the JsonResponder trait
+    //use JsonResponder;
+
     protected PDO $conn;
     protected ServerRequestInterface $request;
     protected array $sessionData;
