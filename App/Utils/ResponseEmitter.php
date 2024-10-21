@@ -54,6 +54,7 @@ class ResponseEmitter
     private function emitHeaders(ResponseInterface $response): void
     {
         foreach ($response->getHeaders() as $name => $values) {
+            /** @var string $name */
             $first = strtolower($name) !== 'set-cookie';
             foreach ($values as $value) {
                 $header = sprintf('%s: %s', $name, $value);
