@@ -138,16 +138,12 @@ class AuthController extends BaseController
      *
      * @return void
      */
-    public function logout(string $pwdReset = ""): void
+    public function logout(): void
     {
         Session::remove('user_id');
         Session::remove('fornamn');
         Session::destroy();
         $redirectUrl = $this->app->getRouter()->generate('show-login');
-        //Add an url parameter to redirectUrl if it was a successful password reset
-        if (!empty($pwdReset)) {
-            $redirectUrl = $redirectUrl . '?pwdReset=true';
-        }
         header('Location: ' . $redirectUrl);
         return;
     }
@@ -463,7 +459,7 @@ class AuthController extends BaseController
         // And logout the user, which sends him to the login screen
         // TODO This flash message does not work because logout() kills the session..
         Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
-        $this->logout("pwdReset");
+        $this->logout();
         return;
     }
 

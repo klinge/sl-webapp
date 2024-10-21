@@ -8,7 +8,7 @@ include_once "views/_layouts/header.php";
 ?>
 
 <!--Add Cloudflare Turnstile script -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-1lIn6ASvp1x/vuPW5FZCww6p3g4eQxROcdx92D7d6FxYNUhRp0UXYn8r8goX0j1V" crossorigin="anonymous" defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-ztFLr92O7w7dOlmjOTuEGzcXpUsRKoAe0is03lxXyeYuXAfkccNA3rY0U0HWyuo0" crossorigin="anonymous" defer></script>
 
 <section class="py-3 py-md-5">
     <div class="container">

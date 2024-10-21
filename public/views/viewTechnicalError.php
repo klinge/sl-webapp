@@ -8,7 +8,7 @@ include_once "views/_layouts/header.php";
 <div class="d-flex align-items-center justify-content-center section-notfound">
     <div class="text-center">
         <p class="fs-3">
-            <img src="assets/img/errors/tech-error-768x493.png" class="img-fluid" alt="image">
+            <img src="assets/img/errors/tech-error-768x493.png" class="img-fluid" alt="Technical error image">
         </p>
         <h1 class="display-1 fw-bold"><span class="text-danger">Oops!</span> Nu blev något fel.. </h1>
         <p class="lead">
