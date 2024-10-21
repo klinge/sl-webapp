@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Utils;
 
 use App\Application;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * View Class
@@ -25,6 +26,12 @@ class View
     /** @var array Data to be passed to the view */
     private $data = [];
 
+    /** @var ResponseInterface Response to be emitted */
+    private ResponseInterface $response;
+
+    /** @var ResponseEmitter Helper class to emit the respose created */
+    private ResponseEmitter $emitter;
+
     /**
      * Constructor
      *
@@ -35,6 +42,7 @@ class View
         $this->app = $app;
         $this->appDir = $this->app->getAppDir();
         $this->rootPath = $this->app->getRootDir();
+        $this->emitter = new ResponseEmitter();
     }
 
     /**
@@ -59,10 +67,20 @@ class View
             throw new \Exception("View \"{$filePath}\" not found");
         }
 
+        //save data and template to $result
         extract($this->data);
         ob_start();
         include $filePath;
-        echo ob_get_clean();
+        $result = ob_get_clean();
+
+        //set properties on the response object
+        $this->response = new \Laminas\Diactoros\Response\HtmlResponse(
+            $result,
+            200
+        );
+
+        //Finally emit the view in the response object
+        $this->emitter->emit($this->response);
         return true;
     }
 
