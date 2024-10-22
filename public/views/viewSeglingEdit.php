@@ -148,8 +148,8 @@ $roller = $viewData['roles'];
         </div>
 
         <button type="submit" class="btn btn-primary">Uppdatera</button>
-        <a class="button btn btn-warning" onclick="deleteSegling(<?php echo $segling->id ?>)">Ta bort</a>
-        <a class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/segling">Tillbaka</a>
+        <button class="button btn btn-warning" onclick="deleteSegling(<?php echo $segling->id ?>)">Ta bort</button>
+        <button class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/segling">Tillbaka</button>
     </form>
 </div>
 
