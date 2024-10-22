@@ -264,12 +264,15 @@ class SeglingController extends BaseController
             $result = $stmt->execute();
 
             if ($result) {
-                echo json_encode(['success' => true]);
+                $this->app->getLogger()->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId . "User: " . Session::get('user_id'));
+                echo json_encode(['status' => 'ok']);
             } else {
-                echo json_encode(['success' => false, 'error' => 'Deletion failed']);
+                $this->app->getLogger()->warning("Failed to delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId);
+                echo json_encode(['status' => 'fail', 'error' => 'Deletion failed']);
             }
         } else {
-            echo json_encode(['success' => false, 'error' => 'Invalid data']);
+            $this->app->getLogger()->warning("Failed to delete medlem from segling. Invalid data. Medlem: " . $medlemId . " Segling: " . $seglingId);
+            echo json_encode(['status' => 'fail', 'error' => 'Invalid data']);
         }
     }
 }

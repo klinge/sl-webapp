@@ -43,7 +43,14 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
         }
 
         if ($this->request->getMethod() === 'POST') {
-            $token = $this->request->getParsedBody()['csrf_token'] ?? '';
+            //Check if we got a json or a form request
+            $contentType = $this->request->getHeaderLine('Content-Type');
+            if (str_contains($contentType, 'application/json')) {
+                $body = json_decode($this->request->getBody()->getContents(), true);
+                $token = $body['csrf_token'] ?? '';
+            } else {
+                $token = $this->request->getParsedBody()['csrf_token'] ?? '';
+            }
             $this->app->getLogger()->debug('In csrf middleware. Token in POST was: ' . $token);
 
             if (!hash_equals(Session::get('csrf_token'), $token)) {
@@ -52,7 +59,7 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
                     . ' Called by: ' . $this->request->getServerParams()['REMOTE_ADDR']);
                 //Set different responses depending on if it was an ajax request or not
                 if ($this->isAjaxRequest()) {
-                    $this->jsonResponse(['status' => 'error', 'message' => 'Error validating csrf token'], 403);
+                    $this->jsonResponse(['status' => 'fail', 'message' => 'Error validating csrf token'], 403);
                 } else {
                     Session::setFlashMessage('error', 'Kunde inte validera CSFR-token..');
                     header('Location: ' . $this->app->getRouter()->generate('tech-error'));
