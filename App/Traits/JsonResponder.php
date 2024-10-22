@@ -7,13 +7,13 @@ use App\Utils\ResponseEmitter;
 
 trait JsonResponder
 {
-    protected function jsonResponse(array $data, int $statusCode = 200, array $headers = []): int
+    protected function jsonResponse(array $data, int $statusCode = 200, array $headers = []): ResponseInterface
     {
         $response = new \Laminas\Diactoros\Response\JsonResponse($data, $statusCode, $headers);
 
         $this->emitJsonResponse($response);
 
-        return $response->getStatusCode();
+        return $response;
     }
 
     private function emitJsonResponse(ResponseInterface $response): void
