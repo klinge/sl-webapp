@@ -78,8 +78,8 @@ class Medlem
 
     private function saveOrCreate(string $operation): int
     {
-        $successVerb = $operation === 'INSERT' ? 'skapad' : 'uppdaterad';
-        $errorVerb = $operation === 'INSERT' ? 'skapande' : 'uppdatering';
+        $successVerb = ($operation === 'INSERT') ? 'skapad' : 'uppdaterad';
+        $errorVerb = ($operation === 'INSERT') ? 'skapande' : 'uppdatering';
         $successMessage = "Medlem: " . $this->fornamn . " " . $this->efternamn . " " . $successVerb . " av användare: " . Session::get('user_id');
         $errorMessage = "Fel vid " . $errorVerb . " av medlem: " . $this->fornamn . " " . $this->efternamn . ". Användare: " . Session::get('user_id') . ". Felmeddelande: ";
 
@@ -159,32 +159,75 @@ class Medlem
         return $results;
     }
 
+    /*
+    * Function that saves the member objects roles to the db
+    */
     public function saveRoles(): void
     {
-        $query = 'DELETE FROM Medlem_Roll WHERE medlem_id = ?; ';
+        try {
+            $this->conn->beginTransaction();
 
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
+            // Get current roles from the database
+            $stmt = $this->conn->prepare("SELECT roll_id FROM Medlem_Roll WHERE medlem_id = :medlem_id");
+            $stmt->execute(['medlem_id' => $this->id]);
+            $currentRoles = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-        foreach ($this->roller as $roll) {
-            $query = 'INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (?, ?);';
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(1, $this->id);
-            $stmt->bindParam(2, $roll["roll_id"]);
-            $stmt->execute();
+            $newRoles = array_values(array_map(function ($role) {
+                return (int) $role['roll_id'];
+            }, $this->roller));
+            //$this->logger->debug("Current roles: " . json_encode($currentRoles));
+            //$this->logger->debug("New roles: " . json_encode($newRoles));
+
+            // Determine roles to add and remove
+            $rolesToAdd = array_values(array_diff($newRoles, $currentRoles));
+            $rolesToRemove = array_values(array_diff($currentRoles, $newRoles));
+
+            //$this->logger->debug("Roles to add: " . json_encode($rolesToAdd));
+            //$this->logger->info("Roles to remove: " . json_encode($rolesToRemove));
+
+            // Add new roles
+            if (!empty($rolesToAdd)) {
+                $stmt = $this->conn->prepare("INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (:medlem_id, :roll_id)");
+                foreach ($rolesToAdd as $rollId) {
+                    $stmt->bindValue(':medlem_id', $this->id, PDO::PARAM_INT);
+                    $stmt->bindValue(':roll_id', $rollId, PDO::PARAM_INT);
+                    $stmt->execute();
+                }
+                $this->logger->info("Roles added for member: " . $this->fornamn . " " . $this->efternamn . ". Rollid: " . json_encode($rolesToAdd));
+            }
+
+            // Remove old roles
+            if (!empty($rolesToRemove)) {
+                $stmt = $this->conn->prepare("DELETE FROM Medlem_Roll WHERE medlem_id = :medlem_id AND roll_id = :roll_id");
+                foreach ($rolesToRemove as $rollId) {
+                    $stmt->bindValue(':medlem_id', $this->id, PDO::PARAM_INT);
+                    $stmt->bindValue(':roll_id', $rollId, PDO::PARAM_INT);
+                    $stmt->execute();
+                }
+                $this->logger->info("Roles removed for member: " . $this->fornamn . " " . $this->efternamn . ". Rollid: " . json_encode($rolesToRemove));
+            }
+            $this->conn->commit();
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            $this->logger->error("Error updating roles for medlem: " . $this->fornamn . " " . $this->efternamn . ". Error: " . $e->getMessage());
+            throw $e;
         }
     }
 
+    /*
+    * Function that updates roles on the member object
+    */
     public function updateMedlemRoles(array $newRoleIds): void
     {
+        $this->logger->debug("In updateMedlemRoles. New roles: " . json_encode($newRoleIds));
+
         //first remove roles from that no longer exist
         $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
-
         foreach ($rolesToRemove as $roleId) {
             $key = array_search($roleId, array_column($this->roller, 'roll_id'));
             unset($this->roller[$key]);
         }
+
         //then add new roles
         foreach ($newRoleIds as $roleId) {
             if (!in_array($roleId, array_column($this->roller, 'roll_id'))) {

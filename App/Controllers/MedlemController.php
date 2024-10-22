@@ -156,7 +156,7 @@ class MedlemController extends BaseController
 
         try {
             $medlem->save();
-            $this->app->getLogger()->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad av ' . $_SESSION['user']->fornamn . ' ' . Session::get('user_id'));
+
             $_SESSION['flash_message'] = [
                 'type' => 'success',
                 'message' => 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
@@ -326,7 +326,7 @@ class MedlemController extends BaseController
             $medlem->$field = isset($cleanValues[$field]) ? true : false;
         }
 
-        //Update the medlem's roles
+        //Update roles on the Medlem object
         if (isset($roller)) {
             $medlem->updateMedlemRoles($roller);
         }
