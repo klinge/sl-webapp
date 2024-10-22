@@ -22,8 +22,8 @@ class BaseMiddlewareTest extends TestCase
 
     public function testIsAjaxRequestReturnsTrueForXmlHttpRequest()
     {
-        $this->request->method('hasHeader')->with('HTTP_X_REQUESTED_WITH')->willReturn(true);
-        $this->request->method('getHeader')->with('HTTP_X_REQUESTED_WITH')->willReturn(['XMLHttpRequest']);
+        $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
+        $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
 
         $result = $this->callProtectedMethod($this->middleware, 'isAjaxRequest');
 
@@ -32,7 +32,7 @@ class BaseMiddlewareTest extends TestCase
 
     public function testIsAjaxRequestReturnsFalseForNonXmlHttpRequest()
     {
-        $this->request->method('hasHeader')->with('HTTP_X_REQUESTED_WITH')->willReturn(false);
+        $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
 
         $result = $this->callProtectedMethod($this->middleware, 'isAjaxRequest');
 
