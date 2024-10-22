@@ -12,7 +12,7 @@ $APP_DIR = $viewData['APP_DIR'];
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" sizes="48x48">
     <!-- Bootstrap CSS -->
     <!-- Using Bootswatch to get some styling -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/flatly/bootstrap.min.css"
