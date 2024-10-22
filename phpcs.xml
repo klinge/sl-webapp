@@ -8,6 +8,8 @@
     <!-- Ignore vendor and views directories -->
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>*/views/*</exclude-pattern>
+    <exclude-pattern>*/logs/*</exclude-pattern>
+    <exclude-pattern>*/db/*</exclude-pattern>
 
     <!-- Use PSR-12 as a base -->
     <rule ref="PSR12"/>

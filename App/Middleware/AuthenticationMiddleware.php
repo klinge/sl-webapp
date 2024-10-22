@@ -18,14 +18,17 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
             if (!Session::get('user_id')) {
                 $this->sendJsonResponse(['success' => false, 'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'], 200);
                 //Log the exception
-                $this->app->getLogger()->debug('Ajax request, user not logged in. 
-                    URI: ' . $this->request->getUri()->__toString() .
-                    ', Remote IP: ' . $this->request->getServerParams()['REMOTE_ADDR']);
+                $this->app->getLogger()->warning('Ajax request, user not logged in. URI: ' .
+                    $this->request->getUri()->__toString() .
+                    ', Remote IP: ' .
+                    $this->request->getServerParams()['REMOTE_ADDR']);
                 $this->doExit();
             }
         } elseif ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
-            $this->app->getLogger()->debug('Request to protected page, user not logged in. URI: ' . $this->request->getUri()->__toString() .
-                ', Remote IP: ' . $this->request->getServerParams()['REMOTE_ADDR']);
+            $this->app->getLogger()->debug('Request to protected page, user not logged in. URI: ' .
+                $this->request->getUri()->__toString() .
+                ', Remote IP: ' .
+                $this->request->getServerParams()['REMOTE_ADDR']);
             // Store the current URL in the session, this is used by AuthController::login() to redirect the user back
             // to the page they wanted after login
             Session::set('redirect_url', $this->request->getUri()->__toString());
