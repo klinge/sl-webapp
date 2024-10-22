@@ -37,11 +37,12 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
                     Session::setFlashMessage('error', 'Du måste vara administratör för att se denna sida.');
                     header('Location: ' . $this->app->getRouter()->generate('user-home'));
                 }
+                $this->doExit();
             }
         }
     }
 
-    private function isUserRoute($routeName): bool
+    protected function isUserRoute($routeName): bool
     {
         return strpos($routeName, 'user-') !== false;
     }
