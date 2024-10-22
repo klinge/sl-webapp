@@ -9,13 +9,7 @@ trait JsonResponder
 {
     protected function jsonResponse(array $data, int $statusCode = 200, array $headers = []): int
     {
-        $jsonData = json_encode($data, JSON_PRETTY_PRINT);
-        // Check for encoding errors
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            // Handle encoding errors gracefully
-            $jsonData = json_encode(['success' => false, 'message' => 'Error encoding data']);
-        }
-        $response = new \Laminas\Diactoros\Response\JsonResponse($jsonData, $statusCode, $headers);
+        $response = new \Laminas\Diactoros\Response\JsonResponse($data, $statusCode, $headers);
 
         $this->emitJsonResponse($response);
 

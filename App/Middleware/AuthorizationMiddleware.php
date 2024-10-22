@@ -32,7 +32,7 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
             // Deny access if NOT: user is admin OR route does not require login OR it's a user route
             if (!(Session::get('is_admin') || in_array($routeName, RouteConfig::$noLoginRequiredRoutes) || $this->isUserRoute($routeName))) {
                 if ($this->isAjaxRequest()) {
-                    $this->sendJsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.']);
+                    $this->jsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.', 401]);
                 } else {
                     Session::setFlashMessage('error', 'Du måste vara administratör för att se denna sida.');
                     header('Location: ' . $this->app->getRouter()->generate('user-home'));

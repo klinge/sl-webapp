@@ -52,7 +52,7 @@ class CsrfMiddleware extends BaseMiddleware implements MiddlewareInterface
                     . ' Called by: ' . $this->request->getServerParams()['REMOTE_ADDR']);
                 //Set different responses depending on if it was an ajax request or not
                 if ($this->isAjaxRequest()) {
-                    $this->sendJsonResponse(['status' => 'error', 'message' => 'Error validating csrf token'], 401);
+                    $this->jsonResponse(['status' => 'error', 'message' => 'Error validating csrf token'], 403);
                 } else {
                     Session::setFlashMessage('error', 'Kunde inte validera CSFR-token..');
                     header('Location: ' . $this->app->getRouter()->generate('tech-error'));
