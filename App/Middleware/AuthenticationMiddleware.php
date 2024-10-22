@@ -25,7 +25,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
                 $this->doExit();
             }
         } elseif ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
-            $this->app->getLogger()->debug('Request to protected page, user not logged in. URI: ' .
+            $this->app->getLogger()->info('Request to protected page, user not logged in. URI: ' .
                 $this->request->getUri()->__toString() .
                 ', Remote IP: ' .
                 $this->request->getServerParams()['REMOTE_ADDR']);

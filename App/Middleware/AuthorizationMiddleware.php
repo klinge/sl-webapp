@@ -37,6 +37,10 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
                     Session::setFlashMessage('error', 'Du måste vara administratör för att se denna sida.');
                     header('Location: ' . $this->app->getRouter()->generate('user-home'));
                 }
+                //Log the exception
+                $this->app->getLogger()->info('Request to an admin page, user is not admin. URI: ' . $this->request->getUri()->__toString() .
+                    ', Remote IP: ' . $this->request->getServerParams()['REMOTE_ADDR'] .
+                    ', User ID: ' . Session::get('user_id'));
                 $this->doExit();
             }
         }
