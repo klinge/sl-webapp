@@ -28,7 +28,7 @@ class JsonResponderTest extends TestCase
 
         ob_start();
         $response = $this->callProtectedMethod($this->testClass, 'jsonResponse', [$data, $statusCode]);
-        $output = ob_get_clean();
+        ob_get_clean();
 
         $this->assertEquals($statusCode, $response->getStatusCode());
     }
@@ -39,7 +39,7 @@ class JsonResponderTest extends TestCase
 
         ob_start();
         $response = $this->callProtectedMethod($this->testClass, 'jsonResponse', [$data]);
-        $output = ob_get_clean();
+        ob_get_clean();
 
         $this->assertEquals(200, $response->getStatusCode());
     }
@@ -51,7 +51,7 @@ class JsonResponderTest extends TestCase
 
         ob_start();
         $response = $this->callProtectedMethod($this->testClass, 'jsonResponse', [$data]);
-        $output = ob_get_clean();
+        ob_get_clean();
 
         $this->assertEquals($expectedContentType, $response->getHeader('Content-Type')[0]);
     }
@@ -63,7 +63,7 @@ class JsonResponderTest extends TestCase
 
         ob_start();
         $response = $this->callProtectedMethod($this->testClass, 'jsonResponse', [$data]);
-        $output = ob_get_clean();
+        ob_get_clean();
 
         $this->assertEquals($expectedBody, $response->getBody()->__toString());
         $this->assertEquals(JsonResponse::class, get_class($response));
@@ -76,7 +76,7 @@ class JsonResponderTest extends TestCase
 
         ob_start();
         $response = $this->callProtectedMethod($this->testClass, 'jsonResponse', [$data, 201, $headers]);
-        $output = ob_get_clean();
+        ob_get_clean();
 
         $this->assertEquals($headers['X-Custom-Header'], $response->getHeader('X-Custom-Header')[0]);
     }
