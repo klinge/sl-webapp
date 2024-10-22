@@ -216,7 +216,11 @@ class CsvImporter
         $query = 'SELECT * FROM Roll;';
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        if (empty($result)) {
+            throw new \Exception('Inga roller hittade i databasen');
+        }
+        return $result;
     }
 
     private function addRolesForMember(int $medlemId, string $besattningRoll, string $underhallRoll, array $allRoles)
