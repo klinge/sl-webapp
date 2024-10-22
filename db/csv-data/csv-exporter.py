@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import os
 
 def clean_cell(cell):
     if isinstance(cell, str):
@@ -12,6 +13,10 @@ def clean_cell(cell):
     return cell
 
 def clean_and_export_excel(input_file, output_file, sheet_name=0):
+    # Check that input file exists
+    if not os.path.exists(input_file):
+        print(f"ERROR: could not find input file: {input_file}")
+        return
     # Read the Excel file
     df = pd.read_excel(input_file, sheet_name=sheet_name)
     
@@ -28,6 +33,6 @@ def clean_and_export_excel(input_file, output_file, sheet_name=0):
 
 
 # Usage example
-input_file = 'Adressregister-AJ-240921.xlsx'
+input_file = 'Adressregister AJ 241003.xlsx'
 output_file = 'medlemmar-cleaned.csv'
 clean_and_export_excel(input_file, output_file)

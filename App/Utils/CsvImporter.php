@@ -114,7 +114,7 @@ class CsvImporter
                     $this->addPaymentsForMember($member->id, $betalningar);
                 }
                 //Add roller to Medlem
-                $this->addRolesForMember($member->id, $row['BesättningRoll'], $row['UnderhållRoll'], $allRoles);
+                $this->addRolesForMember($member->id, $row['Besättning'], $row['Underhåll'], $allRoles);
                 //Finish off by returning if it went well or not
             } catch (PDOException $e) {
                 $countNotUpdated++;
