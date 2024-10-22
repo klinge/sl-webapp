@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Application;
+use App\Traits\JsonResponder;
 use Psr\Http\Message\ServerRequestInterface;
 
 class BaseMiddleware
 {
+    //Add the JsonResponder trait
+    use JsonResponder;
+
     protected Application $app;
     protected ServerRequestInterface $request;
 
@@ -16,14 +20,6 @@ class BaseMiddleware
     {
         $this->app = $app;
         $this->request = $request;
-    }
-
-    protected function sendJsonResponse(array $data, int $statusCode = 200): int
-    {
-        header('Content-Type: application/json');
-        http_response_code($statusCode);
-        echo json_encode($data);
-        return $statusCode;
     }
 
     protected function isAjaxRequest(): bool

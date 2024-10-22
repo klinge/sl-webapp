@@ -22,7 +22,7 @@ class CsrfMiddlewareTest extends TestCase
         // Create the partial mock, passing the required arguments to the constructor
         $this->middleware = $this->getMockBuilder(CsrfMiddlewareFake::class)
             ->setConstructorArgs([$this->app, $this->request])
-            ->onlyMethods(['sendJsonResponse', 'isAjaxRequest'])
+            ->onlyMethods(['jsonResponse', 'isAjaxRequest'])
             ->getMock();
 
         // Clear session before each test
