@@ -155,11 +155,14 @@ $roller = $viewData['roles'];
 
 <script>
     document.querySelectorAll('.delete-medlem').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
             const seglingId = this.dataset.seglingId;
             const medlemId = this.dataset.medlemId;
 
+            e.preventDefault(); // Prevent the default button behavior (form submission)
+
             if (confirm('Är du säker på att du vill ta bort denna deltagare från seglingen?')) {
+
                 fetch('<?php echo $APP_DIR ?>/segling/medlem/delete', {
                         method: 'POST',
                         headers: {
@@ -167,12 +170,13 @@ $roller = $viewData['roles'];
                         },
                         body: JSON.stringify({
                             segling_id: seglingId,
-                            medlem_id: medlemId
+                            medlem_id: medlemId,
+                            csrf_token: "<?php echo $viewData["csrf_token"]; ?>"
                         })
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success) {
+                        if (data.status === 'ok') {
                             // Remove the row from the table or refresh the participant list
                             this.closest('tr').remove();
                         } else {
