@@ -56,6 +56,16 @@ class WebhookController extends BaseController
         $this->scheduleDeployment();
     }
 
+    /**
+     * Verifies and validates the incoming GitHub webhook request.
+     *
+     * This method performs several checks on the incoming request to ensure its authenticity and integrity.
+     *
+     * If it's a 'ping' event, it responds with a 'pong'.
+     * For 'push' events, it processes the payload for further action.
+     *
+     * @return array The validated payload for 'push' events, or an empty array for other cases
+     */
     public function verifyRequest(): array
     {
         $payload = [];
@@ -136,6 +146,9 @@ class WebhookController extends BaseController
         }
     }
 
+    /**
+     * @return array{status: string, message: string}
+     */
     private function handleRepositoryOperations(string $branch, string $repoUrl): array
     {
         $cloneDir = $this->app->getConfig('REPO_BASE_DIRECTORY') . '/' . basename($repoUrl, '.git');
