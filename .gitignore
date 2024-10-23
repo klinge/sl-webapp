@@ -2,6 +2,7 @@ composer.lock
 vendor/
 /scripts/*.sh
 tests/coverage/
+tests/*.xml
 .vscode/
 .env
 *.sqlite
