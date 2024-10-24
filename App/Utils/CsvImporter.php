@@ -255,7 +255,8 @@ class CsvImporter
     {
         foreach ($betalningar as $year => $date) {
             if (!empty($date)) {
-                $query = "INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) VALUES (:medlem_id, :belopp, :datum, :avser_ar, :kommentar)";
+                $query = "INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) 
+                    VALUES (:medlem_id, :belopp, :datum, :avser_ar, :kommentar)";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(':medlem_id', $memberId);
                 $stmt->bindValue(':belopp', 300);
@@ -298,15 +299,3 @@ class CsvImporter
         }
     }
 }
-
-$importer = new CsvImporter('sldb-prod.sqlite');
-//$result =  $importer->findMembersInCsv('B24', 'SM');
-//print_r($result);
-
-$importer->deleteMedlemmar();
-$updatedRows = $importer->insertToDb();
-echo "--- Rader som inte gick att läsa in från csv ---" . PHP_EOL;
-print_r($importer->csvRowsNotImported);
-echo "--- Rader som inte gick att skapa i databasen ---" . PHP_EOL;
-print_r($importer->dbRowsNotCreated);
-$importer->addJohanWithPwdAndAdmin();
