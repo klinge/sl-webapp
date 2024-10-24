@@ -112,7 +112,8 @@ class BetalningController extends BaseController
         try {
             $result = $betalning->create();
             $sentMail = $this->sendWelcomeEmailOnFirstPayment($betalning->medlem_id);
-            $this->app->getLogger()->info('Betalning created successfully. Id of betalning: ' . $result['id'] . '. Registered by: ' . Session::get('user_id'));
+            $this->app->getLogger()->info('Betalning created successfully. Id of betalning: ' . $result['id'] .
+                '. Registered by: ' . Session::get('user_id'));
             $this->jsonResponse(['success' => true, 'message' => 'Betalning created successfully. Id of betalning: ' . $result['id']]);
         } catch (Exception $e) {
             $this->app->getLogger()->warning('Error creating Betalning: ' . $e->getMessage());
