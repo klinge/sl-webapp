@@ -181,11 +181,11 @@ include_once "views/_layouts/header.php";
                 <tbody>
                     <?php foreach (array_slice($viewData['seglingar'], 0, 5) as $segling) : ?>
                         <tr>
-                            <td><?= htmlspecialchars($segling['startdatum']) ?></td>
-                            <td><?= htmlspecialchars($segling['roll_namn']) ?></td>
                             <td>
-                                <a href="/segling/<?php echo $segling['segling_id'] ?>"><?= htmlspecialchars($segling['skeppslag']) ?></a>
+                                <a href="/segling/<?php echo $segling['segling_id'] ?>"><?php echo htmlspecialchars($segling['startdatum']) ?></a>
                             </td>
+                            <td><?php echo $segling['roll_namn'] ?></td>
+                            <td><?php echo htmlspecialchars($segling['skeppslag']) ?></td>
                         </tr>
                     <?php endforeach ?>
                 </tbody>
