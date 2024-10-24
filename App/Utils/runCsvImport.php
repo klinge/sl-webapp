@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Utils\CsvImporter;
 
+require_once __DIR__ . '/../../vendor/autoload.php';
+
 $importer = new CsvImporter('sldb-prod.sqlite');
 //$result = $importer->findMembersInCsv('B24', 'SM');
 //print_r($result);
