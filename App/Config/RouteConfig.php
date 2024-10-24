@@ -11,6 +11,7 @@ class RouteConfig
         'show-login',
         'show-register',
         'login',
+        'logout',
         'register',
         'register-activate',
         'show-request-password',

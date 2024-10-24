@@ -39,8 +39,8 @@ $roller = $viewData['roles'];
                         <tr>
                             <th>Roll</th>
                             <th>Namn</th>
-                            <th>Medlemsavg</th>
-                            <th>Åtgärder</th>
+                            <th>Betalt<br />medlemsavg</th>
+                            <th>Ta bort</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,8 +83,8 @@ $roller = $viewData['roles'];
                     <thead>
                         <tr>
                             <th>Namn</th>
-                            <th>Medlemsavg</th>
-                            <th>Åtgärder</th>
+                            <th>Betalt<br />medlemsavgift</th>
+                            <th>Ta bort</th>
                         </tr>
                     </thead>
                     <tbody>
