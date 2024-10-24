@@ -28,6 +28,8 @@ class AuthenticationMiddlewareTest extends TestCase
 
         $this->middleware = new AuthenticationMiddlewareFake($this->app, $this->request);
 
+        $this->app->method('getRouter')->willReturn($this->router);
+        $this->app->method('getLogger')->willReturn($this->logger);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
     }
     //all ajax requests require a logged-in user
@@ -38,9 +40,6 @@ class AuthenticationMiddlewareTest extends TestCase
 
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
         $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
-
-        $this->app->method('getRouter')->willReturn($this->router);
-        $this->app->method('getLogger')->willReturn($this->logger);
 
         Session::remove('user_id');
 
@@ -66,9 +65,6 @@ class AuthenticationMiddlewareTest extends TestCase
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
         $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
 
-        $this->app->method('getRouter')->willReturn($this->router);
-        $this->app->method('getLogger')->willReturn($this->logger);
-
         Session::set('user_id', 123);
 
         $this->middleware->handle();
@@ -80,9 +76,6 @@ class AuthenticationMiddlewareTest extends TestCase
     {
         $this->request->method('getUri')->willReturn($this->uri);
         $this->uri->method('__toString')->willReturn('/protected/page');
-
-        $this->app->method('getRouter')->willReturn($this->router);
-        $this->app->method('getLogger')->willReturn($this->logger);
 
         $this->router->method('match')->willReturn(['name' => 'protected-route']);
         $this->router->method('generate')->willReturn('/login');
@@ -102,8 +95,6 @@ class AuthenticationMiddlewareTest extends TestCase
     public function testHandleProtectedRouteWithLogin(): void
     {
         $this->request->method('getUri')->willReturn($this->uri);
-        $this->app->method('getRouter')->willReturn($this->router);
-
         $this->router->method('match')->willReturn(['name' => 'protected-route']);
 
         Session::set('user_id', 76);
@@ -118,8 +109,6 @@ class AuthenticationMiddlewareTest extends TestCase
         RouteConfig::$noLoginRequiredRoutes = ['public-route'];
 
         $this->request->method('getUri')->willReturn($this->uri);
-        $this->app->method('getRouter')->willReturn($this->router);
-
         $this->router->method('match')->willReturn(['name' => 'public-route']);
 
         Session::set('user_id', null);
