@@ -125,7 +125,7 @@ class WebhookController extends BaseController
         //Lastly check that the request was for the correct repository
         if ($payload['repository']['id'] !== self::REPOSITORY_ID) {
             $this->jsonResponse(
-                ['status' => 'ignored', 'message' => "Not handling requests for this repo, 
+                ['status' => 'ignored', 'message' => "Not handling requests for this repo,
                 {$payload['repository']['full_name']}"],
                 200
             );

@@ -253,7 +253,7 @@ class CsvImporter
     {
         foreach ($betalningar as $year => $date) {
             if (!empty($date)) {
-                $query = "INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar) 
+                $query = "INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar)
                     VALUES (:medlem_id, :belopp, :datum, :avser_ar, :kommentar)";
                 $stmt = $this->conn->prepare($query);
                 $stmt->bindParam(':medlem_id', $memberId);
