@@ -23,9 +23,18 @@ class WebhookController extends BaseController
 
     public function handle(): void
     {
-        $this->app->getLogger()->info('Starting to process webhook call from: ' . $this->remoteIp, ['class' => __CLASS__, 'function' => __FUNCTION__]);
-        $this->app->getLogger()->debug('Headers: ' . json_encode($this->request->getHeaders()), ['class' => __CLASS__, 'function' => __FUNCTION__]);
-        $this->app->getLogger()->debug('Payload: ' . json_encode($this->request->getParsedBody()), ['class' => __CLASS__, 'function' => __FUNCTION__]);
+        $this->app->getLogger()->info(
+            'Starting to process webhook call from: ' . $this->remoteIp,
+            ['class' => __CLASS__, 'function' => __FUNCTION__]
+        );
+        $this->app->getLogger()->debug(
+            'Headers: ' . json_encode($this->request->getHeaders()),
+            ['class' => __CLASS__, 'function' => __FUNCTION__]
+        );
+        $this->app->getLogger()->debug(
+            'Payload: ' . json_encode($this->request->getParsedBody()),
+            ['class' => __CLASS__, 'function' => __FUNCTION__]
+        );
 
         $payload = $this->verifyRequest();
 
@@ -115,7 +124,11 @@ class WebhookController extends BaseController
 
         //Lastly check that the request was for the correct repository
         if ($payload['repository']['id'] !== self::REPOSITORY_ID) {
-            $this->jsonResponse(['status' => 'ignored', 'message' => "Not handling requests for this repo, {$payload['repository']['full_name']}"], 200);
+            $this->jsonResponse(
+                ['status' => 'ignored', 'message' => "Not handling requests for this repo,
+                {$payload['repository']['full_name']}"],
+                200
+            );
             $this->app->getLogger()->warning("Repository Id in the request was not correct");
             return [];
         }

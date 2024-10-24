@@ -132,11 +132,13 @@ class SeglingController extends BaseController
         $segling = new Segling($this->conn, $id);
         if ($segling->delete()) {
             Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
-            $this->app->getLogger()->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' . Session::get('user_id'));
+            $this->app->getLogger()->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
+                Session::get('user_id'));
             exit;
         } else {
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
-            $this->app->getLogger()->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag . '  User: ' . Session::get('user_id'));
+            $this->app->getLogger()->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag .
+                '  User: ' . Session::get('user_id'));
             exit;
         }
     }
@@ -264,7 +266,8 @@ class SeglingController extends BaseController
             $result = $stmt->execute();
 
             if ($result) {
-                $this->app->getLogger()->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId . "User: " . Session::get('user_id'));
+                $this->app->getLogger()->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId .
+                    "User: " . Session::get('user_id'));
                 echo json_encode(['status' => 'ok']);
             } else {
                 $this->app->getLogger()->warning("Failed to delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId);

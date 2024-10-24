@@ -80,8 +80,10 @@ class Medlem
     {
         $successVerb = ($operation === 'INSERT') ? 'skapad' : 'uppdaterad';
         $errorVerb = ($operation === 'INSERT') ? 'skapande' : 'uppdatering';
-        $successMessage = "Medlem: " . $this->fornamn . " " . $this->efternamn . " " . $successVerb . " av användare: " . Session::get('user_id');
-        $errorMessage = "Fel vid " . $errorVerb . " av medlem: " . $this->fornamn . " " . $this->efternamn . ". Användare: " . Session::get('user_id') . ". Felmeddelande: ";
+        $successMessage = "Medlem: " . $this->fornamn . " " . $this->efternamn . " " .
+            $successVerb . " av användare: " . Session::get('user_id');
+        $errorMessage = "Fel vid " . $errorVerb . " av medlem: " . $this->fornamn . " " . $this->efternamn .
+            ". Användare: " . Session::get('user_id') . ". Felmeddelande: ";
 
         try {
             $this->persistToDatabase($operation);
@@ -204,7 +206,8 @@ class Medlem
                     $stmt->bindValue(':roll_id', $rollId, PDO::PARAM_INT);
                     $stmt->execute();
                 }
-                $this->logger->info("Roles removed for member: " . $this->fornamn . " " . $this->efternamn . ". Rollid: " . json_encode($rolesToRemove));
+                $this->logger->info("Roles removed for member: " . $this->fornamn . " " .
+                    $this->efternamn . ". Rollid: " . json_encode($rolesToRemove));
             }
             $this->conn->commit();
         } catch (Exception $e) {

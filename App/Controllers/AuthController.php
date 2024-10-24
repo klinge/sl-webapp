@@ -282,7 +282,8 @@ class AuthController extends BaseController
         $token_result = $this->getTokenHandler()->isValidToken($token, TokenType::ACTIVATION);
 
         if (!$token_result['success']) {
-            $this->app->getLogger()->warning("Activate account: failed to activate account. Token given was" . $token . ". Remote IP: " . $this->remoteIp);
+            $this->app->getLogger()->warning("Activate account: failed to activate account. Token given was" . $token .
+                ". Remote IP: " . $this->remoteIp);
             Session::setFlashMessage('error', $token_result['message']);
             header('Location: ' . $this->app->getRouter()->generate('login'));
             return;
@@ -509,7 +510,8 @@ class AuthController extends BaseController
             $this->app->getLogger()->info("AuthController::saveMembersPassword::Password updated for member:" . $email);
             return true;
         } catch (PDOException $e) {
-            $this->app->getLogger()->error("AuthController::saveMembersPassword::Error updating password for member:" . $email . " Error: " . $e->getMessage());
+            $this->app->getLogger()->error("AuthController::saveMembersPassword::Error updating password for member:" . $email .
+                " Error: " . $e->getMessage());
             return false;
         }
     }
