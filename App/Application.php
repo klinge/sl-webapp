@@ -47,7 +47,7 @@ class Application
         $this->loadConfig();
         $this->setErrorReporting($this->getAppEnv());
         $this->setupRouter();
-        $this->setupLogger($this->getAppEnv());
+        $this->setupLogger($this->getAppEnv(), $this->getConfig('LOG_NAME'), $this->getConfig('LOG_LEVEL'));
         $this->setupSession();
         $this->psrRequest = ServerRequestFactory::fromGlobals(
             $_SERVER,
@@ -195,13 +195,13 @@ class Application
         }
     }
 
-    private function setupLogger(string $appEnv): void
+    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = "Level::Info"): void
     {
-        $this->logger = new Logger('sl-medlem');
+        $this->logger = new Logger($logName);
         if ($appEnv === 'DEV') {
             $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
         } else {
-            $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', Level::Info));
+            $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', $logLevel));
         }
     }
 
