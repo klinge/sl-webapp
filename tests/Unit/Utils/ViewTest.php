@@ -3,10 +3,8 @@
 namespace Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
-use Tests\TestHelpers\MemoryStreamWrapper;
 use App\Utils\View;
 use App\Application;
-use App\Utils\Session;
 use App\Utils\ResponseEmitter;
 use Laminas\Diactoros\Response\HtmlResponse;
 
@@ -15,6 +13,7 @@ class ViewTest extends TestCase
     private View $view;
     private $app;
     private $tempDir;
+    private ResponseEmitter $emitter;
 
     protected function setUp(): void
     {
