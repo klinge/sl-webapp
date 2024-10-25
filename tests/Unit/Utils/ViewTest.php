@@ -15,8 +15,6 @@ class ViewTest extends TestCase
     private View $view;
     private $app;
     private $tempDir;
-    private ResponseEmitter $emitter;
-    private $template;
 
     protected function setUp(): void
     {
