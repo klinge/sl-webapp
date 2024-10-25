@@ -6,6 +6,7 @@ tests/*.xml
 .vscode/
 .env
 *.sqlite
+db/queries/
 .devdbrc
 *.csv
 *.xlsx

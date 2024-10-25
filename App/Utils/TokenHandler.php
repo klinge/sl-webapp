@@ -67,19 +67,18 @@ class TokenHandler
         $stmt->execute();
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        //Check if we found a token, fail if empty
         if (!$result) {
-            //Fail if we didnt find the token
             return ['success' => false, 'message' => 'Länken är inte giltig'];
-        } else {
-            //Check if token is expired
-            $expirationTime = strtotime($result['created_at']) + (60 * 30); // 30 minutes in seconds
-            if (time() > $expirationTime) {
-                //Also fail if token is expired
-                return ['success' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
-            }
-            $hashedPassword = $result['password_hash'] ?: '';
-            return ['success' => true, 'email' => $result['email'], 'hashedPassword' => $hashedPassword];
         }
+
+        $expirationTime = strtotime($result['created_at']) + (60 * 30); // 30 minutes in seconds
+        //Check if token is expired, fail if so
+        if (time() > $expirationTime) {
+            return ['success' => false, 'message' => 'Länkens giltighetstid är 30 min. Den fungerar inte längre. Försök igen'];
+        }
+        $hashedPassword = $result['password_hash'] ?: '';
+        return ['success' => true, 'email' => $result['email'], 'hashedPassword' => $hashedPassword];
     }
 
     public function deleteToken(string $token): bool
