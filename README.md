@@ -1,4 +1,4 @@
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp)[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=klinge_sl-webapp&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=klinge_sl-webapp)
 
 # SL Member System
 Members and activities database for a sailing club, with an accompanying web-gui.  
@@ -66,4 +66,8 @@ All items moved to Github issues
 2. The webserver need to redirect all requests to index.php. If the server is Apache
    the .htacess in the repo does this. Remember to allow redirects in the site config. 
    If nginx try_files in a location block need to point to index.php for not-found files. 
+
+## Requirements
+* Server needs PHP 8.1 or newer
+* For testing PHP 8.2 is needed since it's required for the PHPUnit tests
 

@@ -8,7 +8,7 @@ include_once "views/_layouts/header.php";
 
 <!--Add Cloudflare Turnstile script -->
 <!-- SRI via https://www.srihash.org/ -->
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" integrity="sha384-ztFLr92O7w7dOlmjOTuEGzcXpUsRKoAe0is03lxXyeYuXAfkccNA3rY0U0HWyuo0" crossorigin="anonymous" defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" crossorigin="anonymous" defer></script>
 
 <!-- Login 13 - Bootstrap Brain Component -->
 <section class="py-1 py-md-3">
