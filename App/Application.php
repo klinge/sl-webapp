@@ -195,13 +195,21 @@ class Application
         }
     }
 
-    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = "Level::Info"): void
+    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = Level::Info): bool
     {
         $this->logger = new Logger($logName);
-        if ($appEnv === 'DEV') {
-            $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
-        } else {
-            $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', $logLevel));
+        try {
+            //try to create a logger given info from .env
+            if ($appEnv === 'DEV') {
+                $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
+            } else {
+                $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', $logLevel));
+            }
+            return true;
+        } catch (\Exception $e) {
+            // Fallback to system logger or stderr
+            $this->logger->pushHandler(new StreamHandler('php://stderr', Level::Warning));
+            return false;
         }
     }
 
