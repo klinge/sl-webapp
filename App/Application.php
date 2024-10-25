@@ -195,7 +195,7 @@ class Application
         }
     }
 
-    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = Level::Info): bool
+    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = 'INFO'): bool
     {
         $this->logger = new Logger($logName);
         try {
