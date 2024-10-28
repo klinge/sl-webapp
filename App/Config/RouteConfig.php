@@ -57,13 +57,13 @@ class RouteConfig
         $router->map('GET', '/login', 'Auth\LoginController#showLogin', 'show-login');
         $router->map('POST', '/login', 'Auth\LoginController#login', 'login');
         $router->map('GET', '/logout', 'Auth\LoginController#logout', 'logout');
-        $router->map('GET', '/auth/register', 'AuthController#showRegister', 'show-register');
-        $router->map('POST', '/auth/register', 'AuthController#register', 'register');
-        $router->map('GET', '/auth/register/[a:token]', 'AuthController#activate', 'register-activate');
-        $router->map('GET', '/auth/bytlosenord', 'AuthController#showRequestPwd', 'show-request-password');
-        $router->map('POST', '/auth/bytlosenord', 'AuthController#sendPwdRequestToken', 'handle-request-password');
-        $router->map('GET', '/auth/bytlosenord/[a:token]', 'AuthController#showResetPassword', 'show-reset-password');
-        $router->map('POST', '/auth/sparalosenord', 'AuthController#resetAndSavePassword', 'reset-password');
+        $router->map('GET', '/auth/register', 'Auth\RegistrationController#showRegister', 'show-register');
+        $router->map('POST', '/auth/register', 'Auth\RegistrationController#register', 'register');
+        $router->map('GET', '/auth/register/[a:token]', 'Auth\RegistrationController#activate', 'register-activate');
+        $router->map('GET', '/auth/bytlosenord', 'Auth\PasswordController#showRequestPwd', 'show-request-password');
+        $router->map('POST', '/auth/bytlosenord', 'Auth\PasswordController#sendPwdRequestToken', 'handle-request-password');
+        $router->map('GET', '/auth/bytlosenord/[a:token]', 'Auth\PasswordController#showResetPassword', 'show-reset-password');
+        $router->map('POST', '/auth/sparalosenord', 'Auth\PasswordController#resetAndSavePassword', 'reset-password');
 
         $router->map('GET', '/user', 'UserController#home', 'user-home');
 

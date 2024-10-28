@@ -214,7 +214,7 @@ text-decoration: none
 <!--[if !mso]>-->
 <td class="t21" style="background-color:#CDD6B0;overflow:hidden;width:286px;text-align:center;line-height:40px;mso-line-height-rule:exactly;mso-text-raise:8px;border-radius:12px 12px 12px 12px;">
 <!--<![endif]-->
-<a class="t19" href="{{ pwd_reset_link }}" style="display:block;margin:0;Margin:0;font-family:Inter Tight,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:40px;font-weight:600;font-style:normal;font-size:14px;text-decoration:none;direction:ltr;color:#292929;text-align:center;mso-line-height-rule:exactly;mso-text-raise:8px;" target="_blank">Återställ lösenord</a></td>
+<a class="t19" href="{{ url }}" style="display:block;margin:0;Margin:0;font-family:Inter Tight,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Arial,sans-serif;line-height:40px;font-weight:600;font-style:normal;font-size:14px;text-decoration:none;direction:ltr;color:#292929;text-align:center;mso-line-height-rule:exactly;mso-text-raise:8px;" target="_blank">Återställ lösenord</a></td>
 </tr></table>
 </td></tr><tr><td><div class="t25" style="mso-line-height-rule:exactly;mso-line-height-alt:20px;line-height:20px;font-size:1px;display:block;">&nbsp;&nbsp;</div></td></tr><tr><td align="center">
 <table class="t27" role="presentation" cellpadding="0" cellspacing="0" style="Margin-left:auto;Margin-right:auto;">

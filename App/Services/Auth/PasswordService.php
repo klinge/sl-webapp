@@ -57,6 +57,22 @@ class PasswordService
     }
 
     /**
+     * Formats password errors for View
+     *
+     * @param array $errors The errors found in the password
+     * @return string A html formatted string
+     */
+    public function formatPasswordErrors(array $errors): string
+    {
+        $message = "<ul>";
+        foreach ($errors as $error) {
+            $message = $message . "<li>" . $error . "</li>";
+        }
+        $message = $message . "</ul>";
+        return $message;
+    }
+
+    /**
      * Verifies if two passwords match.
      *
      * @param string $password
