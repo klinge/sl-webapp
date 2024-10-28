@@ -131,6 +131,5 @@ class LoginController extends AuthBaseController
         Session::remove('fornamn');
         Session::destroy();
         $this->redirectWithSuccess('show-login');
-        return;
     }
 }

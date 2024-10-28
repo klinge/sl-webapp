@@ -93,8 +93,8 @@ class MedlemRepository
         $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
         $stmt->bindParam(':email', $email);
         $stmt->execute();
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result;
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     //NOT USED?

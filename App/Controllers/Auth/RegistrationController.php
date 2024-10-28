@@ -60,6 +60,5 @@ class RegistrationController extends AuthBaseController
         } else {
             $this->redirectWithSuccess('login', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
         }
-        return;
     }
 }

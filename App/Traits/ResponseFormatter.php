@@ -14,14 +14,12 @@ trait ResponseFormatter
             Session::setFlashMessage('success', $message);
         }
         header('Location: ' . $this->app->getRouter()->generate($route));
-        return;
     }
 
     protected function redirectWithError(string $route, string $message): void
     {
         Session::setFlashMessage('error', $message);
         header('Location: ' . $this->app->getRouter()->generate($route));
-        return;
     }
 
     protected function renderWithError(string $view, string $message, array $data = []): void
