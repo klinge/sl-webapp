@@ -35,7 +35,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
 
             // Store the current URL in the session, this is used by AuthController::login() to redirect the user back
             // to the page they wanted after login
-            Session::set('redirect_url', $this->request->getUri()->__toString());
+            Session::set('redirect_url', $match['name']);
             //Then require login
             Session::setFlashMessage('error', 'Du måste vara inloggad för att se denna sida.');
 

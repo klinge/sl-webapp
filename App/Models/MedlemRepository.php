@@ -81,6 +81,22 @@ class MedlemRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Retrieves member data by email.
+     *
+     * @param string $email The email address of the member
+     * @return array|bool Member data array or false if not found
+     */
+    public function getMemberByEmail(string $email): array|bool
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     //NOT USED?
     //Returns an array with member data and roles
     //Use getAll() instead as it returns proper member objects including roles..
