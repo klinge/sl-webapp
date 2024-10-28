@@ -6,12 +6,15 @@ namespace App\Controllers\Auth;
 
 use App\Application;
 use App\Services\Auth\UserAuthenticationService;
+use App\Traits\ResponseFormatter;
 use App\Utils\View;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 
 class PasswordController extends AuthBaseController
 {
+    use ResponseFormatter;
+
     private const NEWPASSWORD_VIEW = 'login/viewReqPassword';
     private const RESET_PASSWORD_VIEW = 'login/viewSetNewPassword';
     private UserAuthenticationService $authService;
@@ -32,8 +35,7 @@ class PasswordController extends AuthBaseController
     public function sendPwdRequestToken(): void
     {
         if (!$this->validateRecaptcha()) {
-            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
-            $this->view->render(self::NEWPASSWORD_VIEW);
+            $this->renderWithError(self::NEWPASSWORD_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
             return;
         }
 
@@ -65,8 +67,7 @@ class PasswordController extends AuthBaseController
             return;
         }
 
-        Session::setFlashMessage('error', $result['message']);
-        header('Location: ' . $this->app->getRouter()->generate('show-request-password'));
+        $this->redirectWithError('show-request-password', $result['message']);
     }
 
     public function resetAndSavePassword(): void
@@ -84,7 +85,6 @@ class PasswordController extends AuthBaseController
             return;
         }
 
-        Session::setFlashMessage('success', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
-        header('Location: ' . $this->app->getRouter()->generate('login'));
+        $this->redirectWithSuccess('login', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
     }
 }

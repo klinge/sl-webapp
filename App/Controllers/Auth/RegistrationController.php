@@ -6,12 +6,15 @@ namespace App\Controllers\Auth;
 
 use App\Application;
 use App\Services\Auth\UserAuthenticationService;
+use App\Traits\ResponseFormatter;
 use App\Utils\Session;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RegistrationController extends AuthBaseController
 {
+    use ResponseFormatter;
+
     private const REGISTER_VIEW = 'login/viewRegisterAccount';
 
     private UserAuthenticationService $userAuthService;
@@ -33,16 +36,14 @@ class RegistrationController extends AuthBaseController
     public function register(): void
     {
         if (!$this->validateRecaptcha()) {
-            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
-            $this->view->render(self::REGISTER_VIEW);
+            $this->renderWithError(self::REGISTER_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
             return;
         }
 
         $result = $this->userAuthService->registerUser($this->request->getParsedBody());
 
         if (!$result['success']) {
-            Session::setFlashMessage('error', $result['message']);
-            $this->view->render(self::REGISTER_VIEW);
+            $this->redirectWithError(self::REGISTER_VIEW, $result['message']);
             return;
         }
 
@@ -55,10 +56,10 @@ class RegistrationController extends AuthBaseController
         $result = $this->userAuthService->activateAccount($params['token']);
 
         if (!$result['success']) {
-            Session::setFlashMessage('error', $result['message']);
+            $this->redirectWithError('login', $result['message']);
         } else {
-            Session::setFlashMessage('success', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
+            $this->redirectWithSuccess('login', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
         }
-        header('Location: ' . $this->app->getRouter()->generate('login'));
+        return;
     }
 }

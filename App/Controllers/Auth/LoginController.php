@@ -8,12 +8,15 @@ use App\Application;
 use App\Models\MedlemRepository;
 use App\Models\Medlem;
 use App\Services\Auth\PasswordService;
+use App\Traits\ResponseFormatter;
 use App\Utils\View;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 
 class LoginController extends AuthBaseController
 {
+    use ResponseFormatter;
+
     private View $view;
     private MedlemRepository $medlemRepo;
     private PasswordService $passwordService;
@@ -59,8 +62,8 @@ class LoginController extends AuthBaseController
     {
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
-            Session::setFlashMessage('error', self::RECAPTCHA_ERROR_MESSAGE);
-            $this->view->render(self::LOGIN_VIEW);
+            $this->renderWithError(self::LOGIN_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
+            return;
         }
 
         $providedEmail = $this->request->getParsedBody()['email'] ?? '';
@@ -68,9 +71,8 @@ class LoginController extends AuthBaseController
 
         if (empty($providedEmail) || empty($providedPassword)) {
             $this->app->getLogger()->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
-            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
-            $this->view->render(self::LOGIN_VIEW);
-            exit;
+            $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
+            return;
         }
 
         $result = $this->medlemRepo->getMemberByEmail($providedEmail);
@@ -78,44 +80,42 @@ class LoginController extends AuthBaseController
         //User not found
         if (!$result) {
             $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
-            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
-            $this->view->render(self::LOGIN_VIEW);
-            exit;
+            $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
+            return;
         }
         //Catch exception if medlem not found, should not happen since we already checked for it
         try {
             $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
         } catch (\Exception $e) {
             $this->app->getLogger()->error("Technical error. Could not create member object for member id: " . $result['id']);
-            Session::setFlashMessage('error', 'Tekniskt fel. Försök igen eller kontakta en administratör!');
-            $this->view->render(self::LOGIN_VIEW);
+            $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
             return;
         }
         //Fail if passwork did not verify
         if (!$this->passwordService->verifyPassword($providedPassword, $medlem->password)) {
             $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->remoteIp);
-            Session::setFlashMessage('error', self::BAD_EMAIL_OR_PASSWORD);
-            $this->view->render(self::LOGIN_VIEW);
+            $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
             return;
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
         $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->remoteIp);
         Session::regenerateId();
+
         Session::set('user_id', $medlem->id);
         Session::set('fornamn', $medlem->fornamn);
+
         // Send admins and users to different parts of the site
         if ($medlem->isAdmin) {
             Session::set('is_admin', true);
             //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
-            $redirectUrl = Session::get('redirect_url') ?? $this->app->getRouter()->generate('home');
-            Session::remove('redirect_url');
+            $route = Session::get('redirect_url') ?? 'home';
         } else {
             Session::set('is_admin', false);
             //if user is not an admin send them to the user part of the site
-            $redirectUrl = $this->app->getRouter()->generate('user-home');
-            Session::remove('redirect_url');
+            $route = 'user-home';
         }
-        header('Location: ' . $redirectUrl);
+        Session::remove('redirect_url');
+        $this->redirectWithSuccess($route);
     }
 
     /**
@@ -130,8 +130,7 @@ class LoginController extends AuthBaseController
         Session::remove('user_id');
         Session::remove('fornamn');
         Session::destroy();
-        $redirectUrl = $this->app->getRouter()->generate('show-login');
-        header('Location: ' . $redirectUrl);
+        $this->redirectWithSuccess('show-login');
         return;
     }
 }
