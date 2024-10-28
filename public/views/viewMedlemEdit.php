@@ -8,7 +8,7 @@ $page_title = $viewData['title'];
 include_once "views/_layouts/header.php";
 ?>
 
-<form class="border border-primary rounded p-3" action="<?= $viewData['formAction'] ?>" method="POST">
+<form class="border border-primary rounded p-3" id="editForm" action="<?= $viewData['formAction'] ?>" method="POST">
     <input type="hidden" name="Content-Type" value="application/x-www-form-urlencoded">
     <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
     <div class="row">
@@ -122,16 +122,26 @@ include_once "views/_layouts/header.php";
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary">Uppdatera</button>
-    <a class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/medlem">Tillbaka</a>
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Uppdatera</button>
+        <a class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/medlem">Tillbaka</a>
+        <button type="button" class="btn btn-danger" onclick="deleteMember()">Ta bort medlem</button>
+    </div>
 </form>
 
-<!-- Begin the delete form -->
-<form class="p-3" action="<?= $viewData['deleteAction'] ?>" method="POST">
+<!-- Hidden form for delete action -->
+<form id="deleteForm" class="d-none" action="<?= $viewData['deleteAction'] ?>" method="POST">
     <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
     <input type="hidden" name="id" value="<?= $medlem->id; ?>">
-    <button type="submit" class="btn btn-danger">Ta bort medlem</button>
 </form>
+
+<script>
+    function deleteMember() {
+        if (confirm('Är du säker på att du vill ta bort denna medlem?')) {
+            document.getElementById('deleteForm').submit();
+        }
+    }
+</script>
 
 <div class="row rounded px-3">
     <!-- Betalningar -->

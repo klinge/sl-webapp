@@ -134,13 +134,13 @@ class SeglingController extends BaseController
             Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
             $this->app->getLogger()->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
                 Session::get('user_id'));
-            exit;
         } else {
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
             $this->app->getLogger()->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag .
                 '  User: ' . Session::get('user_id'));
-            exit;
         }
+        $redirectUrl = $this->app->getRouter()->generate('segling-list');
+        header('Location: ' . $redirectUrl);
     }
 
     public function showCreate()
@@ -181,11 +181,9 @@ class SeglingController extends BaseController
             Session::setFlashMessage('success', 'Seglingen är nu skapad!');
             $redirectUrl = $this->app->getRouter()->generate('segling-edit', ['id' => $result]);
             header('Location: ' . $redirectUrl);
-            exit;
         } else {
             $return = ['success' => false, 'message' => 'Kunde inte spara till databas. Försök igen.'];
             $this->showCreate();
-            exit;
         }
     }
 

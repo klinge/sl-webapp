@@ -253,7 +253,7 @@ class MedlemController extends BaseController
      */
     public function delete(): void
     {
-        $id = $this->request->getParsedBody()['id'];
+        $id = (int) $this->request->getParsedBody()['id'];
         try {
             $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
             $medlem->delete();

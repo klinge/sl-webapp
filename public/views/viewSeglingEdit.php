@@ -148,10 +148,15 @@ $roller = $viewData['roles'];
         </div>
 
         <button type="submit" class="btn btn-primary">Uppdatera</button>
-        <button class="button btn btn-warning" onclick="deleteSegling(<?php echo $segling->id ?>)">Ta bort</button>
         <button class="button btn btn-secondary" href="<?php echo $APP_DIR ?>/segling">Tillbaka</button>
+        <button type="button" class="button btn btn-danger mx-3" onclick="deleteSegling()">Ta bort</button>
     </form>
 </div>
+
+<!-- Hidden form for delete segling action -->
+<form id="deleteSegling" class="d-none" action="/segling/delete/<?= $segling->id ?>" method="POST">
+    <input type="hidden" name="csrf_token" value="<?php echo $viewData["csrf_token"]; ?>">
+</form>
 
 <script>
     document.querySelectorAll('.delete-medlem').forEach(button => {
@@ -189,18 +194,8 @@ $roller = $viewData['roles'];
     });
 
     function deleteSegling(seglingId) {
-        if (confirm('Are you sure you want to delete this segling?')) {
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '<?php echo $APP_DIR ?>/segling/delete/' + seglingId, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-            xhr.onload = function() {
-                window.location = '<?php echo $APP_DIR ?>/segling';
-            };
-
-            var csrfToken = '<?php echo $viewData["csrf_token"]; ?>';
-            xhr.send('csrf_token=' + encodeURIComponent(csrfToken));
+        if (confirm('Är du säker på att du vill ta bort denna segling?')) {
+            document.getElementById('deleteSegling').submit();
         }
     }
 </script>
