@@ -14,6 +14,7 @@ use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Utils\Session;
 use App\Application;
+use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -25,6 +26,8 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class MedlemController extends BaseController
 {
+    use ResponseFormatter;
+
     /**
      * @var View The view object for rendering templates
      */
@@ -125,12 +128,11 @@ class MedlemController extends BaseController
                 'listBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
                 'deleteAction' => $this->app->getRouter()->generate('medlem-delete')
             ];
+
             $this->view->render('viewMedlemEdit', $data);
         } catch (Exception $e) {
-            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Kunde inte hämta medlem!'];
-            $redirectUrl = $this->app->getRouter()->generate('medlem-list');
-            header('Location: ' . $redirectUrl);
-            exit;
+            $this->redirectWithError('medlem-list', 'Kunde inte hämta medlem!');
+            return;
         }
     }
 
@@ -149,29 +151,20 @@ class MedlemController extends BaseController
 
         $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
 
-        ///If the sanitization fails, just exit
+        ///If the sanitization fails, give a message and redirect
         if (!$result) {
-            exit;
+            return;
         }
 
         try {
             $medlem->save();
-
-            $_SESSION['flash_message'] = [
-                'type' => 'success',
-                'message' => 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
-            ];
+            $this->redirectWithSuccess(
+                'medlem-list',
+                'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
+            );
         } catch (Exception $e) {
-            $_SESSION['flash_message'] = [
-                'type' => 'error',
-                'message' => 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage()
-            ];
+            $this->redirectWithError('medlem-list', 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
         }
-
-        // Set the URL and redirect
-        $redirectUrl = $this->app->getRouter()->generate('medlem-list');
-        header('Location: ' . $redirectUrl);
-        exit;
     }
 
     /**
@@ -218,28 +211,23 @@ class MedlemController extends BaseController
         $postData = $this->request->getParsedBody();
 
         $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
-        //If the sanitize function returns false, we have an error, just exit
+        //If the sanitize function returns false, we have an error, just give a message and return
         if (!$result) {
-            exit;
+            return;
         }
 
         try {
             $medlem->create();
-            $_SESSION['flash_message'] = [
-                'type' => 'success',
-                'message' => 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
-            ];
+            $this->redirectWithSuccess(
+                'medlem-list',
+                'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
+            );
         } catch (Exception $e) {
-            $_SESSION['flash_message'] = [
-                'type' => 'error',
-                'message' => 'Kunde inte skapa medlem!'
-            ];
+            $this->redirectWithError(
+                'medlem-create',
+                'Kunde inte skapa medlem! Fel: ' . $e->getMessage()
+            );
         }
-
-        // Set the URL and redirect
-        $redirectUrl = $this->app->getRouter()->generate('medlem-list');
-        header('Location: ' . $redirectUrl);
-        exit;
     }
 
     /**
@@ -257,19 +245,13 @@ class MedlemController extends BaseController
         try {
             $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
             $medlem->delete();
-            $_SESSION['flash_message'] = ['type' => 'ok', 'message' => 'Medlem borttagen!'];
             $this->app->getLogger()->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' borttagen av: ' . Session::get('user_id'));
             // Set the URL and redirect
-            $redirectUrl = $this->app->getRouter()->generate('medlem-list');
-            header('Location: ' . $redirectUrl);
-            exit;
+            $this->redirectWithSuccess('medlem-list', 'Medlem borttagen!');
         } catch (Exception $e) {
             $this->app->getLogger()->warning('Kunde inte ta bort medlem: ' . $e->getMessage());
-            $_SESSION['flash_message'] = ['type' => 'error', 'message' => 'Kunde inte ta bort medlem!'];
-            $redirectUrl = $this->app->getRouter()->generate('medlem-list');
+            $this->redirectWithError('medlem-list', 'Kunde inte ta bort medlem! Fel: ' . $e->getMessage());
         }
-        header('Location: ' . $redirectUrl);
-        exit;
     }
 
     /**
@@ -303,7 +285,7 @@ class MedlemController extends BaseController
         // If there were errors show a flash message and redirect back to the form
         if ($errors) {
             $errorMsg = "Följande obligatoriska fält måste fyllas i: " . implode(', ', $errors);
-            $_SESSION['flash_message'] = ['type' => 'error', 'message' => $errorMsg];
+            Session::setFlashMessage('error', $errorMsg);
             if (isset($medlem->id)) {
                 $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
             } else {
