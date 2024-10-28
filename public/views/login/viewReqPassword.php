@@ -11,7 +11,7 @@ include_once "views/_layouts/header.php";
 
 <!-- Password Reset 3 - Bootstrap Brain Component -->
 <section class="p-2 p-md-3 p-xl-4">
-    <div class="container col-6">
+    <div class="container col-xl-6 col-md-10 col-sm-12">
         <div class="row auth-bg">
             <div class="col-12 col-md-6">
                 <div class="d-flex flex-column justify-content-between h-100 p-3 p-md-4 p-xl-5">
