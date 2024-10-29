@@ -85,6 +85,59 @@ class UserAuthenticationServiceTest extends TestCase
         $this->assertStringContainsString('finns ingen medlem', $result['message']);
     }
 
+    public function testRegisterUserFailPasswordsDontMatch(): void
+    {
+        $formData = [
+            'email' => 'user@example.com',
+            'password' => 'ValidPass123',
+            'verifyPassword' => 'InvalidPass124'
+        ];
+
+        $stmt = $this->createMock(\PDOStatement::class);
+        $this->conn->method('prepare')->willReturn($stmt);
+        $stmt->method('fetch')->willReturn($this->memberData);
+
+        $result = $this->authService->registerUser($formData);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('matchar inte', $result['message']);
+    }
+
+    public function testRegisterUserFailPasswordsDontValidate(): void
+    {
+        $formData = [
+            'email' => 'user@example.com',
+            'password' => 'short',
+            'verifyPassword' => 'short'
+        ];
+
+        $stmt = $this->createMock(\PDOStatement::class);
+        $this->conn->method('prepare')->willReturn($stmt);
+        $stmt->method('fetch')->willReturn($this->memberData);
+
+        $result = $this->authService->registerUser($formData);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('<ul>', $result['message']);
+    }
+
+    public function testRegisterUserFailSendingMail(): void
+    {
+        $formData = [
+            'email' => 'user@example.com',
+            'password' => 'ValidPass123',
+            'verifyPassword' => 'ValidPass123'
+        ];
+
+        $stmt = $this->createMock(\PDOStatement::class);
+        $this->conn->method('prepare')->willReturn($stmt);
+        $stmt->method('fetch')->willReturn($this->memberData);
+
+        $this->mailer->method('send')->willThrowException(new \Exception('Mail error'));
+
+        $result = $this->authService->registerUser($formData);
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('Kunde inte skicka', $result['message']);
+    }
+
     public function testActivateAccountSuccess(): void
     {
         $token = 'valid_token';
