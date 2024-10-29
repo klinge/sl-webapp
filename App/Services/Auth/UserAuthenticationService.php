@@ -22,12 +22,14 @@ class UserAuthenticationService
     private TokenHandler $tokenHandler;
     private MedlemRepository $medlemRepo;
     private PasswordService $passwordSvc;
+    private Email $mailer;
 
-    public function __construct(PDO $conn, Application $app)
+    public function __construct(PDO $conn, Application $app, Email $mailer)
     {
         $this->app = $app;
         $this->conn = $conn;
-        $this->tokenHandler = new TokenHandler($this->conn, $app);
+        $this->mailer = $mailer;
+        $this->tokenHandler = $this->createTokenHandler();
         $this->medlemRepo = new MedlemRepository($this->conn, $app);
         $this->passwordSvc = new PasswordService();
     }
@@ -97,14 +99,13 @@ class UserAuthenticationService
 
     private function sendActivationEmail(Medlem $medlem, string $email, string $token): bool
     {
-        $result = $this->sendAuthenticationEmail(
+        return $this->sendAuthenticationEmail(
             $email,
             $token,
             $medlem->fornamn,
             EmailType::VERIFICATION,
             'register-activate'
         );
-        return $result;
     }
 
     public function activateAccount(string $token): array
@@ -155,14 +156,13 @@ class UserAuthenticationService
 
     private function sendPasswordResetEmail(array $member, string $email, string $token): bool
     {
-        $result = $this->sendAuthenticationEmail(
+        return $this->sendAuthenticationEmail(
             $email,
             $token,
             $member['fornamn'],
             EmailType::PASSWORD_RESET,
             'show-reset-password'
         );
-        return $result;
     }
 
     public function validateResetToken(string $token): array
@@ -231,7 +231,6 @@ class UserAuthenticationService
         EmailType $emailType,
         string $routeName
     ): bool {
-        $mailer = new Email($this->app);
         $data = [
             'token' => $token,
             'fornamn' => $firstName,
@@ -240,7 +239,7 @@ class UserAuthenticationService
         ];
 
         try {
-            $mailer->send($emailType, $email, data: $data);
+            $this->mailer->send($emailType, $email, data: $data);
             $this->app->getLogger()->info("Sent {$emailType->value} email to: {$email}");
             return true;
         } catch (\Exception $e) {
@@ -248,5 +247,10 @@ class UserAuthenticationService
             $this->app->getLogger()->error($e->getMessage());
             return false;
         }
+    }
+
+    protected function createTokenHandler(): TokenHandler
+    {
+        return new TokenHandler($this->conn, $this->app);
     }
 }

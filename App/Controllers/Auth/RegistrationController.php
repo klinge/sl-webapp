@@ -9,6 +9,7 @@ use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\Session;
 use App\Utils\View;
+use App\Utils\Email;
 use Psr\Http\Message\ServerRequestInterface;
 
 class RegistrationController extends AuthBaseController
@@ -23,7 +24,7 @@ class RegistrationController extends AuthBaseController
     public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
-        $this->userAuthService = new UserAuthenticationService($this->conn, $app);
+        $this->userAuthService = new UserAuthenticationService($this->conn, $app, new Email($app));
         $this->view = new View($this->app);
     }
 

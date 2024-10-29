@@ -8,6 +8,7 @@ use App\Application;
 use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\View;
+use App\Utils\Email;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -23,7 +24,7 @@ class PasswordController extends AuthBaseController
     public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
-        $this->authService = new UserAuthenticationService($this->conn, $app);
+        $this->authService = new UserAuthenticationService($this->conn, $app, new Email($app));
         $this->view = new View($this->app);
     }
 
