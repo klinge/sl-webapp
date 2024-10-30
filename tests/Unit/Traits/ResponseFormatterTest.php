@@ -73,7 +73,7 @@ class ResponseFormatterTest extends TestCase
         $data = ['error-route', 'Error message'];
 
 
-        $this->callProtectedMethod($this->testClass, 'redirectWithSuccess', $data);
+        $this->callProtectedMethod($this->testClass, 'redirectWithError', $data);
         $this->assertEquals('Error message', Session::get('flash_message')['message']);
 
         $response =  $this->callProtectedMethod($this->testClass, 'emitRedirect', [$data[0]]);

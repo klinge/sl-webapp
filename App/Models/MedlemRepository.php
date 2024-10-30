@@ -7,6 +7,7 @@ namespace App\Models;
 use PDO;
 use Exception;
 use App\Application;
+use Monolog\Logger;
 
 class MedlemRepository
 {
@@ -34,14 +35,14 @@ class MedlemRepository
     {
         $medlemmar = [];
 
-        $query = "SELECT id from Medlem ORDER BY efternamn ASC";
+        $query = "SELECT id FROM Medlem ORDER BY efternamn ASC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $members =  $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($members as $member) {
             try {
-                $medlem = new Medlem($this->conn, $this->app->getLogger(), $member['id']);
+                $medlem = $this->createMedlem($this->conn, $this->app->getLogger(), $member['id']);
                 $medlemmar[] = $medlem;
             } catch (Exception $e) {
                 //Do nothing right now..
@@ -98,18 +99,8 @@ class MedlemRepository
         return $result ?: false;
     }
 
-    //NOT USED?
-    //Returns an array with member data and roles
-    //Use getAll() instead as it returns proper member objects including roles..
-    public function getAllWithRoles(): array
+    protected function createMedlem(PDO $conn, Logger $logger, int $id): Medlem
     {
-        $query = "SELECT m.*, GROUP_CONCAT(r.roll_namn, ', ') AS roller
-            FROM Medlem m
-            INNER JOIN Medlem_Roll mr ON m.id = mr.medlem_id
-            INNER JOIN Roll r ON mr.roll_id = r.id
-            GROUP BY m.id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return new Medlem($conn, $logger, $id);
     }
 }
