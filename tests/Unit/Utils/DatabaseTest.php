@@ -37,24 +37,6 @@ class DatabaseTest extends TestCase
 
         $this->assertInstanceOf(PDO::class, $connection);
     }
-    /*
-    public function testConnectionFailure()
-    {
-        $this->mockApp->method('getConfig')->willReturn('/non/existent/path/to/database.sqlite');
-
-        $mockLogger = $this->createMock(\Monolog\Logger::class);
-        $mockLogger->expects($this->once())
-            ->method('error')
-            ->with($this->stringContains('Could not connect to the database'));
-
-        $this->mockApp->expects($this->once())
-            ->method('getLogger')
-            ->willReturn($mockLogger);
-
-        $this->expectException(PDOException::class);
-        Database::getInstance($this->mockApp);
-    }
-    */
 
     public function testForeignKeysEnabled()
     {

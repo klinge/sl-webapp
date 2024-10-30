@@ -94,7 +94,16 @@ class Email
 
     private function loadTemplate(EmailType $type, array $data = [])
     {
-        $template = file_get_contents($this->app->getRootDir() . "/public/views/emails/{$type->value}.tpl");
+        $templatePath = $this->app->getRootDir() . "/public/views/emails/{$type->value}.tpl";
+        if (!file_exists($templatePath)) {
+            throw new \RuntimeException("Email template not found: {$type->value}.tpl");
+        }
+
+        $template = file_get_contents($templatePath);
+        if ($template === false) {
+            throw new \RuntimeException("Failed to read email template: {$type->value}.tpl");
+        }
+
         foreach ($data as $key => $value) {
             //Use mb_ereg_replace to support UTF-8 instead of str_replace that is not multibyte safe
             $template = mb_ereg_replace("{{ $key }}", $value, $template);
