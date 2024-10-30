@@ -44,7 +44,7 @@ class RegistrationController extends AuthBaseController
         $result = $this->userAuthService->registerUser($this->request->getParsedBody());
 
         if (!$result['success']) {
-            $this->redirectWithError(self::REGISTER_VIEW, $result['message']);
+            $this->redirectWithError('show-register', $result['message']);
             return;
         }
 
