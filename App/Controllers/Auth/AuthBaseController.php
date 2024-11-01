@@ -13,6 +13,7 @@ abstract class AuthBaseController extends BaseController
 {
     protected string $turnstileSecret;
     protected string $remoteIp;
+    protected Turnstile $turnstile;
 
     //Messages
     protected const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
@@ -22,6 +23,7 @@ abstract class AuthBaseController extends BaseController
         parent::__construct($app, $request);
         $this->turnstileSecret = $this->app->getConfig('TURNSTILE_SECRET_KEY');
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
+        $this->turnstile = new Turnstile($this->turnstileSecret);
     }
 
     /**
@@ -34,8 +36,7 @@ abstract class AuthBaseController extends BaseController
      */
     protected function validateRecaptcha(): bool
     {
-        $turnstile = new Turnstile($this->turnstileSecret);
-        $verifyResponse = $turnstile->verify(
+        $verifyResponse = $this->turnstile->verify(
             $this->request->getParsedBody()['cf-turnstile-response'],
             $this->remoteIp
         );
