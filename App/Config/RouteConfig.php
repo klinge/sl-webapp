@@ -65,6 +65,8 @@ class RouteConfig
         $router->map('GET', '/auth/bytlosenord/[a:token]', 'Auth\PasswordController#showResetPassword', 'show-reset-password');
         $router->map('POST', '/auth/sparalosenord', 'Auth\PasswordController#resetAndSavePassword', 'reset-password');
 
+        $router->map('GET', '/reports', 'ReportController#show', 'show-report-page');
+
         $router->map('GET', '/user', 'UserController#home', 'user-home');
 
         $router->map('POST', '/webhooks/git/handle', 'WebhookController#handle', 'git-webhook-listener');

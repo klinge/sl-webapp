@@ -46,7 +46,7 @@ include_once "views/_layouts/header.php";
                 <div class="card-body">
                     <h4 class="card-title">Alla rapporter</h4>
                     <p class="card-text">Inte implementerad än.. Här hittar du olika rapporter du kan ta fram.</p>
-                    <a href="#" class="btn btn-primary" tabindex="3" role="button">Se skeppslag..</a>
+                    <a href="reports" class="btn btn-primary" tabindex="3" role="button">Rapporter..</a>
                 </div>
             </div>
         </div>
