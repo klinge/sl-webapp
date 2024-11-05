@@ -66,6 +66,7 @@ class RouteConfig
         $router->map('POST', '/auth/sparalosenord', 'Auth\PasswordController#resetAndSavePassword', 'reset-password');
 
         $router->map('GET', '/reports', 'ReportController#show', 'show-report-page');
+        $router->map('POST', '/reports/payments', 'ReportController#showPaymentReport', 'payment-report');
 
         $router->map('GET', '/user', 'UserController#home', 'user-home');
 
