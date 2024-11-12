@@ -74,7 +74,7 @@ class ReportControllerTest extends TestCase
         $this->controller->show();
     }
 
-    public function testShowPaymentReport(): void
+    public function testShowPaymentReportSuccess(): void
     {
         // Mock request parsed body
         $this->request->method('getParsedBody')
@@ -108,6 +108,17 @@ class ReportControllerTest extends TestCase
         $property = $reflection->getProperty('view');
         $property->setAccessible(true);
         $property->setValue($this->controller, $viewMock);
+
+        $this->controller->showPaymentReport();
+    }
+
+    public function testShowPaymentReportThrowsExceptionForInvalidYearParam(): void
+    {
+        $this->request->method('getParsedBody')
+            ->willReturn(['yearRadio' => 5]);
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Invalid year parameter. Must be 1, 2 or 3.');
 
         $this->controller->showPaymentReport();
     }

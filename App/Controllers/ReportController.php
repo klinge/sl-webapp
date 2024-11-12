@@ -28,7 +28,6 @@ class ReportController extends BaseController
             "title" => "Rapporter",
         ];
         $this->view->render('reports/viewRapporter', $data);
-        return;
     }
 
     public function showPaymentReport(): void
@@ -43,10 +42,10 @@ class ReportController extends BaseController
             $years[] = $currentYear - $i;
         }
 
-        $query = "SELECT m.* FROM medlem m 
+        $query = "SELECT m.* FROM medlem m
                 WHERE NOT EXISTS (
-                    SELECT 1 
-                    FROM betalning b 
+                    SELECT 1
+                    FROM betalning b
                     WHERE b.medlem_id = m.id";
 
         switch ($year_param) {
@@ -58,6 +57,9 @@ class ReportController extends BaseController
                 break;
             case 3:
                 $query .= " AND b.avser_ar IN (:year0, :year1, :year2))";
+                break;
+            default:
+                throw new \InvalidArgumentException("Invalid year parameter. Must be 1, 2 or 3.");
         }
 
         $stmt = $this->conn->prepare($query);
@@ -78,8 +80,6 @@ class ReportController extends BaseController
             "items" => $result
         ];
         $this->view->render('reports/viewReportResults', $data);
-
-        return;
     }
 
     public function showMemberEmails(): void
