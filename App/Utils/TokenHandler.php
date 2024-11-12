@@ -35,11 +35,8 @@ class TokenHandler
             $stmt = $this->conn->prepare(
                 "INSERT INTO AuthToken (email, token, token_type, password_hash) VALUES (:email, :token, :token_type, :password_hash)"
             );
-        } elseif ($tokenType === TokenType::RESET) {
-            $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)");
         } else {
-            $this->app->getLogger()->error("TokenHandler::Invalid token type: " . $tokenType->value);
-            return false;
+            $stmt = $this->conn->prepare("INSERT INTO AuthToken (email, token, token_type) VALUES (:email, :token, :token_type)");
         }
 
         try {

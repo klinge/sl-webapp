@@ -304,7 +304,7 @@ class Application
                 //Maybe also throw a 404 error here?
                 $this->logger->error('Error: can not call ' . $controller . '#' . $action);
             }
-        } elseif (is_array($match) && is_callable($match['target'])) {
+        } elseif (is_callable($match['target'])) {
             //Handle the case then the target is a closure
             call_user_func_array($match['target'], $match['params']);
         } else {
