@@ -58,7 +58,7 @@ include_once "views/_layouts/header.php";
                 <img class="card-img-top" src="/assets/img/reports/reports-600x400.png" alt="Andra rapporter">
                 <div class="card-body">
                     <h5 class="card-title">Nåt annat</h5>
-                    <p class="card-text">Nån annan rapport</p>
+                    <p class="card-text">Inte implmenenterat än. Vilka rapporter vill du ha?</p>
                     <a href="#" class="btn btn-primary">Go somewhere</a>
                 </div>
             </div>

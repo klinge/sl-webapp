@@ -39,13 +39,13 @@ include_once "views/_layouts/header.php";
 
         <div class="col-sm-4">
             <div class="card border-primary mb-3" style="max-width: 25rem;">
-                <div class="card-header">Rapporter</div>
+                <div class="card-header">Rapporter och listor</div>
                 <div class="bg-light d-flex justify-content-center" width="100%">
                     <img class="my-1" width="35%" height="35%" src="assets/img/anchor.svg" />
                 </div>
                 <div class="card-body">
-                    <h4 class="card-title">Alla rapporter</h4>
-                    <p class="card-text">Inte implementerad än.. Här hittar du olika rapporter du kan ta fram.</p>
+                    <h4 class="card-title">Rapporter</h4>
+                    <p class="card-text">Här hittar du olika listor och rapporter du kan ta fram.</p>
                     <a href="reports" class="btn btn-primary" tabindex="3" role="button">Rapporter..</a>
                 </div>
             </div>
