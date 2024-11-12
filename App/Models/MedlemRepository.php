@@ -99,6 +99,19 @@ class MedlemRepository
         return $result ?: false;
     }
 
+    /**
+     * Retrieves member email addresses.
+     *
+     * @return array An array of member email addresses
+     */
+    public function getEmailForActiveMembers(): array
+    {
+        $query = "SELECT email FROM medlem WHERE pref_kommunikation = 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     protected function createMedlem(PDO $conn, Logger $logger, int $id): Medlem
     {
         return new Medlem($conn, $logger, $id);
