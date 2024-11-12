@@ -135,6 +135,9 @@ class CsvImporter
         $query = 'DELETE FROM Medlem_Roll;';
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
+        $query = 'DELETE FROM Betalning;';
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
     }
 
     private function readCsv(): array

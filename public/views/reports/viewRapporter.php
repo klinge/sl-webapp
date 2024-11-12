@@ -55,7 +55,7 @@ include_once "views/_layouts/header.php";
 
         <div class="col-sm-4">
             <div class="card">
-                <img class="card-img-top" src="https://placehold.co/600x400" alt="Andra rapporter">
+                <img class="card-img-top" src="/assets/img/reports/reports-600x400.png" alt="Andra rapporter">
                 <div class="card-body">
                     <h5 class="card-title">Nåt annat</h5>
                     <p class="card-text">Nån annan rapport</p>

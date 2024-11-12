@@ -6,30 +6,34 @@ $page_title = $viewData['title'];
 include_once "views/_layouts/header.php";
 ?>
 <div class="row col-6 mx-3">
-    <table class="table">
-        <thead>
-            <tr>
-                <?php foreach (array_keys(reset($viewData['items'])) as $header):
-                    if ($header === "password") {
-                        continue;
-                    } ?>
-                    <th><?= ucfirst($header) ?></th>
-                <?php endforeach; ?>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($viewData['items'] as $item) : ?>
+    <?php if (!$viewData['items']): ?>
+        <p>Inga medlemmar hittades.</p>
+    <?php else: ?>
+        <table class="table">
+            <thead>
                 <tr>
-                    <?php foreach ($item as $key => $value) :
-                        if ($key === "password") {
+                    <?php foreach (array_keys(reset($viewData['items'])) as $header):
+                        if ($header === "password") {
                             continue;
                         } ?>
-                        <td><?= $value ?></td>
-                    <?php endforeach ?>
+                        <th><?= ucfirst($header) ?></th>
+                    <?php endforeach; ?>
                 </tr>
-            <?php endforeach ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php foreach ($viewData['items'] as $item) : ?>
+                    <tr>
+                        <?php foreach ($item as $key => $value) :
+                            if ($key === "password") {
+                                continue;
+                            } ?>
+                            <td><?= $value ?></td>
+                        <?php endforeach ?>
+                    </tr>
+                <?php endforeach ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </div>
 
 <?php // footer

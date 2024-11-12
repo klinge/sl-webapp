@@ -43,7 +43,8 @@ class ReportController extends BaseController
         }
 
         $query = "SELECT m.* FROM medlem m
-                WHERE NOT EXISTS (
+                WHERE m.standig_medlem != 1
+                AND NOT EXISTS (
                     SELECT 1
                     FROM betalning b
                     WHERE b.medlem_id = m.id";

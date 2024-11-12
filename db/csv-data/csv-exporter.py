@@ -33,6 +33,6 @@ def clean_and_export_excel(input_file, output_file, sheet_name=0):
 
 
 # Usage example
-input_file = 'Adressregister AJ 241003.xlsx'
+input_file = 'Adressregister AJ 241104.xlsx'
 output_file = 'medlemmar-cleaned.csv'
 clean_and_export_excel(input_file, output_file)
