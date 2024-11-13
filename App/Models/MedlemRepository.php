@@ -109,7 +109,9 @@ class MedlemRepository
         $query = "SELECT email FROM medlem WHERE pref_kommunikation = 1";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //Remove rows with empty emails
+        return array_filter($result, fn($item) => !empty($item['email']));
     }
 
     protected function createMedlem(PDO $conn, Logger $logger, int $id): Medlem

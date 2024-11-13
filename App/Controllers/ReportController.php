@@ -86,7 +86,6 @@ class ReportController extends BaseController
     public function showMemberEmails(): void
     {
         $mailList = $this->medlemRepo->getEmailForActiveMembers();
-        $mailList = array_filter($mailList, fn($item) => !empty($item['email']));
 
         $data = [
             "title" => "Rapport: Email till aktiva medlemmar",
