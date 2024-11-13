@@ -13,6 +13,7 @@ use App\Models\BetalningRepository;
 use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Utils\Session;
+use App\Services\MailAliasService;
 use App\Application;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
@@ -28,10 +29,9 @@ class MedlemController extends BaseController
 {
     use ResponseFormatter;
 
-    /**
-     * @var View The view object for rendering templates
-     */
     private View $view;
+    private MailAliasService $mailAliasService;
+    private MedlemRepository $medlemRepo;
 
     /**
      * Constructs a new MedlemController instance.
@@ -43,6 +43,8 @@ class MedlemController extends BaseController
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
+        $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
+        $this->mailAliasService = new MailAliasService($this->app);
     }
 
     //Sanitizing rules for sanitizing user input for Medlem data
@@ -158,6 +160,8 @@ class MedlemController extends BaseController
 
         try {
             $medlem->save();
+            $this->updateEmailAliases();
+
             $this->redirectWithSuccess(
                 'medlem-list',
                 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
@@ -218,6 +222,8 @@ class MedlemController extends BaseController
 
         try {
             $medlem->create();
+            $this->updateEmailAliases();
+
             $this->redirectWithSuccess(
                 'medlem-list',
                 'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
@@ -245,6 +251,8 @@ class MedlemController extends BaseController
         try {
             $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
             $medlem->delete();
+            $this->updateEmailAliases();
+
             $this->app->getLogger()->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' borttagen av: ' . Session::get('user_id'));
             // Set the URL and redirect
             $this->redirectWithSuccess('medlem-list', 'Medlem borttagen!');
@@ -314,5 +322,15 @@ class MedlemController extends BaseController
         }
 
         return true;
+    }
+
+    public function updateEmailAliases(): void
+    {
+        if ($this->app->getConfig('SMARTEREMAIL_ENABLED')) {
+            $mailAlias = $this->app->getConfig('SMARTEREMAIL_ALIASNAME');
+            $allEmails = array_column($this->medlemRepo->getEmailForActiveMembers(), 'email');
+
+            $this->mailAliasService->updateAlias($mailAlias, $allEmails);
+        }
     }
 }
