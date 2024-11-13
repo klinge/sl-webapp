@@ -331,7 +331,6 @@ class MedlemController extends BaseController
             $allEmails = array_column($this->medlemRepo->getEmailForActiveMembers(), 'email');
 
             $this->mailAliasService->updateAlias($mailAlias, $allEmails);
-            echo "DONE!";
         }
     }
 }

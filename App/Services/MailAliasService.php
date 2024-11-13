@@ -34,17 +34,20 @@ class MailAliasService
 
     private function authenticate(): void
     {
-        $response = $this->client->post($this->baseUrl . '/api/v1/auth/authenticate-user', [
-            'json' => [
-                'username' => $this->username,
-                'password' => $this->password,
-                'teamWorkspace' => false,
-                'retrieveAutoLoginToken' => false
-            ]
-        ]);
-
-        $data = json_decode($response->getBody()->getContents(), true);
-        $this->accessToken = $data['accessToken'];
+        try {
+            $response = $this->client->post($this->baseUrl . '/api/v1/auth/authenticate-user', [
+                'json' => [
+                    'username' => $this->username,
+                    'password' => $this->password,
+                    'teamWorkspace' => false,
+                    'retrieveAutoLoginToken' => false
+                ]
+            ]);
+            $data = json_decode($response->getBody()->getContents(), true);
+            $this->accessToken = $data['accessToken'];
+        } catch (RequestException $e) {
+            $this->logger->error('Failed to authenticate with SmarterMail API: ' . $e->getMessage());
+        }
     }
 
     public function updateAlias(string $aliasName, array $targetEmails): void
