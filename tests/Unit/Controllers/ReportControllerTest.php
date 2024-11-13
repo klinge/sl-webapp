@@ -128,7 +128,10 @@ class ReportControllerTest extends TestCase
         // Mock MedlemRepository
         $medlemRepoMock = $this->createMock(MedlemRepository::class);
         $medlemRepoMock->method('getEmailForActiveMembers')
-            ->willReturn(['test@example.com']);
+            ->willReturn([
+                ['email' => 'test1@example.com'],
+                ['email' => 'test2@example.com']
+            ]);
 
         // Create mock for View
         $viewMock = $this->createMock(View::class);
@@ -138,7 +141,10 @@ class ReportControllerTest extends TestCase
                 'reports/viewReportResults',
                 [
                     'title' => 'Rapport: Email till aktiva medlemmar',
-                    'items' => ['test@example.com']
+                    'items' => [
+                        ['email' => 'test1@example.com'],
+                        ['email' => 'test2@example.com']
+                    ]
                 ]
             );
 
