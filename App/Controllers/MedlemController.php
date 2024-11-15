@@ -14,7 +14,9 @@ use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Utils\Session;
 use App\Services\MailAliasService;
+use App\Services\MedlemDataValidatorService;
 use App\Application;
+use App\Services\MedlemDataValidator;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -32,6 +34,7 @@ class MedlemController extends BaseController
     private View $view;
     private MailAliasService $mailAliasService;
     private MedlemRepository $medlemRepo;
+    private MedlemDataValidatorService $validator;
 
     /**
      * Constructs a new MedlemController instance.
@@ -45,28 +48,8 @@ class MedlemController extends BaseController
         $this->view = new View($this->app);
         $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
         $this->mailAliasService = new MailAliasService($this->app);
+        $this->validator = new MedlemDataValidatorService();
     }
-
-    //Sanitizing rules for sanitizing user input for Medlem data
-    private array $sanitizerRules = [
-        'id' => 'int',
-        'fodelsedatum' => ['date', 'Y-m-d'],
-        'fornamn' => 'string',
-        'efternamn' => 'string',
-        'email' => 'email',
-        'mobil' => 'string',
-        'telefon' => 'string',
-        'adress' => 'string',
-        'postnummer' => 'string',
-        'postort' => 'string',
-        'kommentar' => 'string',
-        'godkant_gdpr' => 'bool',
-        'pref_kommunikation' => 'bool',
-        'isAdmin' => 'bool',
-        'foretag' => 'bool',
-        'standig_medlem' => 'bool',
-        'skickat_valkomstbrev' => 'bool',
-    ];
 
     /**
      * Lists all members.
@@ -148,23 +131,27 @@ class MedlemController extends BaseController
         $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
         $postData = $this->request->getParsedBody();
 
-        $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
-
-        ///If the sanitization fails, give a message and redirect
-        if (!$result) {
-            return;
-        }
-
-        try {
-            $medlem->save();
-            $this->updateEmailAliases();
-
-            $this->redirectWithSuccess(
-                'medlem-list',
-                'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
-            );
-        } catch (Exception $e) {
-            $this->redirectWithError('medlem-list', 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
+        if ($this->validator->validateAndPrepare($medlem, $postData)) {
+            try {
+                $medlem->save();
+                if ($this->validator->hasEmailChanged()) {
+                    $this->updateEmailAliases();
+                }
+                $this->redirectWithSuccess(
+                    'medlem-list',
+                    'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
+                );
+            } catch (Exception $e) {
+                $this->redirectWithError('medlem-list', 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
+            }
+        } else {
+            //Error messages are set in the MedlemDataValidatorService so just redirect
+            if (isset($medlem->id)) {
+                $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
+            } else {
+                $redirectUrl = $this->app->getRouter()->generate('medlem-new');
+            }
+            header('Location: ' . $redirectUrl);
         }
     }
 
@@ -211,25 +198,29 @@ class MedlemController extends BaseController
         $medlem = new Medlem($this->conn, $this->app->getLogger());
         $postData = $this->request->getParsedBody();
 
-        $result = $this->prepareAndSanitizeMedlemData($medlem, $postData);
-        //If the sanitize function returns false, we have an error, just give a message and return
-        if (!$result) {
-            return;
-        }
+        if ($this->validator->validateAndPrepare($medlem, $postData)) {
+            try {
+                $medlem->create();
+                $this->updateEmailAliases();
 
-        try {
-            $medlem->create();
-            $this->updateEmailAliases();
-
-            $this->redirectWithSuccess(
-                'medlem-list',
-                'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
-            );
-        } catch (Exception $e) {
-            $this->redirectWithError(
-                'medlem-create',
-                'Kunde inte skapa medlem! Fel: ' . $e->getMessage()
-            );
+                $this->redirectWithSuccess(
+                    'medlem-list',
+                    'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
+                );
+            } catch (Exception $e) {
+                $this->redirectWithError(
+                    'medlem-create',
+                    'Kunde inte skapa medlem! Fel: ' . $e->getMessage()
+                );
+            }
+        } else {
+            //Error messages are set in the MedlemDataValidatorService so just redirect
+            if (isset($medlem->id)) {
+                $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
+            } else {
+                $redirectUrl = $this->app->getRouter()->generate('medlem-new');
+            }
+            header('Location: ' . $redirectUrl);
         }
     }
 
@@ -257,68 +248,6 @@ class MedlemController extends BaseController
             $this->app->getLogger()->warning('Kunde inte ta bort medlem: ' . $e->getMessage());
             $this->redirectWithError('medlem-list', 'Kunde inte ta bort medlem! Fel: ' . $e->getMessage());
         }
-    }
-
-    /**
-     * Prepares and sanitizes member data from POST input.
-     *
-     * Validates required fields, sanitizes input, and sets values on the Medlem object.
-     *
-     * @param Medlem $medlem The member object to update
-     * @param array $postData The POST data to process
-     * @return bool True if preparation was successful, false otherwise
-     */
-    private function prepareAndSanitizeMedlemData(Medlem $medlem, array $postData): bool
-    {
-        $errors = [];
-        $requiredFields = ['fornamn', 'efternamn', 'fodelsedatum'];
-        $booleanFields = ['godkant_gdpr', 'pref_kommunikation', 'isAdmin', 'foretag', 'standig_medlem', 'skickat_valkomstbrev'];
-
-        //Sanitize user input
-        $sanitizer = new Sanitizer();
-        $cleanValues = $sanitizer->sanitize($postData, $this->sanitizerRules);
-
-        //Save roller because the sanitizer removes them from the array
-        $roller = $postData['roller'];
-
-        // Validate required fields
-        foreach ($requiredFields as $field) {
-            if (empty($cleanValues[$field])) {
-                $errors[] = $field;
-            }
-        }
-        // If there were errors show a flash message and redirect back to the form
-        if ($errors) {
-            $errorMsg = "Följande obligatoriska fält måste fyllas i: " . implode(', ', $errors);
-            Session::setFlashMessage('error', $errorMsg);
-            if (isset($medlem->id)) {
-                $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
-            } else {
-                $redirectUrl = $this->app->getRouter()->generate('medlem-new');
-            }
-            header('Location: ' . $redirectUrl);
-            return false;
-        }
-
-        //Loop over everything in POST and set values on the Medlem object
-        foreach ($cleanValues as $key => $value) {
-            if (property_exists($medlem, $key) && !in_array($key, $booleanFields)) {
-                // Assign value to corresponding property, checkoxes are handled below
-                $medlem->$key = $value;
-            }
-        }
-
-        // If checkboxes are not checked they don't exist in $_POST so set to False/0
-        foreach ($booleanFields as $field) {
-            $medlem->$field = isset($cleanValues[$field]) ? true : false;
-        }
-
-        //Update roles on the Medlem object
-        if (isset($roller)) {
-            $medlem->updateMedlemRoles($roller);
-        }
-
-        return true;
     }
 
     public function updateEmailAliases(): void
