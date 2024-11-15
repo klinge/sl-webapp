@@ -32,6 +32,22 @@ class BetalningRepository
         return $betalningar;
     }
 
+    public function getAllWithName(): array
+    {
+        $betalningar = [];
+
+        $query = "SELECT b.*, m.fornamn, m.efternamn 
+             FROM Betalning b 
+             LEFT JOIN Medlem m ON b.medlem_id = m.id 
+             ORDER BY b.datum DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $betalningar =  $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $betalningar;
+    }
+
     public function getBetalningForMedlem(int $medlemId): array
     {
         $betalningar = [];

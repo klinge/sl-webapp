@@ -4,19 +4,16 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use AltoRouter;
 use Exception;
 use App\Models\Medlem;
 use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Models\BetalningRepository;
-use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Utils\Session;
 use App\Services\MailAliasService;
 use App\Services\MedlemDataValidatorService;
 use App\Application;
-use App\Services\MedlemDataValidator;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -151,7 +148,7 @@ class MedlemController extends BaseController
             } else {
                 $redirectUrl = $this->app->getRouter()->generate('medlem-new');
             }
-            header('Location: ' . $redirectUrl);
+            $this->emitRedirect($redirectUrl);
         }
     }
 
@@ -220,7 +217,7 @@ class MedlemController extends BaseController
             } else {
                 $redirectUrl = $this->app->getRouter()->generate('medlem-new');
             }
-            header('Location: ' . $redirectUrl);
+            $this->emitRedirect($redirectUrl);
         }
     }
 

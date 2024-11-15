@@ -8,7 +8,7 @@ include_once "views/_layouts/header.php";
 
 if (isset($data['items'])) {
     $num = sizeof($viewData['items']);
-    $result = $viewData['items'];
+    $data = $viewData['items'];
 } else {
     $num = 0;
     $result = [];
@@ -19,30 +19,28 @@ if (isset($data['items'])) {
     <thead>
         <tr>
             <th>Id</th>
-            <th>Betalare</th>
+            <th>Medlemsnr</th>
+            <th>Namn</th>
             <th>Belopp</th>
             <th>Datum</th>
             <th>Avser år</th>
             <th>Kommentar</th>
             <th>Skapad</th>
             <th>Uppdaterad</th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($result as $betalning): ?>
+        <?php foreach ($data as $betalning): ?>
             <tr>
-                <td><?= $betalning->id ?></td>
-                <td><?= $betalning->medlem_id ?></td>
-                <td><?= $betalning->belopp ?></td>
-                <td><?= $betalning->datum ?></td>
-                <td><?= $betalning->avser_ar ?></td>
-                <td><?= $betalning->kommentar ?></td>
-                <td><?= $betalning->created_at ?></td>
-                <td><?= $betalning->updated_at ?></td>
-                <td>
-                    <a type="button" class="btn btn-primary btn-sm edit-member-btn" href="betalning/<?= $betalning->id ?>">Ändra</button>
-                </td>
+                <td><?= $betalning['id'] ?></td>
+                <td><?= $betalning['medlem_id'] ?></td>
+                <td><?= $betalning['fornamn'] . " " . $betalning['efternamn'] ?></td>
+                <td><?= $betalning['belopp'] ?></td>
+                <td><?= $betalning['datum'] ?></td>
+                <td><?= $betalning['avser_ar'] ?></td>
+                <td><?= $betalning['kommentar'] ?></td>
+                <td><?= $betalning['created_at'] ?></td>
+                <td><?= $betalning['updated_at'] ?></td>
             </tr>
         <?php endforeach; ?>
     </tbody>
@@ -55,6 +53,14 @@ if (isset($data['items'])) {
 </script>
 <script>
     let dataTable = new DataTable('#betalningTable');
+    document.querySelector('#betalningTable').addEventListener('click', function(e) {
+        // Get the parent row of the clicked cell
+        let row = dataTable.row(e.target.closest('tr'));
+        let rowData = row.data();
+        let id = rowData[0]; // First column contains ID
+
+        window.location.href = `/betalning/${id}`;
+    });
 </script>
 
 <?php // footer

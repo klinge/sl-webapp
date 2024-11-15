@@ -31,7 +31,7 @@ class BetalningController extends BaseController
     public function list(): void
     {
         $betalningar = new BetalningRepository($this->conn);
-        $result = $betalningar->getAll();
+        $result = $betalningar->getAllWithName();
 
         //Put everyting in the data variable that is used by the view
         $data = [
