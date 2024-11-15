@@ -75,8 +75,7 @@ class MedlemController extends BaseController
      */
     public function listAll(): void
     {
-        $medlemRepo = new MedlemRepository($this->conn, $this->app);
-        $result = $medlemRepo->getAll();
+        $result = $this->medlemRepo->getAll();
 
         //Put everyting in the data variable that is used by the view
         $data = [
@@ -89,10 +88,8 @@ class MedlemController extends BaseController
 
     public function listJson(): void
     {
-        $medlemRepo = new MedlemRepository($this->conn, $this->app);
-        $result = $medlemRepo->getAll();
+        $result = $this->medlemRepo->getAll();
         $this->jsonResponse($result);
-        exit;
     }
 
     /**
