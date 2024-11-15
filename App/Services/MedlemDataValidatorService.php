@@ -76,7 +76,7 @@ class MedlemDataValidatorService
         foreach ($cleanValues as $key => $value) {
             if (property_exists($medlem, $key) && !in_array($key, $this->booleanFields)) {
                 // Check if email is being updated to a different value
-                if ($key === 'email' && $medlem->email !== $value) {
+                if ($key === 'email' && isset($medlem->email) && $medlem->email !== $value) {
                     $this->emailChanged = true;
                 }
                 $medlem->$key = $value;
