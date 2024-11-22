@@ -30,7 +30,6 @@ $num = sizeof($viewData['items']);
                     <th data-priority="4">Adress</th>
                     <th data-priority="3">Postnr</th>
                     <th data-priority="2">Ort</th>
-                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -47,9 +46,6 @@ $num = sizeof($viewData['items']);
                         <td><?= $medlem->adress ?></td>
                         <td><?= $medlem->postnummer ?></td>
                         <td><?= $medlem->postort ?></td>
-                        <td>
-                            <a type="button" class="btn btn-primary btn-sm edit-member-btn" href="medlem/<?= $medlem->id ?>">Ändra</button>
-                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -83,6 +79,14 @@ $num = sizeof($viewData['items']);
                 "previous": "<"
             },
         }
+    });
+    document.querySelector('#memberTable').addEventListener('click', function(e) {
+        // Get the parent row of the clicked cell
+        let row = dataTable.row(e.target.closest('tr'));
+        let rowData = row.data();
+        let id = rowData[0]; // First column contains ID
+
+        window.location.href = `/medlem/${id}`;
     });
 </script>
 

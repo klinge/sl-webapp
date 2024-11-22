@@ -30,7 +30,6 @@ $num = sizeof($seglingar);
             <th>Skeppare</th>
             <th>Båtsman</th>
             <th>Kock</th>
-            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -53,9 +52,6 @@ $num = sizeof($seglingar);
                 <td><?= $skepparNamn ?></td>
                 <td><?= $batsmanNamn ?></td>
                 <td><?= $kockNamn ?></td>
-                <td>
-                    <a type="button" class="btn btn-primary btn-sm edit-segling-btn" href="./segling/<?= $segling->id ?>">Ändra</button>
-                </td>
             </tr>
         <?php endforeach; ?>
     </tbody>
@@ -69,6 +65,14 @@ $num = sizeof($seglingar);
 <script>
     let dataTable = new DataTable('#sailingTable', {
         responsive: true
+    });
+    document.querySelector('#sailingTable').addEventListener('click', function(e) {
+        // Get the parent row of the clicked cell
+        let row = dataTable.row(e.target.closest('tr'));
+        let rowData = row.data();
+        let id = rowData[0]; // First column contains ID
+
+        window.location.href = `/segling/${id}`;
     });
 </script>
 

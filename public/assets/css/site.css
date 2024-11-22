@@ -51,6 +51,12 @@
 #betalningTable tbody tr {
     cursor: pointer;
 }
+#memberTable tbody tr {
+    cursor: pointer;
+}
+#sailingTable tbody tr {
+    cursor: pointer;
+}
 
 /* Rules to make forms more compact */
 .form-label { 
