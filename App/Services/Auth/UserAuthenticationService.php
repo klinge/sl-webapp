@@ -136,7 +136,8 @@ class UserAuthenticationService
         $member = $this->medlemRepo->getMemberByEmail($email);
         if (!$member) {
             $this->app->getLogger()->info("Reset password called for non-existing user: " . $email);
-            return ['success' => false];
+            //Return true to avoid leaking information about existing users
+            return ['success' => true];
         }
 
         $token = $this->tokenHandler->generateToken();
