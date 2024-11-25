@@ -196,7 +196,20 @@ class UserAuthenticationServiceTest extends TestCase
         $this->assertTrue($result['success']);
     }
 
-    public function testSendPasswordResetFailEmailNotFound(): void
+    public function testSendPasswordResetFail(): void
+    {
+        $email = 'test@example.com';
+
+        $stmt = $this->createMock(\PDOStatement::class);
+        $this->conn->method('prepare')->willReturn($stmt);
+        $stmt->method('fetch')->willReturn($this->memberData);
+        $this->mailer->method('send')->willThrowException(new \Exception('Mail error'));
+
+        $result = $this->authService->requestPasswordReset($email);
+        $this->assertFalse($result['success']);
+    }
+
+    public function testSendPasswordResetEmailNotFound(): void
     {
         $email = 'nonexistent@example.com';
         $stmt = $this->createMock(\PDOStatement::class);
@@ -204,7 +217,8 @@ class UserAuthenticationServiceTest extends TestCase
         $stmt->method('fetch')->willReturn('');
 
         $result = $this->authService->requestPasswordReset($email);
-        $this->assertFalse($result['success']);
+        //Should return true as we don't want to leak information about existing users
+        $this->assertTrue($result['success']);
     }
 
     public function testResetPasswordSuccess(): void
