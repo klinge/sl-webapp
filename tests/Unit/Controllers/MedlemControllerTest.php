@@ -85,10 +85,9 @@ class MedlemControllerTest extends TestCase
         $instance->setValue(null, null);
     }
 
-    public function testListAllRendersViewWithCorrectData(): void
+    private function setupBasicMemberData(): array
     {
-        // Mock the expected data from repository
-        $expectedMembers = [
+        return [
             [
                 'id' => 1,
                 'fornamn' => 'Test',
@@ -111,6 +110,12 @@ class MedlemControllerTest extends TestCase
                 'updated_at' => '2023-01-01 00:00:00'
             ]
         ];
+    }
+
+    public function testListAllRendersViewWithCorrectData(): void
+    {
+        // Mock the expected data from repository
+        $expectedMembers = $this->setupBasicMemberData();
 
         // Setup repository mock to return test data
         $this->medlemRepo->expects($this->once())
@@ -147,29 +152,7 @@ class MedlemControllerTest extends TestCase
     public function testListJsonOutputsCorrectJsonResponse(): void
     {
         // Mock the expected data from repository
-        $expectedMembers = [
-            [
-                'id' => 1,
-                'fornamn' => 'Test',
-                'efternamn' => 'Person',
-                'fodelsedatum' => '1990-01-01',
-                'email' => 'test@example.com',
-                'mobil' => '123456789',
-                'telefon' => '987654321',
-                'adress' => 'Test Street 1',
-                'postnummer' => '12345',
-                'postort' => 'Test City',
-                'kommentar' => 'Test comment',
-                'godkant_gdpr' => 1,
-                'pref_kommunikation' => 1,
-                'foretag' => 0,
-                'standig_medlem' => 1,
-                'skickat_valkomstbrev' => 0,
-                'isAdmin' => 0,
-                'created_at' => '2023-01-01 00:00:00',
-                'updated_at' => '2023-01-01 00:00:00'
-            ]
-        ];
+        $expectedMembers = $this->setupBasicMemberData();
 
         // Setup repository mock to return test data
         $this->medlemRepo->expects($this->once())
