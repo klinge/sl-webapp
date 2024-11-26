@@ -13,11 +13,13 @@ class CsrfMiddlewareTest extends TestCase
     private $app;
     private $request;
     private $middleware;
+    private $logger;
 
     protected function setUp(): void
     {
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
+        $this->logger = $this->createMock(\Monolog\Logger::class);
 
         // Create the partial mock, passing the required arguments to the constructor
         $this->middleware = $this->getMockBuilder(CsrfMiddlewareFake::class)
@@ -25,6 +27,7 @@ class CsrfMiddlewareTest extends TestCase
             ->onlyMethods(['jsonResponse', 'isAjaxRequest'])
             ->getMock();
 
+        $this->app->method('getLogger')->willReturn($this->logger);
         // Clear session before each test
         $_SESSION = [];
     }
@@ -32,6 +35,13 @@ class CsrfMiddlewareTest extends TestCase
     protected function tearDown(): void
     {
         $_SESSION = [];
+    }
+
+    private function setupMockUri(string $path): void
+    {
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn($path);
+        $this->request->method('getUri')->willReturn($uri);
     }
 
     public function testCsrfMiddlewareImplementsMiddlewareInterface()
@@ -48,16 +58,11 @@ class CsrfMiddlewareTest extends TestCase
 
     public function testHandleSkipsValidationForExcludedPath()
     {
-        $uri = $this->createMock(UriInterface::class);
-        $uri->method('getPath')->willReturn('/webhooks');
-        $this->request->method('getUri')->willReturn($uri);
+        $this->setupMockUri('/webhooks');
 
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $logger->expects($this->once())
+        $this->logger->expects($this->once())
             ->method('debug')
             ->with($this->stringContains('Call to a path that excludes csrf protection:'));
-
-        $this->app->method('getLogger')->willReturn($logger);
 
         $this->middleware->handle();
     }
@@ -68,16 +73,11 @@ class CsrfMiddlewareTest extends TestCase
         $this->request->method('getParsedBody')->willReturn(['csrf_token' => 'valid_token']);
         $_SESSION['csrf_token'] = 'valid_token';
 
-        $uri = $this->createMock(UriInterface::class);
-        $uri->method('getPath')->willReturn('/some/path');
-        $this->request->method('getUri')->willReturn($uri);
+        $this->setupMockUri('/some/path');
 
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $logger->expects($this->once())
+        $this->logger->expects($this->once())
             ->method('debug')
             ->with($this->stringContains('In csrf middleware. Token in POST was:'));
-
-        $this->app->method('getLogger')->willReturn($logger);
 
         $this->middleware->handle();
     }
@@ -90,16 +90,12 @@ class CsrfMiddlewareTest extends TestCase
         $this->request->method('getParsedBody')->willReturn(['csrf_token' => 'invalid_token']);
         $_SESSION['csrf_token'] = 'valid_token';
 
-        $uri = $this->createMock(UriInterface::class);
-        $uri->method('getPath')->willReturn('/some/path');
-        $this->request->method('getUri')->willReturn($uri);
+        $this->setupMockUri('/some/path');
 
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $logger->expects($this->once())
+        $this->logger->expects($this->once())
             ->method('debug')
             ->with($this->stringContains('In csrf middleware. Token in POST was:'));
 
-        $this->app->method('getLogger')->willReturn($logger);
 
         $this->middleware->handle();
 
@@ -113,12 +109,7 @@ class CsrfMiddlewareTest extends TestCase
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => 'localhost']);
         $_SESSION['csrf_token'] = 'valid_token';
 
-        $uri = $this->createMock(UriInterface::class);
-        $uri->method('getPath')->willReturn('/');
-        $this->request->method('getUri')->willReturn($uri);
-
-        $logger = $this->createMock(\Monolog\Logger::class);
-        $this->app->method('getLogger')->willReturn($logger);
+        $this->setupMockUri('/');
 
         $this->middleware->handle();
 
