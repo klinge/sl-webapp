@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use AltoRouter;
 use Exception;
 use App\Models\Betalning;
 use App\Models\BetalningRepository;
@@ -21,17 +20,18 @@ use Psr\Http\Message\ServerRequestInterface;
 class BetalningController extends BaseController
 {
     private View $view;
+    private BetalningRepository $betalningRepo;
 
     public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
+        $this->betalningRepo = new BetalningRepository($this->conn);
     }
 
     public function list(): void
     {
-        $betalningar = new BetalningRepository($this->conn);
-        $result = $betalningar->getAllWithName();
+        $result = $this->betalningRepo->getAllWithName();
 
         //Put everyting in the data variable that is used by the view
         $data = [
@@ -73,7 +73,7 @@ class BetalningController extends BaseController
         }
         $this->view->render('viewBetalning', $data);
     }
-
+    //This function is called via a javascript fetch POST in the viewBetalning.php view
     public function createBetalning(array $params): void
     {
         $betalning = new Betalning($this->conn);
