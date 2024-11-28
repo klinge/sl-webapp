@@ -136,6 +136,10 @@ class BetalningController extends BaseController
 
     private function sendWelcomeEmailOnFirstPayment(int $memberId): bool
     {
+        if ($this->app->getConfig('WELCOME_MAIL_ENABLED') !== '1') {
+            $this->app->getLogger()->info('sendWelcomeEmailOnFirstPayment: Sending mail is disabled');
+            return false;
+        }
         //Try to create a member frrom the id, fail if not found
         try {
             $member = new Medlem($this->conn, $this->app->getLogger(), $memberId);
@@ -149,7 +153,7 @@ class BetalningController extends BaseController
         }
         //Fail if we don't have an email adress for the member
         if (empty($member->email)) {
-            $this->app->getLogger()->warning('sendWelcomeEmailonFirstPaymen: No email adress for member. MemberId: ' . $memberId);
+            $this->app->getLogger()->warning('sendWelcomeEmailOnFirstPaymen: No email adress for member. MemberId: ' . $memberId);
             return false;
         }
         //No welcome mail was sent and we have an email adress for the member
