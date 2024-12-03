@@ -21,12 +21,14 @@ class BetalningController extends BaseController
 {
     private View $view;
     private BetalningRepository $betalningRepo;
+    private ?string $welcomeEmailEnabled = "0";
 
     public function __construct(Application $app, ServerRequestInterface $request)
     {
         parent::__construct($app, $request);
         $this->view = new View($this->app);
         $this->betalningRepo = new BetalningRepository($this->conn);
+        $this->welcomeEmailEnabled = $this->app->getConfig('WELCOME_MAIL_ENABLED');
     }
 
     public function list(): void
@@ -56,8 +58,7 @@ class BetalningController extends BaseController
         $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
         $namn = $medlem->getNamn();
-        $repo = new BetalningRepository($this->conn);
-        $result = $repo->getBetalningForMedlem($id);
+        $result = $this->betalningRepo->getBetalningForMedlem($id);
 
         if (!empty($result)) {
             $data = [
@@ -134,9 +135,9 @@ class BetalningController extends BaseController
         }
     }
 
-    private function sendWelcomeEmailOnFirstPayment(int $memberId): bool
+    protected function sendWelcomeEmailOnFirstPayment(int $memberId): bool
     {
-        if ($this->app->getConfig('WELCOME_MAIL_ENABLED') !== '1') {
+        if ($this->welcomeEmailEnabled !== "1") {
             $this->app->getLogger()->info('sendWelcomeEmailOnFirstPayment: Sending mail is disabled');
             return false;
         }
