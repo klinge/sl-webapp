@@ -18,6 +18,7 @@ use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\ServerRequestFactory;
+use League\Container\Container;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
@@ -34,6 +35,7 @@ use Laminas\Diactoros\ServerRequestFactory;
 class Application
 {
     private array $config = [];
+    private $container;
     private ?AltoRouter $router = null;
     private array $middlewares = [];
     private string $rootDir = '';
@@ -45,9 +47,9 @@ class Application
         $this->rootDir = dirname(__DIR__);
         $this->loadEnvironment();
         $this->loadConfig();
-        $this->setErrorReporting($this->getAppEnv());
         $this->setupRouter();
         $this->setupLogger($this->getAppEnv(), $this->getConfig('LOG_NAME'), $this->getConfig('LOG_LEVEL'));
+        $this->setErrorReporting($this->getAppEnv());
         $this->setupSession();
         $this->psrRequest = ServerRequestFactory::fromGlobals(
             $_SERVER,
@@ -55,11 +57,23 @@ class Application
             $_POST,
             $_COOKIE
         );
+        $this->setupContainer();
 
         // Add middlewares here
         $this->addMiddleware(new AuthenticationMiddleware($this, $this->psrRequest));
         $this->addMiddleware(new AuthorizationMiddleware($this, $this->psrRequest));
         $this->addMiddleware(new CsrfMiddleware($this, $this->psrRequest));
+    }
+
+    private function setupContainer(): void
+    {
+        $this->container = new Container();
+
+        // Core services
+        $this->container->add('config', $this->config);
+        $this->container->add(Logger::class, $this->logger);
+        $this->container->add('router', $this->router);
+        $this->container->add(ServerRequestInterface::class, $this->psrRequest);
     }
 
     /**
