@@ -9,16 +9,19 @@ use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
+use Psr\Http\Message\ServerRequestInterface;
+use Laminas\Diactoros\ServerRequestFactory;
+use League\Container\Container;
 use App\Config\RouteConfig;
-use Exception;
+use App\Utils\Database;
 use App\Middleware\MiddlewareInterface;
 use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
+use App\Controllers\ReportController;
 use App\Utils\Session;
-use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\ServerRequestFactory;
-use League\Container\Container;
+use PDO;
+use Exception;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
@@ -74,6 +77,17 @@ class Application
         $this->container->add(Logger::class, $this->logger);
         $this->container->add('router', $this->router);
         $this->container->add(ServerRequestInterface::class, $this->psrRequest);
+        // Add database and PDO connection to the container
+        $this->container->add(Database::class, function () {
+            return Database::getInstance($this);
+        });
+        $this->container->add(PDO::class, function () {
+            return $this->container->get(Database::class)->getConnection();
+        });
+
+        $this->container->add(ReportController::class)
+            ->addArgument(Logger::class)
+            ->addArgument(PDO::class);
     }
 
     /**
