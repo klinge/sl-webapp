@@ -16,6 +16,7 @@ use App\Services\MedlemDataValidatorService;
 use App\Application;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 /**
  * MedlemController handles operations related to members (medlemmar).
@@ -32,6 +33,7 @@ class MedlemController extends BaseController
     private MailAliasService $mailAliasService;
     private MedlemRepository $medlemRepo;
     private MedlemDataValidatorService $validator;
+    private PDO $conn;
 
     /**
      * Constructs a new MedlemController instance.
@@ -39,9 +41,10 @@ class MedlemController extends BaseController
      * @param Application $app The application instance
      * @param ServerRequestInterface $request The request object
      */
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->view = new View($this->app);
         $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
         $this->mailAliasService = new MailAliasService($this->app);

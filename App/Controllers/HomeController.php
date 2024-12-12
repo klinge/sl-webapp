@@ -8,6 +8,7 @@ use App\Application;
 use App\Utils\Session;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 class HomeController extends BaseController
 {

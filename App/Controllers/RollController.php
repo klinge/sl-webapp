@@ -9,14 +9,17 @@ use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 class RollController extends BaseController
 {
     private View $view;
+    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->view = new View($this->app);
     }
 

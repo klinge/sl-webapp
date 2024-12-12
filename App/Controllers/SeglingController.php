@@ -21,10 +21,12 @@ use Psr\Http\Message\ServerRequestInterface;
 class SeglingController extends BaseController
 {
     private View $view;
+    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->view = new View($this->app);
     }
 

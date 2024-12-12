@@ -14,10 +14,12 @@ class ReportController extends BaseController
 {
     private View $view;
     private MedlemRepository $medlemRepo;
+    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->view = new View($this->app);
         $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
     }

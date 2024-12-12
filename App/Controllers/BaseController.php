@@ -17,7 +17,6 @@ class BaseController
     //Add the JsonResponder trait
     use JsonResponder;
 
-    protected PDO $conn;
     protected ServerRequestInterface $request;
     protected array $sessionData;
     protected Application $app;
@@ -27,7 +26,6 @@ class BaseController
         $this->app = $app;
         $this->request = $request;
         $this->initializeSessionData();
-        $this->conn = $this->getDatabaseConn();
     }
 
     protected function initializeSessionData(): void
@@ -38,18 +36,6 @@ class BaseController
             'fornamn' => Session::get('fornamn'),
             'isAdmin' => Session::isAdmin()
         ];
-    }
-
-    private function getDatabaseConn(): PDO|false
-    {
-        try {
-            return Database::getInstance($this->app)->getConnection();
-        } catch (PDOException $e) {
-            $this->app->getLogger()->critical('Failed to connect to database: ' . $e->getMessage(), ['class' => __CLASS__, 'method' => __METHOD__]);
-            Session::setFlashMessage('error', 'Tekniskt fel. Kunde inte öppna databas. Fel: ' . $e->getMessage());
-            header("Location: " . $this->createUrl('home'));
-            return false;
-        }
     }
 
     protected function setCsrfToken(): void

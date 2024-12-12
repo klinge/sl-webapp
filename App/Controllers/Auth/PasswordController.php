@@ -11,6 +11,7 @@ use App\Utils\View;
 use App\Utils\Email;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 class PasswordController extends AuthBaseController
 {
@@ -20,10 +21,12 @@ class PasswordController extends AuthBaseController
     private const RESET_PASSWORD_VIEW = 'login/viewSetNewPassword';
     private UserAuthenticationService $authService;
     private View $view;
+    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->authService = new UserAuthenticationService($this->conn, $app, new Email($app));
         $this->view = new View($this->app);
     }

@@ -11,6 +11,7 @@ use App\Utils\Session;
 use App\Utils\View;
 use App\Utils\Email;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 class RegistrationController extends AuthBaseController
 {
@@ -20,10 +21,12 @@ class RegistrationController extends AuthBaseController
 
     private UserAuthenticationService $userAuthService;
     private View $view;
+    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->userAuthService = new UserAuthenticationService($this->conn, $app, new Email($app));
         $this->view = new View($this->app);
     }

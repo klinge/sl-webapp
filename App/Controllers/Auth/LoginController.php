@@ -12,6 +12,7 @@ use App\Traits\ResponseFormatter;
 use App\Utils\View;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 class LoginController extends AuthBaseController
 {
@@ -20,6 +21,7 @@ class LoginController extends AuthBaseController
     private View $view;
     private MedlemRepository $medlemRepo;
     private PasswordService $passwordService;
+    private PDO $conn;
 
     //Messages
     protected const BAD_EMAIL_OR_PASSWORD = 'Felaktig e-postadress eller lösenord';
@@ -31,9 +33,10 @@ class LoginController extends AuthBaseController
      * @param Application $app The application instance.
      * @param ServerRequestInterface $request The request data.
      */
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->view = new View($this->app);
         $this->passwordService = new PasswordService();
         $this->medlemRepo = new MedlemRepository($this->conn, $this->app);

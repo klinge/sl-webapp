@@ -16,16 +16,19 @@ use App\Utils\EmailType;
 use App\Application;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use Psr\Http\Message\ServerRequestInterface;
+use PDO;
 
 class BetalningController extends BaseController
 {
     private View $view;
     private BetalningRepository $betalningRepo;
     private ?string $welcomeEmailEnabled = "0";
+    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
     {
         parent::__construct($app, $request);
+        $this->conn = $conn;
         $this->view = new View($this->app);
         $this->betalningRepo = new BetalningRepository($this->conn);
         $this->welcomeEmailEnabled = $this->app->getConfig('WELCOME_MAIL_ENABLED');

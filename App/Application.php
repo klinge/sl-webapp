@@ -13,12 +13,12 @@ use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\ServerRequestFactory;
 use League\Container\Container;
 use App\Config\RouteConfig;
+use App\Config\ContainerConfigurator;
 use App\Utils\Database;
 use App\Middleware\MiddlewareInterface;
 use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
-use App\Controllers\ReportController;
 use App\Utils\Session;
 use PDO;
 use Exception;
@@ -71,23 +71,7 @@ class Application
     private function setupContainer(): void
     {
         $this->container = new Container();
-
-        // Core services
-        $this->container->add('config', $this->config);
-        $this->container->add(Logger::class, $this->logger);
-        $this->container->add('router', $this->router);
-        $this->container->add(ServerRequestInterface::class, $this->psrRequest);
-        // Add database and PDO connection to the container
-        $this->container->add(Database::class, function () {
-            return Database::getInstance($this);
-        });
-        $this->container->add(PDO::class, function () {
-            return $this->container->get(Database::class)->getConnection();
-        });
-
-        $this->container->add(ReportController::class)
-            ->addArgument(Logger::class)
-            ->addArgument(PDO::class);
+        ContainerConfigurator::registerServices($this->container, $this);
     }
 
     /**
@@ -136,6 +120,16 @@ class Application
         $this->config = array_map(function ($value) {
             return $value === 'true' ? true : ($value === 'false' ? false : $value);
         }, $_ENV);
+    }
+
+    /**
+     * Returns the current request as a PSR-7 ServerRequestInterface object.
+     *
+     * @return ServerRequestInterface The current request
+     */
+    public function getPsrRequest(): ServerRequestInterface
+    {
+        return $this->psrRequest;
     }
 
     /**
@@ -326,7 +320,7 @@ class Application
 
             //Check that the controller has the requested method and call it
             if (method_exists($controllerClass, $action)) {
-                $controllerInstance = new $controllerClass($this, $request);
+                $controllerInstance = $this->container->get($controllerClass);
                 $controllerInstance->{$action}($params);
             } else {
                 //Maybe also throw a 404 error here?
