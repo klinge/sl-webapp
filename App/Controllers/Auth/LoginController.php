@@ -13,15 +13,16 @@ use App\Utils\View;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
+use Monolog\Logger;
 
 class LoginController extends AuthBaseController
 {
     use ResponseFormatter;
 
+    private PDO $conn;
     private View $view;
     private MedlemRepository $medlemRepo;
     private PasswordService $passwordService;
-    private PDO $conn;
 
     //Messages
     protected const BAD_EMAIL_OR_PASSWORD = 'Felaktig e-postadress eller lösenord';
@@ -33,13 +34,13 @@ class LoginController extends AuthBaseController
      * @param Application $app The application instance.
      * @param ServerRequestInterface $request The request data.
      */
-    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
         $this->passwordService = new PasswordService();
-        $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
+        $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
     }
 
     /**
@@ -73,7 +74,7 @@ class LoginController extends AuthBaseController
         $providedPassword = $this->request->getParsedBody()['password'] ?? '';
 
         if (empty($providedEmail) || empty($providedPassword)) {
-            $this->app->getLogger()->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
+            $this->logger->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
             $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
             return;
         }
@@ -82,26 +83,26 @@ class LoginController extends AuthBaseController
 
         //User not found
         if (!$result) {
-            $this->app->getLogger()->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
+            $this->logger->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
             $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
             return;
         }
         //Catch exception if medlem not found, should not happen since we already checked for it
         try {
-            $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
+            $medlem = new Medlem($this->conn, $this->logger, $result['id']);
         } catch (\Exception $e) {
-            $this->app->getLogger()->error("Technical error. Could not create member object for member id: " . $result['id']);
+            $this->logger->error("Technical error. Could not create member object for member id: " . $result['id']);
             $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
             return;
         }
         //Fail if passwork did not verify
         if (!$this->passwordService->verifyPassword($providedPassword, $medlem->password)) {
-            $this->app->getLogger()->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->remoteIp);
+            $this->logger->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->remoteIp);
             $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
             return;
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
-        $this->app->getLogger()->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->remoteIp);
+        $this->logger->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->remoteIp);
         Session::regenerateId();
 
         Session::set('user_id', $medlem->id);

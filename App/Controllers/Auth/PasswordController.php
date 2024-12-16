@@ -12,6 +12,8 @@ use App\Utils\Email;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
+use Monolog\Logger;
+use AltoRouter;
 
 class PasswordController extends AuthBaseController
 {
@@ -23,11 +25,17 @@ class PasswordController extends AuthBaseController
     private View $view;
     private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn, AltoRouter $router, array $config)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->conn = $conn;
-        $this->authService = new UserAuthenticationService($this->conn, $app, new Email($app));
+        $this->authService = new UserAuthenticationService(
+            $this->conn,
+            $this->logger,
+            $router,
+            new Email($app),
+            $config
+        );
         $this->view = new View($this->app);
     }
 

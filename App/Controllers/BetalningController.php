@@ -17,6 +17,7 @@ use App\Application;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
+use Monolog\Logger;
 
 class BetalningController extends BaseController
 {
@@ -25,9 +26,9 @@ class BetalningController extends BaseController
     private ?string $welcomeEmailEnabled = "0";
     private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
         $this->betalningRepo = new BetalningRepository($this->conn);
@@ -59,7 +60,7 @@ class BetalningController extends BaseController
     public function getMedlemBetalning(array $params): void
     {
         $id = (int) $params['id'];
-        $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
+        $medlem = new Medlem($this->conn, $this->logger, $id);
         $namn = $medlem->getNamn();
         $result = $this->betalningRepo->getBetalningForMedlem($id);
 
@@ -116,11 +117,11 @@ class BetalningController extends BaseController
         try {
             $result = $betalning->create();
             $sentMail = $this->sendWelcomeEmailOnFirstPayment($betalning->medlem_id);
-            $this->app->getLogger()->info('Betalning created successfully. Id of betalning: ' . $result['id'] .
+            $this->logger->info('Betalning created successfully. Id of betalning: ' . $result['id'] .
                 '. Registered by: ' . Session::get('user_id'));
             $this->jsonResponse(['success' => true, 'message' => 'Betalning created successfully. Id of betalning: ' . $result['id']]);
         } catch (Exception $e) {
-            $this->app->getLogger()->warning('Error creating Betalning: ' . $e->getMessage());
+            $this->logger->warning('Error creating Betalning: ' . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => 'Error creating Betalning: ' . $e->getMessage()]);
         }
     }
@@ -133,7 +134,7 @@ class BetalningController extends BaseController
         try {
             $betalning->delete();
         } catch (Exception $e) {
-            $this->app->getLogger()->warning('Error deleting Betalning: ' . $e->getMessage());
+            $this->logger->warning('Error deleting Betalning: ' . $e->getMessage());
             $this->jsonResponse(['success' => false, 'message' => 'Error deleting Betalning: ' . $e->getMessage()]);
         }
     }
@@ -141,14 +142,14 @@ class BetalningController extends BaseController
     protected function sendWelcomeEmailOnFirstPayment(int $memberId): bool
     {
         if ($this->welcomeEmailEnabled !== "1") {
-            $this->app->getLogger()->info('sendWelcomeEmailOnFirstPayment: Sending mail is disabled');
+            $this->logger->info('sendWelcomeEmailOnFirstPayment: Sending mail is disabled');
             return false;
         }
         //Try to create a member frrom the id, fail if not found
         try {
-            $member = new Medlem($this->conn, $this->app->getLogger(), $memberId);
+            $member = new Medlem($this->conn, $this->logger, $memberId);
         } catch (Exception $e) {
-            $this->app->getLogger()->warning('sendWelcomeEmailonFirstPaymen: Member not found. MemberId: ' . $memberId);
+            $this->logger->warning('sendWelcomeEmailonFirstPaymen: Member not found. MemberId: ' . $memberId);
             return false;
         }
         //Quit early if the member has already received the welcome mail
@@ -157,7 +158,7 @@ class BetalningController extends BaseController
         }
         //Fail if we don't have an email adress for the member
         if (empty($member->email)) {
-            $this->app->getLogger()->warning('sendWelcomeEmailOnFirstPaymen: No email adress for member. MemberId: ' . $memberId);
+            $this->logger->warning('sendWelcomeEmailOnFirstPaymen: No email adress for member. MemberId: ' . $memberId);
             return false;
         }
         //No welcome mail was sent and we have an email adress for the member
@@ -165,13 +166,13 @@ class BetalningController extends BaseController
         $email = new Email($this->app);
         try {
             $email->send(EmailType::WELCOME, $member->email, 'Välkommen till föreningen Sofia Linnea', $data);
-            $this->app->getLogger()->info('sendWelcomeEmailOnFirstPayment: Welcome email sent to: ' . $member->email);
+            $this->logger->info('sendWelcomeEmailOnFirstPayment: Welcome email sent to: ' . $member->email);
             //Update the status on the member
             $member->skickat_valkomstbrev = true;
             $member->save();
             return true;
         } catch (PHPMailerException $e) {
-            $this->app->getLogger()->warning('sendWelcomeEmailOnFirstPayment: Failed to send welcome email. Error: ' . $e->getMessage());
+            $this->logger->warning('sendWelcomeEmailOnFirstPayment: Failed to send welcome email. Error: ' . $e->getMessage());
             return false;
         }
     }

@@ -9,6 +9,7 @@ use App\Utils\View;
 use App\Models\MedlemRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
+use Monolog\Logger;
 
 class ReportController extends BaseController
 {
@@ -16,12 +17,12 @@ class ReportController extends BaseController
     private MedlemRepository $medlemRepo;
     private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
-        $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
+        $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
     }
 
     public function show(): void

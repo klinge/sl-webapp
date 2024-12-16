@@ -6,12 +6,12 @@ namespace App\Config;
 
 use League\Container\Container;
 use Psr\Http\Message\ServerRequestInterface;
-use Monolog\Logger;
 use AltoRouter;
-use PDO;
 use App\Application;
-use App\Utils\Database;
+use App\ServiceProviders\DatabaseServiceProvider;
+use App\ServiceProviders\LoggerServiceProvider;
 use App\Utils\Session;
+use Monolog\Logger;
 
 class ContainerConfigurator
 {
@@ -20,23 +20,18 @@ class ContainerConfigurator
         // Core services registration
         $container->add(Application::class, $app);
         $container->add(ServerRequestInterface::class, $app->getPsrRequest());
-        $container->add(Logger::class, $app->getLogger());
         $container->add(AltoRouter::class, $app->getRouter());
+        $container->add('config', $app->getConfig(null));
         $container->add(Session::class);
 
-        // Add database and PDO connection to the container
-        $container->add(Database::class, function () use ($container, $app) {
-            return Database::getInstance(
-                $app->getConfig('DB_PATH'),
-                $container->get(Logger::class)
-            );
-        });
-        $container->add(PDO::class, function () use ($container) {
-            return $container->get(Database::class)->getConnection();
-        });
+        // Add service providers
+        $container->addServiceProvider(new DatabaseServiceProvider());
+        $container->addServiceProvider(new LoggerServiceProvider());
 
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);
+
+        // Add other services here as needed
     }
 
     private static function registerControllers(Container $container, Application $app): void
@@ -63,7 +58,8 @@ class ContainerConfigurator
                     // Base dependencies
                     $definition
                         ->addArgument(Application::class)
-                        ->addArgument(ServerRequestInterface::class);
+                        ->addArgument(ServerRequestInterface::class)
+                        ->addArgument(Logger::class);
 
                     // Additional dependencies
                     $constructor = $reflection->getConstructor();

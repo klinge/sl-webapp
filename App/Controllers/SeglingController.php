@@ -17,15 +17,16 @@ use Exception;
 use PDO;
 use PDOException;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 class SeglingController extends BaseController
 {
     private View $view;
     private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
     }
@@ -77,7 +78,7 @@ class SeglingController extends BaseController
         $roller = $roll->getAll();
 
         //Fetch lists of persons who has a role to populate select boxes
-        $medlemmar = new MedlemRepository($this->conn, $this->app);
+        $medlemmar = new MedlemRepository($this->conn, $this->logger);
         $allaSkeppare = $medlemmar->getMembersByRollName('Skeppare');
         $allaBatsman = $medlemmar->getMembersByRollName('Båtsman');
         $allaKockar = $medlemmar->getMembersByRollName('Kock');
@@ -134,11 +135,11 @@ class SeglingController extends BaseController
         $segling = new Segling($this->conn, $id);
         if ($segling->delete()) {
             Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
-            $this->app->getLogger()->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
+            $this->logger->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
                 Session::get('user_id'));
         } else {
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
-            $this->app->getLogger()->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag .
+            $this->logger->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag .
                 '  User: ' . Session::get('user_id'));
         }
         $redirectUrl = $this->app->getRouter()->generate('segling-list');
@@ -266,15 +267,15 @@ class SeglingController extends BaseController
             $result = $stmt->execute();
 
             if ($result) {
-                $this->app->getLogger()->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId .
+                $this->logger->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId .
                     "User: " . Session::get('user_id'));
                 echo json_encode(['status' => 'ok']);
             } else {
-                $this->app->getLogger()->warning("Failed to delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId);
+                $this->logger->warning("Failed to delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId);
                 echo json_encode(['status' => 'fail', 'error' => 'Deletion failed']);
             }
         } else {
-            $this->app->getLogger()->warning("Failed to delete medlem from segling. Invalid data. Medlem: " . $medlemId . " Segling: " . $seglingId);
+            $this->logger->warning("Failed to delete medlem from segling. Invalid data. Medlem: " . $medlemId . " Segling: " . $seglingId);
             echo json_encode(['status' => 'fail', 'error' => 'Invalid data']);
         }
     }

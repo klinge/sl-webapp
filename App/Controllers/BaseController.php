@@ -7,10 +7,8 @@ namespace App\Controllers;
 use App\Application;
 use App\Traits\JsonResponder;
 use App\Utils\Session;
-use App\Utils\Database;
-use PDO;
-use PDOException;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 class BaseController
 {
@@ -20,11 +18,13 @@ class BaseController
     protected ServerRequestInterface $request;
     protected array $sessionData;
     protected Application $app;
+    protected Logger $logger;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
     {
         $this->app = $app;
         $this->request = $request;
+        $this->logger = $logger;
         $this->initializeSessionData();
     }
 

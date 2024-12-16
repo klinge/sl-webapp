@@ -17,6 +17,7 @@ use App\Application;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
+use Monolog\Logger;
 
 /**
  * MedlemController handles operations related to members (medlemmar).
@@ -41,13 +42,13 @@ class MedlemController extends BaseController
      * @param Application $app The application instance
      * @param ServerRequestInterface $request The request object
      */
-    public function __construct(Application $app, ServerRequestInterface $request, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
-        $this->medlemRepo = new MedlemRepository($this->conn, $this->app);
-        $this->mailAliasService = new MailAliasService($this->app);
+        $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
+        $this->mailAliasService = new MailAliasService($this->logger, $this->app->getConfig(null));
         $this->validator = new MedlemDataValidatorService();
     }
 
@@ -89,7 +90,7 @@ class MedlemController extends BaseController
 
         //Fetch member data
         try {
-            $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
+            $medlem = new Medlem($this->conn, $this->logger, $id);
             $roll = new Roll($this->conn);
             //Fetch roles and seglingar to use in the view
             $roller = $roll->getAll();
@@ -128,7 +129,7 @@ class MedlemController extends BaseController
     public function update(array $params): void
     {
         $id = (int) $params['id'];
-        $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
+        $medlem = new Medlem($this->conn, $this->logger, $id);
         $postData = $this->request->getParsedBody();
 
         if ($this->validator->validateAndPrepare($medlem, $postData)) {
@@ -195,7 +196,7 @@ class MedlemController extends BaseController
      */
     public function create(): void
     {
-        $medlem = new Medlem($this->conn, $this->app->getLogger());
+        $medlem = new Medlem($this->conn, $this->logger);
         $postData = $this->request->getParsedBody();
 
         if ($this->validator->validateAndPrepare($medlem, $postData)) {
@@ -237,15 +238,15 @@ class MedlemController extends BaseController
     {
         $id = (int) $this->request->getParsedBody()['id'];
         try {
-            $medlem = new Medlem($this->conn, $this->app->getLogger(), $id);
+            $medlem = new Medlem($this->conn, $this->logger, $id);
             $medlem->delete();
             $this->updateEmailAliases();
 
-            $this->app->getLogger()->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' borttagen av: ' . Session::get('user_id'));
+            $this->logger->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' borttagen av: ' . Session::get('user_id'));
             // Set the URL and redirect
             $this->redirectWithSuccess('medlem-list', 'Medlem borttagen!');
         } catch (Exception $e) {
-            $this->app->getLogger()->warning('Kunde inte ta bort medlem: ' . $e->getMessage());
+            $this->logger->warning('Kunde inte ta bort medlem: ' . $e->getMessage());
             $this->redirectWithError('medlem-list', 'Kunde inte ta bort medlem! Fel: ' . $e->getMessage());
         }
     }

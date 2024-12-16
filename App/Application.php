@@ -51,7 +51,6 @@ class Application
         $this->loadEnvironment();
         $this->loadConfig();
         $this->setupRouter();
-        $this->setupLogger($this->getAppEnv(), $this->getConfig('LOG_NAME'), $this->getConfig('LOG_LEVEL'));
         $this->setErrorReporting($this->getAppEnv());
         $this->setupSession();
         $this->psrRequest = ServerRequestFactory::fromGlobals(
@@ -61,11 +60,13 @@ class Application
             $_COOKIE
         );
         $this->setupContainer();
+        $this->logger = $this->container->get(Logger::class);
+
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this, $this->psrRequest));
-        $this->addMiddleware(new AuthorizationMiddleware($this, $this->psrRequest));
-        $this->addMiddleware(new CsrfMiddleware($this, $this->psrRequest));
+        $this->addMiddleware(new AuthenticationMiddleware($this->psrRequest, $this->router, $this->logger));
+        $this->addMiddleware(new AuthorizationMiddleware($this->psrRequest, $this->router, $this->logger));
+        $this->addMiddleware(new CsrfMiddleware($this->psrRequest, $this->router, $this->logger));
     }
 
     private function setupContainer(): void
@@ -165,14 +166,17 @@ class Application
     }
 
     /**
-     * Returns the value of a specific environment variable.
+     * Returns the entire config or the value of a specific environment variable
      *
-     * @param string $key The environment variable to retrieve
+     * @param ?string $key The environment variable to retrieve
      *
-     * @return string|null The value of the environment variebale, or null if the key is not found
+     * @return array|string|null The entire config array, the value of the environment variable or null if the key is not found
      */
-    public function getConfig(string $key): string|null
+    public function getConfig(?string $key): array|string|null
     {
+        if ($key === null) {
+            return $this->config;
+        }
         return $this->config[$key] ?? null;
     }
 
@@ -215,29 +219,6 @@ class Application
             session_regenerate_id(true);
             $_SESSION['session_regeneration_time'] = time();
         }
-    }
-
-    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = 'INFO'): bool
-    {
-        $this->logger = new Logger($logName);
-        try {
-            //try to create a logger given info from .env
-            if ($appEnv === 'DEV') {
-                $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
-            } else {
-                $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', $logLevel));
-            }
-            return true;
-        } catch (\Exception $e) {
-            // Fallback to system logger or stderr
-            $this->logger->pushHandler(new StreamHandler('php://stderr', Level::Warning));
-            return false;
-        }
-    }
-
-    public function getLogger(): Logger
-    {
-        return $this->logger;
     }
 
     /**
