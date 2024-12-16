@@ -10,6 +10,7 @@ use AltoRouter;
 use App\Application;
 use App\ServiceProviders\DatabaseServiceProvider;
 use App\ServiceProviders\LoggerServiceProvider;
+use App\ServiceProviders\AuthServiceProvider;
 use App\Utils\Session;
 use Monolog\Logger;
 
@@ -27,6 +28,8 @@ class ContainerConfigurator
         // Add service providers
         $container->addServiceProvider(new DatabaseServiceProvider());
         $container->addServiceProvider(new LoggerServiceProvider());
+        $container->addServiceProvider(new AuthServiceProvider());
+
 
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);

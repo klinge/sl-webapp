@@ -24,7 +24,7 @@ class LoggerServiceProvider extends AbstractServiceProvider
 
             try {
                 if ($config['APP_ENV'] === 'DEV') {
-                    $logger->pushHandler(new StreamHandler($config['ROOT_DIR'] . '/logs/app.log', Level::Debug));
+                    $logger->pushHandler(new StreamHandler($config['APP_DIR'] . '/logs/app.log', Level::Debug));
                 } else {
                     $logger->pushHandler(new StreamHandler($config['LOG_DIR'] . '/app.log', $config['LOG_LEVEL']));
                 }

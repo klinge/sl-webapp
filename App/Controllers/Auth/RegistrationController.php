@@ -9,11 +9,8 @@ use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\Session;
 use App\Utils\View;
-use App\Utils\Email;
 use Psr\Http\Message\ServerRequestInterface;
-use PDO;
 use Monolog\Logger;
-use AltoRouter;
 
 class RegistrationController extends AuthBaseController
 {
@@ -23,13 +20,11 @@ class RegistrationController extends AuthBaseController
 
     private UserAuthenticationService $userAuthService;
     private View $view;
-    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn, AltoRouter $router, array $config)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, UserAuthenticationService $userAuthSvc)
     {
         parent::__construct($app, $request, $logger);
-        $this->conn = $conn;
-        $this->userAuthService = new UserAuthenticationService($this->conn, $this->logger, $router, new Email($app), $config);
+        $this->userAuthService = $userAuthSvc;
         $this->view = new View($this->app);
     }
 

@@ -8,12 +8,9 @@ use App\Application;
 use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\View;
-use App\Utils\Email;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
-use PDO;
 use Monolog\Logger;
-use AltoRouter;
 
 class PasswordController extends AuthBaseController
 {
@@ -23,19 +20,15 @@ class PasswordController extends AuthBaseController
     private const RESET_PASSWORD_VIEW = 'login/viewSetNewPassword';
     private UserAuthenticationService $authService;
     private View $view;
-    private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn, AltoRouter $router, array $config)
-    {
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        UserAuthenticationService $userAuthSvc
+    ) {
         parent::__construct($app, $request, $logger);
-        $this->conn = $conn;
-        $this->authService = new UserAuthenticationService(
-            $this->conn,
-            $this->logger,
-            $router,
-            new Email($app),
-            $config
-        );
+        $this->authService = $userAuthSvc;
         $this->view = new View($this->app);
     }
 

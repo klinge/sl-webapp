@@ -7,20 +7,16 @@ namespace App;
 use Dotenv\Dotenv;
 use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Level;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\ServerRequestFactory;
 use League\Container\Container;
 use App\Config\RouteConfig;
 use App\Config\ContainerConfigurator;
-use App\Utils\Database;
 use App\Middleware\MiddlewareInterface;
 use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
-use PDO;
 use Exception;
 
 /**

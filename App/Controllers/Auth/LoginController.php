@@ -34,12 +34,12 @@ class LoginController extends AuthBaseController
      * @param Application $app The application instance.
      * @param ServerRequestInterface $request The request data.
      */
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn, PasswordService $pwdService)
     {
         parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
-        $this->passwordService = new PasswordService();
+        $this->passwordService = $pwdService;
         $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
     }
 
