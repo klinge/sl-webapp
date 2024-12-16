@@ -6,20 +6,15 @@ namespace App\Models;
 
 use PDO;
 use Exception;
-use App\Application;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
-class MedlemRepository
+class MedlemRepository extends BaseModel
 {
-    // database connection and table name
-    private $conn;
-    private $logger;
     public $medlemmar;
 
-    public function __construct(PDO $db, Logger $logger)
+    public function __construct(PDO $db, LoggerInterface $logger)
     {
-        $this->conn = $db;
-        $this->logger  = $logger;
+        parent::__construct($db, $logger);
     }
 
 

@@ -26,12 +26,17 @@ class BetalningController extends BaseController
     private ?string $welcomeEmailEnabled = "0";
     private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
-    {
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        PDO $conn,
+        BetalningRepository $betalningRepo
+    ) {
         parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
-        $this->betalningRepo = new BetalningRepository($this->conn);
+        $this->betalningRepo = $betalningRepo;
         $this->welcomeEmailEnabled = $this->app->getConfig('WELCOME_MAIL_ENABLED');
     }
 
@@ -50,7 +55,7 @@ class BetalningController extends BaseController
     public function getBetalning(array $params): Betalning
     {
         $id = (int) $params['id'];
-        $betalning = new Betalning($this->conn);
+        $betalning = new Betalning($this->conn, $this->logger);
         $betalning->get($id);
         var_dump($betalning);
         //TODO add a view or modal to edit a payment..
@@ -81,7 +86,7 @@ class BetalningController extends BaseController
     //This function is called via a javascript fetch POST in the viewBetalning.php view
     public function createBetalning(array $params): void
     {
-        $betalning = new Betalning($this->conn);
+        $betalning = new Betalning($this->conn, $this->logger);
         $parsedBody = $this->request->getParsedBody();
 
         //Check for mandatory fields
@@ -129,7 +134,7 @@ class BetalningController extends BaseController
     public function deleteBetalning(array $params): void
     {
         $id = $params['id'];
-        $betalning = new Betalning($this->conn);
+        $betalning = new Betalning($this->conn, $this->logger);
         $betalning->get($id);
         try {
             $betalning->delete();

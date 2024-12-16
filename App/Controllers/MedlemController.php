@@ -33,6 +33,7 @@ class MedlemController extends BaseController
     private View $view;
     private MailAliasService $mailAliasService;
     private MedlemRepository $medlemRepo;
+    private BetalningRepository $betalningRepo;
     private MedlemDataValidatorService $validator;
     private PDO $conn;
 
@@ -42,12 +43,18 @@ class MedlemController extends BaseController
      * @param Application $app The application instance
      * @param ServerRequestInterface $request The request object
      */
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
-    {
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        PDO $conn,
+        BetalningRepository $betalningRepository
+    ) {
         parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
         $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
+        $this->betalningRepo = $betalningRepository;
         $this->mailAliasService = new MailAliasService($this->logger, $this->app->getConfig(null));
         $this->validator = new MedlemDataValidatorService();
     }
@@ -91,13 +98,12 @@ class MedlemController extends BaseController
         //Fetch member data
         try {
             $medlem = new Medlem($this->conn, $this->logger, $id);
-            $roll = new Roll($this->conn);
+            $roll = new Roll($this->conn, $this->logger);
             //Fetch roles and seglingar to use in the view
             $roller = $roll->getAll();
             $seglingar = $medlem->getSeglingar();
             //fetch betalningar for member
-            $betalRepo = new BetalningRepository($this->conn);
-            $betalningar = $betalRepo->getBetalningForMedlem($id);
+            $betalningar = $this->betalningRepo->getBetalningForMedlem($id);
 
             $data = [
                 "title" => "Visa medlem",
@@ -168,7 +174,7 @@ class MedlemController extends BaseController
      */
     public function showNewForm(): void
     {
-        $roll = new Roll($this->conn);
+        $roll = new Roll($this->conn, $this->logger);
         $roller = $roll->getAll();
         //Just show the form to add a new member
         $data = [

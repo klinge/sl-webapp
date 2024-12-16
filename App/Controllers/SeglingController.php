@@ -23,18 +23,30 @@ class SeglingController extends BaseController
 {
     private View $view;
     private PDO $conn;
+    private SeglingRepository $seglingRepo;
+    private BetalningRepository $betalningRepo;
+    private MedlemRepository $medlemRepo;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
-    {
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        PDO $conn,
+        SeglingRepository $seglingRepo,
+        MedlemRepository $medlemRepo,
+        BetalningRepository $betalningsRepo
+    ) {
         parent::__construct($app, $request, $logger);
         $this->conn = $conn;
+        $this->seglingRepo = $seglingRepo;
+        $this->medlemRepo = $medlemRepo;
+        $this->betalningRepo = $betalningsRepo;
         $this->view = new View($this->app);
     }
 
     public function list()
     {
-        $seglingar = new SeglingRepository($this->conn);
-        $result = $seglingar->getAllWithDeltagare();
+        $result = $this->seglingRepo->getAllWithDeltagare();
 
         //Put everyting in the data variable that is used by the view
         $data = [
@@ -51,7 +63,7 @@ class SeglingController extends BaseController
         $formAction = $this->app->getRouter()->generate('segling-save', ['id' => $id]);
         //Fetch Segling
         try {
-            $segling = new Segling($this->conn, $id);
+            $segling = new Segling($this->conn, $this->logger, $id);
         } catch (Exception $e) {
             header("HTTP/1.1 404 Not Found");
             exit();
@@ -62,10 +74,9 @@ class SeglingController extends BaseController
         //Fetch payment status for deltagare and add to the $deltagare array
         $year = (int) substr($segling->start_dat, 0, 4);
         $deltagareWithBetalning = [];
-        $betalningsRepo = new BetalningRepository($this->conn);
 
         foreach ($segling->deltagare as $deltagare) {
-            $hasPayed = $betalningsRepo->memberHasPayed($deltagare['medlem_id'], $year);
+            $hasPayed = $this->betalningRepo->memberHasPayed($deltagare['medlem_id'], $year);
             $deltagare['har_betalt'] = $hasPayed;
             $deltagareWithBetalning[] = $deltagare;
         }
@@ -74,14 +85,13 @@ class SeglingController extends BaseController
         $segling->deltagare = $deltagareWithBetalning;
 
         //Fetch all available roles
-        $roll = new Roll($this->conn);
+        $roll = new Roll($this->conn, $this->logger);
         $roller = $roll->getAll();
 
         //Fetch lists of persons who has a role to populate select boxes
-        $medlemmar = new MedlemRepository($this->conn, $this->logger);
-        $allaSkeppare = $medlemmar->getMembersByRollName('Skeppare');
-        $allaBatsman = $medlemmar->getMembersByRollName('Båtsman');
-        $allaKockar = $medlemmar->getMembersByRollName('Kock');
+        $allaSkeppare = $this->medlemRepo->getMembersByRollName('Skeppare');
+        $allaBatsman = $this->medlemRepo->getMembersByRollName('Båtsman');
+        $allaKockar = $this->medlemRepo->getMembersByRollName('Kock');
 
         $data = [
             "title" => "Visa segling",
@@ -98,7 +108,7 @@ class SeglingController extends BaseController
     public function save(array $params)
     {
         $id = (int) $params['id'];
-        $segling = new Segling($this->conn, $id);
+        $segling = new Segling($this->conn, $this->logger, $id);
 
         //Sanitize user input
         $sanitizer = new Sanitizer();
@@ -132,7 +142,7 @@ class SeglingController extends BaseController
     public function delete(array $params)
     {
         $id = (int) $params['id'];
-        $segling = new Segling($this->conn, $id);
+        $segling = new Segling($this->conn, $this->logger, $id);
         if ($segling->delete()) {
             Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
             $this->logger->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
@@ -173,7 +183,7 @@ class SeglingController extends BaseController
             $this->showCreate();
             exit;
         }
-        $segling = new Segling($this->conn);
+        $segling = new Segling($this->conn, $this->logger);
         $segling->start_dat = $cleanValues['startdat'];
         $segling->slut_dat = $cleanValues['slutdat'];
         $segling->skeppslag = $cleanValues['skeppslag'];

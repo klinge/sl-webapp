@@ -59,8 +59,7 @@ class ContainerConfigurator
                     $definition = $container->add($className);
 
                     // Base dependencies
-                    $definition
-                        ->addArgument(Application::class)
+                    $definition->addArgument(Application::class)
                         ->addArgument(ServerRequestInterface::class)
                         ->addArgument(Logger::class);
 
@@ -68,7 +67,7 @@ class ContainerConfigurator
                     $constructor = $reflection->getConstructor();
                     if ($constructor) {
                         $params = $constructor->getParameters();
-                        for ($i = 2; $i < count($params); $i++) {
+                        for ($i = 3; $i < count($params); $i++) {
                             $type = $params[$i]->getType();
                             if ($type instanceof \ReflectionNamedType) {
                                 $definition->addArgument($type->getName());

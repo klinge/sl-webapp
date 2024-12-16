@@ -179,6 +179,20 @@ class Application
     /**
      * Returns the AltoRouter instance used by the application.
      *
+     * @return Container The DI container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+    /**
+     * Returns the AltoRouter instance used by the application.
+     *
+     * @return AltoRouter The AltoRouter instance
+     */
+    /**
+     * Returns the AltoRouter instance used by the application.
+     *
      * @return AltoRouter The AltoRouter instance
      */
     public function getRouter(): AltoRouter

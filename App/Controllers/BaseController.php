@@ -9,6 +9,7 @@ use App\Traits\JsonResponder;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Monolog\Logger;
+use League\Container\Container;
 
 class BaseController
 {
@@ -19,12 +20,14 @@ class BaseController
     protected array $sessionData;
     protected Application $app;
     protected Logger $logger;
+    protected Container $container;
 
     public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
     {
         $this->app = $app;
         $this->request = $request;
         $this->logger = $logger;
+        $this->container = $app->getContainer();
         $this->initializeSessionData();
     }
 

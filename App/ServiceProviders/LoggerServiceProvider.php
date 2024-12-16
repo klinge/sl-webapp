@@ -8,6 +8,7 @@ use League\Container\ServiceProvider\AbstractServiceProvider;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
+use App\Application;
 
 class LoggerServiceProvider extends AbstractServiceProvider
 {
@@ -24,7 +25,10 @@ class LoggerServiceProvider extends AbstractServiceProvider
 
             try {
                 if ($config['APP_ENV'] === 'DEV') {
-                    $logger->pushHandler(new StreamHandler($config['APP_DIR'] . '/logs/app.log', Level::Debug));
+                    $rootDir = $this->getContainer()->get(Application::class)->getRootDir();
+                    $logPath = $rootDir . '/logs/app.log';
+
+                    $logger->pushHandler(new StreamHandler($logPath, Level::Debug));
                 } else {
                     $logger->pushHandler(new StreamHandler($config['LOG_DIR'] . '/app.log', $config['LOG_LEVEL']));
                 }

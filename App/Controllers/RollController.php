@@ -26,7 +26,7 @@ class RollController extends BaseController
 
     public function list()
     {
-        $roll = new Roll($this->conn);
+        $roll = new Roll($this->conn, $this->logger);
         $roller = $roll->getAll();
         $data = [
             "title" => "Visa roller",
