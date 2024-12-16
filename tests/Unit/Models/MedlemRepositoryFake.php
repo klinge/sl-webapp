@@ -5,15 +5,15 @@ namespace Tests\Unit\Models;
 use App\Models\MedlemRepository;
 use App\Models\Medlem;
 use PDO;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 class MedlemRepositoryFake extends MedlemRepository
 {
-    protected function createMedlem(PDO $conn, Logger $logger, int $id): Medlem
+    protected function createMedlem(int $id): Medlem
     {
         // Create a simple test double that extends Medlem
         // @codingStandardsIgnoreLine
-        return new class($conn, $logger, $id) extends Medlem {
+        return new class($id) extends Medlem {
             public function __construct($conn, $logger, $id)
             {
                 // Empty constructor to avoid database calls

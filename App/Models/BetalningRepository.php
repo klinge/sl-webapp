@@ -58,7 +58,7 @@ class BetalningRepository extends BaseModel
         $payments =  $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($payments as $payment) {
-            $betalning = new Betalning($this->conn, $payment);
+            $betalning = new Betalning($this->conn, $this->logger, $payment);
             $betalningar[] = $betalning;
         }
         return $betalningar;

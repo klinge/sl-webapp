@@ -5,7 +5,7 @@ namespace Tests\Unit\Models;
 use PHPUnit\Framework\TestCase;
 use App\Models\Medlem;
 use PDO;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use ReflectionMethod;
 
 class MedlemTest extends TestCase
@@ -17,7 +17,7 @@ class MedlemTest extends TestCase
     protected function setUp(): void
     {
         $this->db = $this->createMock(PDO::class);
-        $this->logger = $this->createMock(Logger::class);
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->medlem = $this->getMockBuilder(Medlem::class)
             ->setConstructorArgs([$this->db, $this->logger])
             ->onlyMethods(['persistToDatabase'])

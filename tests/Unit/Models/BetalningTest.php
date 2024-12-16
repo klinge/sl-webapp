@@ -11,12 +11,14 @@ class BetalningTest extends TestCase
 {
     private $mockPdo;
     private $mockStatement;
+    private $mockLogger;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->mockPdo = $this->createMock(PDO::class);
         $this->mockStatement = $this->createMock(PDOStatement::class);
+        $this->mockLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
     }
 
     public function testConstructorWithPaymentData()
@@ -32,7 +34,7 @@ class BetalningTest extends TestCase
             'updated_at' => '2023-05-01 10:00:00'
         ];
 
-        $betalning = new Betalning($this->mockPdo, $paymentData);
+        $betalning = new Betalning($this->mockPdo, $this->mockLogger, $paymentData);
 
         $this->assertEquals(1, $betalning->id);
         $this->assertEquals(100.50, $betalning->belopp);
@@ -65,7 +67,7 @@ class BetalningTest extends TestCase
                 'updated_at' => '2023-05-02 11:00:00'
             ]);
 
-        $betalning = new Betalning($this->mockPdo);
+        $betalning = new Betalning($this->mockPdo, $this->mockLogger);
         $betalning->get(2);
 
         $this->assertEquals(2, $betalning->id);
@@ -92,7 +94,7 @@ class BetalningTest extends TestCase
             ->method('lastInsertId')
             ->willReturn('3');
 
-        $betalning = new Betalning($this->mockPdo);
+        $betalning = new Betalning($this->mockPdo, $this->mockLogger);
         $betalning->medlem_id = 4;
         $betalning->belopp = 300.25;
         $betalning->datum = '2023-05-03';
@@ -120,7 +122,7 @@ class BetalningTest extends TestCase
             ->method('errorInfo')
             ->willReturn([null, null, 'Test error message']);
 
-        $betalning = new Betalning($this->mockPdo);
+        $betalning = new Betalning($this->mockPdo, $this->mockLogger);
         $betalning->medlem_id = 5;
         $betalning->belopp = 400.00;
         $betalning->datum = '2023-05-04';
@@ -143,7 +145,7 @@ class BetalningTest extends TestCase
             ->method('execute')
             ->willReturn(true);
 
-        $betalning = new Betalning($this->mockPdo);
+        $betalning = new Betalning($this->mockPdo, $this->mockLogger);
         $betalning->id = 6;
 
         $result = $betalning->delete();
@@ -166,7 +168,7 @@ class BetalningTest extends TestCase
             ->method('errorInfo')
             ->willReturn([null, null, 'Test delete error message']);
 
-        $betalning = new Betalning($this->mockPdo);
+        $betalning = new Betalning($this->mockPdo, $this->mockLogger);
         $betalning->id = 7;
 
         $result = $betalning->delete();

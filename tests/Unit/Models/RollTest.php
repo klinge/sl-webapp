@@ -6,16 +6,19 @@ use PHPUnit\Framework\TestCase;
 use App\Models\Roll;
 use PDO;
 use PDOStatement;
+use Psr\Log\LoggerInterface;
 
 class RollTest extends TestCase
 {
     private $mockPDO;
     private $roll;
+    private $mockLogger;
 
     protected function setUp(): void
     {
         $this->mockPDO = $this->createMock(PDO::class);
-        $this->roll = new Roll($this->mockPDO);
+        $this->mockLogger = $this->createMock(LoggerInterface::class);
+        $this->roll = new Roll($this->mockPDO, $this->mockLogger);
     }
 
     public function testGetAllReturnsArray()

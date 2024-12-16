@@ -26,7 +26,7 @@ class AuthenticationMiddlewareTest extends TestCase
         $this->logger = $this->createMock(\Monolog\Logger::class);
         $this->uri = $this->createMock(UriInterface::class);
 
-        $this->middleware = new AuthenticationMiddlewareFake($this->app, $this->request);
+        $this->middleware = new AuthenticationMiddlewareFake($this->request, $this->router, $this->logger);
 
         $this->app->method('getRouter')->willReturn($this->router);
         $this->app->method('getLogger')->willReturn($this->logger);
