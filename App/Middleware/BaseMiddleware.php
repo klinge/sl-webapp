@@ -7,19 +7,23 @@ namespace App\Middleware;
 use App\Application;
 use App\Traits\JsonResponder;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
+use AltoRouter;
 
 class BaseMiddleware
 {
     //Add the JsonResponder trait
     use JsonResponder;
 
-    protected Application $app;
     protected ServerRequestInterface $request;
+    protected AltoRouter $router;
+    protected Logger $logger;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(ServerRequestInterface $request, AltoRouter $router, Logger $logger)
     {
-        $this->app = $app;
         $this->request = $request;
+        $this->router = $router;
+        $this->logger = $logger;
     }
 
     protected function isAjaxRequest(): bool

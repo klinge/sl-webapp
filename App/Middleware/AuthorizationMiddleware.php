@@ -26,7 +26,7 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
      */
     public function handle(): void
     {
-        $match = $this->app->getRouter()->match();
+        $match = $this->router->match();
         if ($match) {
             $routeName = $match['name'];
             //admins can access everything so just return..
@@ -42,10 +42,10 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
                 $this->jsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.', 401]);
             } else {
                 Session::setFlashMessage('error', 'Du måste vara administratör för att se denna sida.');
-                header('Location: ' . $this->app->getRouter()->generate('user-home'));
+                header('Location: ' . $this->router->generate('user-home'));
             }
             //Log the exception
-            $this->app->getLogger()->info('Request to an admin page, user is not admin. URI: ' . $this->request->getUri()->__toString() .
+            $this->logger->info('Request to an admin page, user is not admin. URI: ' . $this->request->getUri()->__toString() .
                 ', Remote IP: ' . $this->request->getServerParams()['REMOTE_ADDR'] .
                 ', User ID: ' . Session::get('user_id'));
             $this->doExit();
@@ -59,14 +59,14 @@ class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterf
     {
         //The no-login routes are defined in RouteConfig
         $result = in_array($routeName, RouteConfig::$noLoginRequiredRoutes);
-        $this->app->getLogger()->debug('>isOpenRoute: ' . $routeName . ':' . (string) $result);
+        $this->logger->debug('>isOpenRoute: ' . $routeName . ':' . (string) $result);
         return $result;
     }
 
     protected function isUserRoute(string $routeName): bool
     {
         $result = strpos($routeName, 'user-') !== false;
-        $this->app->getLogger()->debug('>isUserRoute: ' . $routeName . ':' . (string) $result);
+        $this->logger->debug('>isUserRoute: ' . $routeName . ':' . (string) $result);
         return $result;
     }
 }

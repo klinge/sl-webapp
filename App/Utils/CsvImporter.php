@@ -10,6 +10,7 @@ use App\Application;
 use App\Models\Medlem;
 use App\Utils\DateFormatter;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 
 /**
  * @deprecated This class will is just for initial database import and will be deprecated in upcoming releases.
@@ -23,10 +24,12 @@ class CsvImporter
     public array $csvRowsNotImported = [];
     public array $dbRowsNotCreated = [];
     public Application $app;
+    public LoggerInterface $logger;
 
     public function __construct(string $dbFilename)
     {
         $this->app = new Application();
+        $this->logger = $this->app->getContainer()->get(LoggerInterface::class);
         $this->dbfile = $this->app->getRootDir() . '/db/' . $dbFilename;
         $this->csvfile = $this->app->getRootDir() . '/db/csv-data/medlemmar-cleaned.csv';
 
@@ -69,7 +72,7 @@ class CsvImporter
 
         foreach ($this->data as $row) {
             //First populate a member object with the row data and save it
-            $member = new Medlem($this->conn, $this->app->getLogger());
+            $member = new Medlem($this->conn, $this->logger);
             $birthdate = DateFormatter::formatDateWithHms($row['Födelsedatum']);
             $member->fodelsedatum = $birthdate ?: "";
             if (!empty($this->fodelsedatum)) {

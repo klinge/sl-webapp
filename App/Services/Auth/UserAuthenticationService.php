@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Auth;
 
-use App\Application;
 use App\Services\Auth\PasswordService;
 use App\Utils\Sanitizer;
 use App\Utils\EmailType;
@@ -14,23 +13,30 @@ use App\Utils\TokenHandler;
 use App\Models\MedlemRepository;
 use App\Models\Medlem;
 use PDO;
+use AltoRouter;
+use Monolog\Logger;
 
 class UserAuthenticationService
 {
-    private Application $app;
+    private Logger $logger;
     private PDO $conn;
+    private AltoRouter $router;
+    private Email $mailer;
+    private array $config;
     private TokenHandler $tokenHandler;
     private MedlemRepository $medlemRepo;
     private PasswordService $passwordSvc;
-    private Email $mailer;
 
-    public function __construct(PDO $conn, Application $app, Email $mailer)
+
+    public function __construct(PDO $conn, Logger $logger, AltoRouter $router, Email $mailer, array $config)
     {
-        $this->app = $app;
         $this->conn = $conn;
+        $this->logger = $logger;
+        $this->router = $router;
         $this->mailer = $mailer;
+        $this->config = $config;
         $this->tokenHandler = $this->createTokenHandler();
-        $this->medlemRepo = new MedlemRepository($this->conn, $app);
+        $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
         $this->passwordSvc = new PasswordService();
     }
 
@@ -47,14 +53,14 @@ class UserAuthenticationService
         // Check if user exists
         $result = $this->medlemRepo->getMemberByEmail($email);
         if (!$result) {
-            $this->app->getLogger()->info("Register member: Failed to register new member. Email does not exist: " . $email);
+            $this->logger->info("Register member: Failed to register new member. Email does not exist: " . $email);
             return [
                 'success' => false,
                 'message' => 'Det finns ingen medlem med den emailadressen. Använd den mailadress du angav när du registrerade dina medlemsuppgifter.'
             ];
         }
 
-        $medlem = new Medlem($this->conn, $this->app->getLogger(), $result['id']);
+        $medlem = new Medlem($this->conn, $this->logger, $result['id']);
 
         if ($medlem->password) {
             return [
@@ -112,7 +118,7 @@ class UserAuthenticationService
     {
         $tokenResult = $this->tokenHandler->isValidToken($token, TokenType::ACTIVATION);
         if (!$tokenResult['success']) {
-            $this->app->getLogger()->warning(
+            $this->logger->warning(
                 "Activate account: failed to activate account. Token given was" . $token
             );
             return $tokenResult;
@@ -124,7 +130,7 @@ class UserAuthenticationService
         $this->tokenHandler->deleteToken($token);
         $this->tokenHandler->deleteExpiredTokens();
 
-        $this->app->getLogger()->info("Activated account for member: " . $member['email']);
+        $this->logger->info("Activated account for member: " . $member['email']);
 
         return [
             'success' => true
@@ -135,7 +141,7 @@ class UserAuthenticationService
     {
         $member = $this->medlemRepo->getMemberByEmail($email);
         if (!$member) {
-            $this->app->getLogger()->info("Reset password called for non-existing user: " . $email);
+            $this->logger->info("Reset password called for non-existing user: " . $email);
             //Return true to avoid leaking information about existing users
             return ['success' => true];
         }
@@ -216,10 +222,10 @@ class UserAuthenticationService
             $stmt->bindParam(':email', $email);
             $stmt->execute();
 
-            $this->app->getLogger()->info("Password updated for member:" . $email);
+            $this->logger->info("Password updated for member:" . $email);
             return true;
         } catch (\PDOException $e) {
-            $this->app->getLogger()->error("Error updating password for member:" . $email .
+            $this->logger->error("Error updating password for member:" . $email .
                 " Error: " . $e->getMessage());
             return false;
         }
@@ -235,23 +241,23 @@ class UserAuthenticationService
         $data = [
             'token' => $token,
             'fornamn' => $firstName,
-            'url' => $this->app->getConfig('SITE_ADDRESS') .
-                $this->app->getRouter()->generate($routeName, ['token' => $token])
+            'url' => $this->config['SITE_ADDRESS'] .
+                $this->router->generate($routeName, ['token' => $token])
         ];
 
         try {
             $this->mailer->send($emailType, $email, data: $data);
-            $this->app->getLogger()->info("Sent {$emailType->value} email to: {$email}");
+            $this->logger->info("Sent {$emailType->value} email to: {$email}");
             return true;
         } catch (\Exception $e) {
-            $this->app->getLogger()->error("Failed to send {$emailType->value} mail to member with email: " . $email);
-            $this->app->getLogger()->error($e->getMessage());
+            $this->logger->error("Failed to send {$emailType->value} mail to member with email: " . $email);
+            $this->logger->error($e->getMessage());
             return false;
         }
     }
 
     protected function createTokenHandler(): TokenHandler
     {
-        return new TokenHandler($this->conn, $this->app);
+        return new TokenHandler($this->conn, $this->logger);
     }
 }

@@ -7,17 +7,17 @@ namespace App;
 use Dotenv\Dotenv;
 use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Level;
+use Psr\Http\Message\ServerRequestInterface;
+use Laminas\Diactoros\ServerRequestFactory;
+use League\Container\Container;
 use App\Config\RouteConfig;
-use Exception;
+use App\Config\ContainerConfigurator;
 use App\Middleware\MiddlewareInterface;
 use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
-use Psr\Http\Message\ServerRequestInterface;
-use Laminas\Diactoros\ServerRequestFactory;
+use Exception;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
@@ -34,6 +34,7 @@ use Laminas\Diactoros\ServerRequestFactory;
 class Application
 {
     private array $config = [];
+    private $container;
     private ?AltoRouter $router = null;
     private array $middlewares = [];
     private string $rootDir = '';
@@ -45,9 +46,8 @@ class Application
         $this->rootDir = dirname(__DIR__);
         $this->loadEnvironment();
         $this->loadConfig();
-        $this->setErrorReporting($this->getAppEnv());
         $this->setupRouter();
-        $this->setupLogger($this->getAppEnv(), $this->getConfig('LOG_NAME'), $this->getConfig('LOG_LEVEL'));
+        $this->setErrorReporting($this->getAppEnv());
         $this->setupSession();
         $this->psrRequest = ServerRequestFactory::fromGlobals(
             $_SERVER,
@@ -55,11 +55,20 @@ class Application
             $_POST,
             $_COOKIE
         );
+        $this->setupContainer();
+        $this->logger = $this->container->get(Logger::class);
+
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this, $this->psrRequest));
-        $this->addMiddleware(new AuthorizationMiddleware($this, $this->psrRequest));
-        $this->addMiddleware(new CsrfMiddleware($this, $this->psrRequest));
+        $this->addMiddleware(new AuthenticationMiddleware($this->psrRequest, $this->router, $this->logger));
+        $this->addMiddleware(new AuthorizationMiddleware($this->psrRequest, $this->router, $this->logger));
+        $this->addMiddleware(new CsrfMiddleware($this->psrRequest, $this->router, $this->logger));
+    }
+
+    private function setupContainer(): void
+    {
+        $this->container = new Container();
+        ContainerConfigurator::registerServices($this->container, $this);
     }
 
     /**
@@ -111,6 +120,16 @@ class Application
     }
 
     /**
+     * Returns the current request as a PSR-7 ServerRequestInterface object.
+     *
+     * @return ServerRequestInterface The current request
+     */
+    public function getPsrRequest(): ServerRequestInterface
+    {
+        return $this->psrRequest;
+    }
+
+    /**
      * Returns the path for the application relative to the servers document root,
      * returns an empty string if the APP_DIR is not set.
      *
@@ -143,17 +162,34 @@ class Application
     }
 
     /**
-     * Returns the value of a specific environment variable.
+     * Returns the entire config or the value of a specific environment variable
      *
-     * @param string $key The environment variable to retrieve
+     * @param ?string $key The environment variable to retrieve
      *
-     * @return string|null The value of the environment variebale, or null if the key is not found
+     * @return array|string|null The entire config array, the value of the environment variable or null if the key is not found
      */
-    public function getConfig(string $key): string|null
+    public function getConfig(?string $key): array|string|null
     {
+        if ($key === null) {
+            return $this->config;
+        }
         return $this->config[$key] ?? null;
     }
 
+    /**
+     * Returns the AltoRouter instance used by the application.
+     *
+     * @return Container The DI container
+     */
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+    /**
+     * Returns the AltoRouter instance used by the application.
+     *
+     * @return AltoRouter The AltoRouter instance
+     */
     /**
      * Returns the AltoRouter instance used by the application.
      *
@@ -193,29 +229,6 @@ class Application
             session_regenerate_id(true);
             $_SESSION['session_regeneration_time'] = time();
         }
-    }
-
-    private function setupLogger(string $appEnv, string $logName = "myapp", string $logLevel = 'INFO'): bool
-    {
-        $this->logger = new Logger($logName);
-        try {
-            //try to create a logger given info from .env
-            if ($appEnv === 'DEV') {
-                $this->logger->pushHandler(new StreamHandler(__DIR__ . '/../logs/app.log', Level::Debug));
-            } else {
-                $this->logger->pushHandler(new StreamHandler($this->getConfig('LOG_DIR') . '/app.log', $logLevel));
-            }
-            return true;
-        } catch (\Exception $e) {
-            // Fallback to system logger or stderr
-            $this->logger->pushHandler(new StreamHandler('php://stderr', Level::Warning));
-            return false;
-        }
-    }
-
-    public function getLogger(): Logger
-    {
-        return $this->logger;
     }
 
     /**
@@ -298,7 +311,7 @@ class Application
 
             //Check that the controller has the requested method and call it
             if (method_exists($controllerClass, $action)) {
-                $controllerInstance = new $controllerClass($this, $request);
+                $controllerInstance = $this->container->get($controllerClass);
                 $controllerInstance->{$action}($params);
             } else {
                 //Maybe also throw a 404 error here?

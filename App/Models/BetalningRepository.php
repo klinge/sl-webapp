@@ -5,15 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use PDO;
+use Psr\Log\LoggerInterface;
 
-class BetalningRepository
+class BetalningRepository extends BaseModel
 {
-    // database connection and table name
-    private $conn;
 
-    public function __construct($db)
+    public function __construct($db, LoggerInterface $logger)
     {
-        $this->conn = $db;
+        parent::__construct($db, $logger);
     }
 
     public function getAll(): array

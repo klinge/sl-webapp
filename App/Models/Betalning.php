@@ -6,11 +6,10 @@ namespace App\Models;
 
 use PDO;
 use Exception;
+use Psr\Log\LoggerInterface;
 
-class Betalning
+class Betalning extends BaseModel
 {
-    // database connection and table name
-    private $conn;
     private $table_name = "Betalning";
 
     // object properties
@@ -23,9 +22,9 @@ class Betalning
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, array $paymentData = [])
+    public function __construct(PDO $db, LoggerInterface $logger, array $paymentData = [])
     {
-        $this->conn = $db;
+        parent::__construct($db, $logger);
 
         //if created with paymentsData set the properties
         if ($paymentData !== []) {
@@ -94,6 +93,7 @@ class Betalning
             return ['success' => true, 'message' => 'Betalning deleted successfully'];
         } else {
             $error = $stmt->errorInfo();
+            $this->logger->error('Error deleting Betalning: ' . $error[2]);
             return ['success' => false, 'message' => 'Error deleting Betalning: ' . $error[2]];
         }
     }

@@ -6,33 +6,33 @@ namespace App\Utils;
 
 use PDO;
 use PDOException;
-use App\Application;
+use Monolog\Logger;
 
 class Database
 {
     private static $instance = null;
     private $conn;
     private $dbfile;
-    private $app;
+    private $logger;
 
-    private function __construct(Application $app)
+
+    private function __construct(string $dbPath, Logger $logger)
     {
-        $this->app = $app;
-        $this->dbfile = $app->getConfig('DB_PATH');
+        $this->dbfile = $dbPath;
         if ($this->dbfile !== ':memory:' && !file_exists($this->dbfile)) {
             throw new PDOException("Database file not found: {$this->dbfile}");
         }
-        //$this->dbfile = "slask";
+        $this->logger = $logger;
         $this->connect();
     }
 
-    public static function getInstance(Application $app): Database
+    public static function getInstance(string $dbPath, Logger $logger): Database
     {
         if (self::$instance === null) {
             try {
-                self::$instance = new self($app);
+                self::$instance = new self($dbPath, $logger);
             } catch (PDOException $e) {
-                $app->getLogger()->error("Could not connect to the database. Error: {$e}");
+                $logger->error("Could not connect to the database. Error: {$e}");
                 throw new PDOException($e->getMessage(), (int) $e->getCode());
             }
         }
@@ -47,7 +47,7 @@ class Database
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         } catch (PDOException $exception) {
-            $this->app->getLogger()->error("Could not connect to the database. Error: {$exception}");
+            $this->logger->error("Could not connect to the database. Error: {$exception}");
             throw new PDOException($exception->getMessage(), (int) $exception->getCode());
         }
     }

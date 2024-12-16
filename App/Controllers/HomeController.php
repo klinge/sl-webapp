@@ -8,14 +8,15 @@ use App\Application;
 use App\Utils\Session;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 class HomeController extends BaseController
 {
     private View $view;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->view = new View($this->app);
     }
 

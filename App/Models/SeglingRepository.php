@@ -6,16 +6,16 @@ namespace App\Models;
 
 use PDO;
 use Exception;
+use Psr\Log\LoggerInterface;
 
-class SeglingRepository
+class SeglingRepository extends BaseModel
 {
-    // database connection and table name
-    private $conn;
+    // object attributes
     public $seglingar;
 
-    public function __construct($db)
+    public function __construct(PDO $db, LoggerInterface $logger)
     {
-        $this->conn = $db;
+        parent::__construct($db, $logger);
     }
 
     /**
@@ -54,7 +54,7 @@ class SeglingRepository
 
         foreach ($result as $sailevent) {
             try {
-                $seglingar[] = new Segling($this->conn, $sailevent['id'], $withdeltagare);
+                $seglingar[] = new Segling($this->conn, $this->logger, $sailevent['id'], $withdeltagare);
             } catch (Exception $e) {
                 //Do nothing right now..
             }

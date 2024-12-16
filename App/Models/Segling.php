@@ -6,12 +6,10 @@ namespace App\Models;
 
 use PDO;
 use Exception;
-use PDOException;
+use Psr\Log\LoggerInterface;
 
-class Segling
+class Segling extends BaseModel
 {
-    // database connection and table name
-    private $conn;
     private $table_name = "Segling";
 
     // object properties
@@ -24,9 +22,9 @@ class Segling
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, ?int $id = null, ?string $withdeltagare = null)
+    public function __construct(PDO $db, LoggerInterface $logger, ?int $id = null, ?string $withdeltagare = null)
     {
-        $this->conn = $db;
+        parent::__construct($db, $logger);
 
         if (isset($id)) {
             if ($withdeltagare == 'withdeltagare') {

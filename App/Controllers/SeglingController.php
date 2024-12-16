@@ -17,21 +17,36 @@ use Exception;
 use PDO;
 use PDOException;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 class SeglingController extends BaseController
 {
     private View $view;
+    private PDO $conn;
+    private SeglingRepository $seglingRepo;
+    private BetalningRepository $betalningRepo;
+    private MedlemRepository $medlemRepo;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
-    {
-        parent::__construct($app, $request);
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        PDO $conn,
+        SeglingRepository $seglingRepo,
+        MedlemRepository $medlemRepo,
+        BetalningRepository $betalningsRepo
+    ) {
+        parent::__construct($app, $request, $logger);
+        $this->conn = $conn;
+        $this->seglingRepo = $seglingRepo;
+        $this->medlemRepo = $medlemRepo;
+        $this->betalningRepo = $betalningsRepo;
         $this->view = new View($this->app);
     }
 
     public function list()
     {
-        $seglingar = new SeglingRepository($this->conn);
-        $result = $seglingar->getAllWithDeltagare();
+        $result = $this->seglingRepo->getAllWithDeltagare();
 
         //Put everyting in the data variable that is used by the view
         $data = [
@@ -48,7 +63,7 @@ class SeglingController extends BaseController
         $formAction = $this->app->getRouter()->generate('segling-save', ['id' => $id]);
         //Fetch Segling
         try {
-            $segling = new Segling($this->conn, $id);
+            $segling = new Segling($this->conn, $this->logger, $id);
         } catch (Exception $e) {
             header("HTTP/1.1 404 Not Found");
             exit();
@@ -59,10 +74,9 @@ class SeglingController extends BaseController
         //Fetch payment status for deltagare and add to the $deltagare array
         $year = (int) substr($segling->start_dat, 0, 4);
         $deltagareWithBetalning = [];
-        $betalningsRepo = new BetalningRepository($this->conn);
 
         foreach ($segling->deltagare as $deltagare) {
-            $hasPayed = $betalningsRepo->memberHasPayed($deltagare['medlem_id'], $year);
+            $hasPayed = $this->betalningRepo->memberHasPayed($deltagare['medlem_id'], $year);
             $deltagare['har_betalt'] = $hasPayed;
             $deltagareWithBetalning[] = $deltagare;
         }
@@ -71,14 +85,13 @@ class SeglingController extends BaseController
         $segling->deltagare = $deltagareWithBetalning;
 
         //Fetch all available roles
-        $roll = new Roll($this->conn);
+        $roll = new Roll($this->conn, $this->logger);
         $roller = $roll->getAll();
 
         //Fetch lists of persons who has a role to populate select boxes
-        $medlemmar = new MedlemRepository($this->conn, $this->app);
-        $allaSkeppare = $medlemmar->getMembersByRollName('Skeppare');
-        $allaBatsman = $medlemmar->getMembersByRollName('Båtsman');
-        $allaKockar = $medlemmar->getMembersByRollName('Kock');
+        $allaSkeppare = $this->medlemRepo->getMembersByRollName('Skeppare');
+        $allaBatsman = $this->medlemRepo->getMembersByRollName('Båtsman');
+        $allaKockar = $this->medlemRepo->getMembersByRollName('Kock');
 
         $data = [
             "title" => "Visa segling",
@@ -95,7 +108,7 @@ class SeglingController extends BaseController
     public function save(array $params)
     {
         $id = (int) $params['id'];
-        $segling = new Segling($this->conn, $id);
+        $segling = new Segling($this->conn, $this->logger, $id);
 
         //Sanitize user input
         $sanitizer = new Sanitizer();
@@ -129,14 +142,14 @@ class SeglingController extends BaseController
     public function delete(array $params)
     {
         $id = (int) $params['id'];
-        $segling = new Segling($this->conn, $id);
+        $segling = new Segling($this->conn, $this->logger, $id);
         if ($segling->delete()) {
             Session::setFlashMessage('success', 'Seglingen är nu borttagen!');
-            $this->app->getLogger()->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
+            $this->logger->info('Segling was deleted: ' . $segling->id . '/' . $segling->skeppslag . ' by user: ' .
                 Session::get('user_id'));
         } else {
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
-            $this->app->getLogger()->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag .
+            $this->logger->warning('Failed to delete segling was: ' . $segling->id . '/' . $segling->skeppslag .
                 '  User: ' . Session::get('user_id'));
         }
         $redirectUrl = $this->app->getRouter()->generate('segling-list');
@@ -170,7 +183,7 @@ class SeglingController extends BaseController
             $this->showCreate();
             exit;
         }
-        $segling = new Segling($this->conn);
+        $segling = new Segling($this->conn, $this->logger);
         $segling->start_dat = $cleanValues['startdat'];
         $segling->slut_dat = $cleanValues['slutdat'];
         $segling->skeppslag = $cleanValues['skeppslag'];
@@ -264,15 +277,15 @@ class SeglingController extends BaseController
             $result = $stmt->execute();
 
             if ($result) {
-                $this->app->getLogger()->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId .
+                $this->logger->info("Delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId .
                     "User: " . Session::get('user_id'));
                 echo json_encode(['status' => 'ok']);
             } else {
-                $this->app->getLogger()->warning("Failed to delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId);
+                $this->logger->warning("Failed to delete medlem from segling. Medlem: " . $medlemId . " Segling: " . $seglingId);
                 echo json_encode(['status' => 'fail', 'error' => 'Deletion failed']);
             }
         } else {
-            $this->app->getLogger()->warning("Failed to delete medlem from segling. Invalid data. Medlem: " . $medlemId . " Segling: " . $seglingId);
+            $this->logger->warning("Failed to delete medlem from segling. Invalid data. Medlem: " . $medlemId . " Segling: " . $seglingId);
             echo json_encode(['status' => 'fail', 'error' => 'Invalid data']);
         }
     }
