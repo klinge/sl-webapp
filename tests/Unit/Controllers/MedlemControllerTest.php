@@ -67,7 +67,7 @@ class MedlemControllerTest extends TestCase
 
         // Mock the app's getConfig method with specific return values
         $this->app->method('getConfig')
-            ->willReturnCallback(function($key) use ($mockConfig) {
+            ->willReturnCallback(function ($key) use ($mockConfig) {
                 if ($key === null) {
                     return $mockConfig;
                 }
@@ -200,11 +200,11 @@ class MedlemControllerTest extends TestCase
             'SMARTEREMAIL_USERNAME' => 'testuser',
             'SMARTEREMAIL_PASSWORD' => 'testpass'
         ];
-        
+
         $this->app = $this->createMock(Application::class);
         $this->app->method('getAppDir')->willReturn('/path/to/app');
         $this->app->method('getConfig')
-            ->willReturnCallback(function($key) use ($disabledConfig) {
+            ->willReturnCallback(function ($key) use ($disabledConfig) {
                 if ($key === null) {
                     return $disabledConfig;
                 }

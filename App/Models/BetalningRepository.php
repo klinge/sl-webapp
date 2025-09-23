@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface;
 
 class BetalningRepository extends BaseModel
 {
-
     public function __construct($db, LoggerInterface $logger)
     {
         parent::__construct($db, $logger);

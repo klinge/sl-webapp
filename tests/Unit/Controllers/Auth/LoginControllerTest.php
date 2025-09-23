@@ -87,7 +87,7 @@ class LoginControllerTest extends TestCase
         $viewProp = $controllerReflection->getProperty('view');
         $viewProp->setAccessible(true);
         $viewProp->setValue($this->controller, $this->view);
-        
+
         $medlemRepoProp = $controllerReflection->getProperty('medlemRepo');
         $medlemRepoProp->setAccessible(true);
         $medlemRepoProp->setValue($this->controller, $this->medlemRepo);
