@@ -17,6 +17,7 @@ class BetalningControllerTest extends TestCase
 {
     private $app;
     private $request;
+    private $logger;
     private $controller;
     private $conn;
     private $betalningRepo;
@@ -28,6 +29,7 @@ class BetalningControllerTest extends TestCase
 
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
+        $this->logger = $this->createMock(\Monolog\Logger::class);
         $this->view = $this->createMock(View::class);
         $this->betalningRepo = $this->createMock(BetalningRepository::class);
 
@@ -41,20 +43,14 @@ class BetalningControllerTest extends TestCase
         // Mock the getAppDir method
         $this->app->method('getAppDir')->willReturn('/path/to/app');
 
-        // Mock Database singleton
-        $database = $this->createMock(\App\Utils\Database::class);
-        $database->method('getConnection')
-            ->willReturn($this->conn);
+        $this->controller = new BetalningController(
+            $this->app,
+            $this->request,
+            $this->logger,
+            $this->conn,
+            $this->betalningRepo
+        );
 
-        // Set up Database singleton
-        $reflection = new \ReflectionClass(\App\Utils\Database::class);
-        $instance = $reflection->getProperty('instance');
-        $instance->setAccessible(true);
-        $instance->setValue(null, $database);
-
-        $this->controller = new BetalningController($this->app, $this->request);
-
-        $this->setProtectedProperty($this->controller, 'betalningRepo', $this->betalningRepo);
         $this->setProtectedProperty($this->controller, 'view', $this->view);
     }
 

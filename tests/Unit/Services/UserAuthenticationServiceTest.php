@@ -28,11 +28,15 @@ class UserAuthenticationServiceTest extends TestCase
         $this->router = $this->createMock(AltoRouter::class);
         $this->mailer = $this->createMock(Email::class);
 
-        $this->app->method('getLogger')->willReturn($this->logger);
+        // Create mock config array with required values
+        $mockConfig = [
+            'SITE_ADDRESS' => 'https://some.testsite.com'
+        ];
+
         $this->app->method('getRouter')->willReturn($this->router);
         $this->app->method('getConfig')->willReturn('http://test.com');
 
-        $this->authService = new UserAuthenticationService($this->conn, $this->app, $this->mailer);
+        $this->authService = new UserAuthenticationService($this->conn, $this->logger, $this->router, $this->mailer, $mockConfig);
 
         $this->memberData = [
             'id' => 1,

@@ -39,6 +39,20 @@ class ContainerConfigurator
         // Add other services here as needed
     }
 
+
+    /**
+     * Automatically registers all controller classes from the App/Controllers directory into the DI container.
+     *
+     * This method scans the controllers directory recursively and registers each controller
+     * with its required dependencies. All controllers receive base dependencies (Application,
+     * ServerRequestInterface, Logger) plus any additional type-hinted constructor parameters.
+     *
+     * @param Container $container The DI container instance
+     * @param Application $app The main application instance
+     * @return void
+     *
+     * @throws \ReflectionException When class reflection fails
+     */
     private static function registerControllers(Container $container, Application $app): void
     {
         $controllersPath = $app->getRootDir() . '/App/Controllers';

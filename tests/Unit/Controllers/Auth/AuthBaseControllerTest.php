@@ -7,6 +7,7 @@ use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use andkab\Turnstile\Turnstile;
 use andkab\Turnstile\Response;
+use Monolog\Logger;
 
 class AuthBaseControllerTest extends TestCase
 {
@@ -14,12 +15,14 @@ class AuthBaseControllerTest extends TestCase
     private $request;
     private $controller;
     private $conn;
+    private $logger;
 
     protected function setUp(): void
     {
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->conn = $this->createMock(\PDO::class);
+        $this->logger = $this->createMock(Logger::class);
 
         // Mock Database singleton
         $database = $this->createMock(\App\Utils\Database::class);
@@ -42,7 +45,7 @@ class AuthBaseControllerTest extends TestCase
         $this->request->method('getServerParams')
             ->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
-        $this->controller = new FakeBaseAuthController($this->app, $this->request);
+        $this->controller = new FakeBaseAuthController($this->app, $this->request, $this->logger);
     }
 
     protected function tearDown(): void

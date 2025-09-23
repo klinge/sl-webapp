@@ -5,23 +5,20 @@ namespace Tests\Unit\Models;
 use PHPUnit\Framework\TestCase;
 use App\Models\Medlem;
 use Tests\Unit\Models\MedlemRepositoryFake;
-use App\Application;
 use PDO;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 class MedlemRepositoryTest extends TestCase
 {
     private $conn;
     private $logger;
-    private $app;
     private $medlemRepository;
 
     protected function setUp(): void
     {
         $this->conn = $this->createMock(PDO::class);
-        $this->app  = $this->createMock(Application::class);
-        $this->logger = $this->createMock(Logger::class);
-        $this->medlemRepository = new MedlemRepositoryFake($this->conn, $this->app);
+        $this->logger = $this->createMock(LoggerInterface::class);
+        $this->medlemRepository = new MedlemRepositoryFake($this->conn, $this->logger);
     }
 
     public function testGetAllSuccess(): void

@@ -4,25 +4,24 @@ namespace Tests\Unit\Utils;
 
 use PHPUnit\Framework\TestCase;
 use App\Utils\Database;
-use App\Application;
 use PDO;
-use PDOException;
+use Monolog\Logger;
 
 class DatabaseTest extends TestCase
 {
-    private $mockApp;
+    private $logger;
+    private $dbPath;
 
     protected function setUp(): void
     {
-        $this->mockApp = $this->createMock(Application::class);
+        $this->logger = $this->createMock(Logger::class);
+        $this->dbPath = ':memory:'; // Use SQLite in-memory database for testing
     }
 
     public function testGetInstance()
     {
-        $this->mockApp->method('getConfig')->willReturn(':memory:');
-
-        $instance1 = Database::getInstance($this->mockApp);
-        $instance2 = Database::getInstance($this->mockApp);
+        $instance1 = Database::getInstance($this->dbPath, $this->logger);
+        $instance2 = Database::getInstance($this->dbPath, $this->logger);
 
         $this->assertInstanceOf(Database::class, $instance1);
         $this->assertSame($instance1, $instance2);
@@ -30,9 +29,7 @@ class DatabaseTest extends TestCase
 
     public function testGetConnection()
     {
-        $this->mockApp->method('getConfig')->willReturn(':memory:');
-
-        $database = Database::getInstance($this->mockApp);
+        $database = Database::getInstance($this->dbPath, $this->logger);
         $connection = $database->getConnection();
 
         $this->assertInstanceOf(PDO::class, $connection);
@@ -40,9 +37,7 @@ class DatabaseTest extends TestCase
 
     public function testForeignKeysEnabled()
     {
-        $this->mockApp->method('getConfig')->willReturn(':memory:');
-
-        $database = Database::getInstance($this->mockApp);
+        $database = Database::getInstance($this->dbPath, $this->logger);
         $connection = $database->getConnection();
 
         $result = $connection->query("PRAGMA foreign_keys")->fetchColumn();
@@ -51,9 +46,7 @@ class DatabaseTest extends TestCase
 
     public function testErrorMode()
     {
-        $this->mockApp->method('getConfig')->willReturn(':memory:');
-
-        $database = Database::getInstance($this->mockApp);
+        $database = Database::getInstance($this->dbPath, $this->logger);
         $connection = $database->getConnection();
 
         $this->assertEquals(PDO::ERRMODE_EXCEPTION, $connection->getAttribute(PDO::ATTR_ERRMODE));
@@ -61,9 +54,7 @@ class DatabaseTest extends TestCase
 
     public function testDefaultFetchMode()
     {
-        $this->mockApp->method('getConfig')->willReturn(':memory:');
-
-        $database = Database::getInstance($this->mockApp);
+        $database = Database::getInstance($this->dbPath, $this->logger);
         $connection = $database->getConnection();
 
         $this->assertEquals(PDO::FETCH_ASSOC, $connection->getAttribute(PDO::ATTR_DEFAULT_FETCH_MODE));

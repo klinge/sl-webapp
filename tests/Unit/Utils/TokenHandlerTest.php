@@ -6,19 +6,19 @@ use PHPUnit\Framework\TestCase;
 use App\Utils\TokenHandler;
 use App\Utils\TokenType;
 use PDO;
-use App\Application;
+use Monolog\Logger;
 
 class TokenHandlerTest extends TestCase
 {
     private TokenHandler $tokenHandler;
     private $mockPdo;
-    private $mockApp;
+    private $mockLogger;
 
     protected function setUp(): void
     {
         $this->mockPdo = $this->createMock(PDO::class);
-        $this->mockApp = $this->createMock(Application::class);
-        $this->tokenHandler = new TokenHandler($this->mockPdo, $this->mockApp);
+        $this->mockLogger = $this->createMock(Logger::class);
+        $this->tokenHandler = new TokenHandler($this->mockPdo, $this->mockLogger);
     }
 
     public function testGenerateTokenReturnsNonEmptyString(): void

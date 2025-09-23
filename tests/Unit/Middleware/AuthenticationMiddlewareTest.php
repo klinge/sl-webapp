@@ -29,7 +29,6 @@ class AuthenticationMiddlewareTest extends TestCase
         $this->middleware = new AuthenticationMiddlewareFake($this->request, $this->router, $this->logger);
 
         $this->app->method('getRouter')->willReturn($this->router);
-        $this->app->method('getLogger')->willReturn($this->logger);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
     }
     //all ajax requests require a logged-in user

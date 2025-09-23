@@ -3,15 +3,16 @@
 namespace Tests\Unit\Middleware;
 
 use PHPUnit\Framework\TestCase;
-use App\Middleware\CsrfMiddleware;
 use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
+use Monolog\Logger;
 
 class CsrfMiddlewareTest extends TestCase
 {
     private $app;
     private $request;
+    private $router;
     private $middleware;
     private $logger;
 
@@ -19,15 +20,14 @@ class CsrfMiddlewareTest extends TestCase
     {
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->logger = $this->createMock(\Monolog\Logger::class);
+        $this->router = $this->createMock(\AltoRouter::class);
+        $this->logger = $this->createMock(Logger::class);
 
         // Create the partial mock, passing the required arguments to the constructor
         $this->middleware = $this->getMockBuilder(CsrfMiddlewareFake::class)
-            ->setConstructorArgs([$this->app, $this->request])
+            ->setConstructorArgs([$this->request, $this->router, $this->logger])
             ->onlyMethods(['jsonResponse', 'isAjaxRequest'])
             ->getMock();
-
-        $this->app->method('getLogger')->willReturn($this->logger);
         // Clear session before each test
         $_SESSION = [];
     }
