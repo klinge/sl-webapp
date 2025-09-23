@@ -8,6 +8,8 @@ use App\Application;
 use App\Traits\JsonResponder;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Laminas\Diactoros\Response;
 use Monolog\Logger;
 use League\Container\Container;
 
@@ -55,5 +57,11 @@ class BaseController
     protected function createUrl(string $routeName, array $params = []): string
     {
         return $this->app->getRouter()->generate($routeName, $params);
+    }
+
+    protected function notFoundResponse(): ResponseInterface
+    {
+        $response = new Response();
+        return $response->withStatus(404);
     }
 }

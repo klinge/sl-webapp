@@ -9,39 +9,42 @@ use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
-use PDO;
 use Monolog\Logger;
 
 class RollController extends BaseController
 {
     private View $view;
-    private PDO $conn;
+    private Roll $roll;
+    private MedlemRepository $medlemRepo;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
-    {
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        View $view,
+        Roll $roll,
+        MedlemRepository $medlemRepo
+    ) {
         parent::__construct($app, $request, $logger);
-        $this->conn = $conn;
-        $this->view = new View($this->app);
+        $this->view = $view;
+        $this->roll = $roll;
+        $this->medlemRepo = $medlemRepo;
     }
 
-    public function list()
+    public function list(): void
     {
-        $roll = new Roll($this->conn, $this->logger);
-        $roller = $roll->getAll();
+        $roller = $this->roll->getAll();
         $data = [
             "title" => "Visa roller",
             "items" => $roller
         ];
         $this->view->render('viewRoller', $data);
-        return;
     }
 
-    public function membersInRole(array $params)
+    public function membersInRole(array $params): void
     {
         $rollId = (int) $params['id'];
-        $medlemRepo = new MedlemRepository($this->conn, $this->logger);
-        $result = $medlemRepo->getMembersByRollId($rollId);
+        $result = $this->medlemRepo->getMembersByRollId($rollId);
         $this->jsonResponse($result);
-        exit;
     }
 }

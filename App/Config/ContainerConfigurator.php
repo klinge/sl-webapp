@@ -13,6 +13,7 @@ use App\ServiceProviders\LoggerServiceProvider;
 use App\ServiceProviders\AuthServiceProvider;
 use App\ServiceProviders\ModelServiceProvider;
 use App\Utils\Session;
+use App\Utils\View;
 use Monolog\Logger;
 
 class ContainerConfigurator
@@ -25,6 +26,8 @@ class ContainerConfigurator
         $container->add(AltoRouter::class, $app->getRouter());
         $container->add('config', $app->getConfig(null));
         $container->add(Session::class);
+        $container->add(\App\Utils\View::class)
+            ->addArgument(Application::class);
 
         // Add service providers
         $container->addServiceProvider(new DatabaseServiceProvider());
