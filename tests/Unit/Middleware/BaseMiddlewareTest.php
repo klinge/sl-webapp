@@ -4,20 +4,23 @@ namespace Tests\Unit\Middleware;
 
 use PHPUnit\Framework\TestCase;
 use App\Middleware\BaseMiddleware;
-use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
+use AltoRouter;
+use Monolog\Logger;
 
 class BaseMiddlewareTest extends TestCase
 {
-    private $app;
     private $request;
+    private $router;
+    private $logger;
     private $middleware;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->middleware = new BaseMiddleware($this->app, $this->request);
+        $this->router = $this->createMock(AltoRouter::class);
+        $this->logger = $this->createMock(Logger::class);
+        $this->middleware = new BaseMiddleware($this->request, $this->router, $this->logger);
     }
 
     public function testIsAjaxRequestReturnsTrueForXmlHttpRequest()

@@ -62,8 +62,6 @@ class LoginControllerTest extends TestCase
 
         // Mock the logger
         $this->logger = $this->createMock(Logger::class);
-        $this->app->method('getLogger')
-            ->willReturn($this->logger);
 
         // Mock the config and app directory methods to return test values
         $this->app->method('getConfig')
@@ -78,27 +76,23 @@ class LoginControllerTest extends TestCase
             ->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
 
-        // Create partial mock of controller
+        // Create partial mock of controller that also mocks the constructor dependencies
         $this->controller = $this->getMockBuilder(LoginController::class)
-            ->setConstructorArgs([$this->app, $this->request])
+            ->setConstructorArgs([$this->app, $this->request, $this->logger, $this->conn, $this->passwordService])
             ->onlyMethods(['validateRecaptcha'])
             ->getMock();
 
-        // Set properties on LoginController
+        // Override the view and medlemRepo properties with our mocks
         $controllerReflection = new \ReflectionClass(LoginController::class);
-        foreach (['view', 'medlemRepo', 'passwordService'] as $property) {
-            $prop = $controllerReflection->getProperty($property);
-            $prop->setAccessible(true);
-            $prop->setValue($this->controller, $this->{$property});
-        }
+        $viewProp = $controllerReflection->getProperty('view');
+        $viewProp->setAccessible(true);
+        $viewProp->setValue($this->controller, $this->view);
 
-        // Set properties on AuthBaseController
-        $parentReflection = new \ReflectionClass(get_parent_class($this->controller));
-        foreach (['conn', 'app'] as $property) {
-            $prop = $parentReflection->getProperty($property);
-            $prop->setAccessible(true);
-            $prop->setValue($this->controller, $this->{$property});
-        }
+        $medlemRepoProp = $controllerReflection->getProperty('medlemRepo');
+        $medlemRepoProp->setAccessible(true);
+        $medlemRepoProp->setValue($this->controller, $this->medlemRepo);
+
+
 
         $this->medlemData = [
             'id' => 1,

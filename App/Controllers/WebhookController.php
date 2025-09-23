@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 class WebhookController extends BaseController
 {
@@ -14,24 +15,24 @@ class WebhookController extends BaseController
 
     private const REPOSITORY_ID = 781366756;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
         $this->githubSecret = $this->app->getConfig('GITHUB_WEBHOOK_SECRET');
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
     }
 
     public function handle(): void
     {
-        $this->app->getLogger()->info(
+        $this->logger->info(
             'Starting to process webhook call from: ' . $this->remoteIp,
             ['class' => __CLASS__, 'function' => __FUNCTION__]
         );
-        $this->app->getLogger()->debug(
+        $this->logger->debug(
             'Headers: ' . json_encode($this->request->getHeaders()),
             ['class' => __CLASS__, 'function' => __FUNCTION__]
         );
-        $this->app->getLogger()->debug(
+        $this->logger->debug(
             'Payload: ' . json_encode($this->request->getParsedBody()),
             ['class' => __CLASS__, 'function' => __FUNCTION__]
         );
@@ -46,16 +47,16 @@ class WebhookController extends BaseController
         // Check if it's a release branch
         if (!preg_match('/^release\/v\d+(\.\d+)?$/', $branch)) {
             $this->jsonResponse(['status' => 'ignored', 'message' => 'Not a push to the release branch']);
-            $this->app->getLogger()->debug('Not a push to the release branch', ['class' => __CLASS__, 'function' => __FUNCTION__]);
+            $this->logger->debug('Not a push to the release branch', ['class' => __CLASS__, 'function' => __FUNCTION__]);
             exit;
         } else {
             $this->jsonResponse(['status' => 'success', 'message' => 'Successfully received a push on the release branch']);
-            $this->app->getLogger()->info('Received a push on the release branch. Continuing to deploy.. ');
+            $this->logger->info('Received a push on the release branch. Continuing to deploy.. ');
         }
         $repoUrl = $payload['repository']['clone_url'];
         $result = $this->handleRepositoryOperations($branch, $repoUrl);
         if ($result['status'] !== 'success') {
-            $this->app->getLogger()->error(
+            $this->logger->error(
                 "Error occurred while handling repository operations. Message: {$result['message']}",
                 ['class' => __CLASS__, 'function' => __FUNCTION__]
             );
@@ -83,7 +84,7 @@ class WebhookController extends BaseController
         // Verify that it's a github webhook request
         if (!$this->request->hasHeader('X-GitHub-Event')) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing event header'], 400);
-            $this->app->getLogger()->warning("Missing X-GitHub-Event header. Headers was: " . json_encode($this->request->getHeaders()));
+            $this->logger->warning("Missing X-GitHub-Event header. Headers was: " . json_encode($this->request->getHeaders()));
             return $payload;
         } else {
             $event = $this->request->getHeader('X-GitHub-Event')[0];
@@ -91,13 +92,13 @@ class WebhookController extends BaseController
         // Verify that it's ping or a push
         if (!empty($event) && $event !== 'push' && $event !== 'ping') {
             $this->jsonResponse(['status' => 'error', 'message' => 'Event not supported'], 400);
-            $this->app->getLogger()->warning("Github event was not push or ping");
+            $this->logger->warning("Github event was not push or ping");
             return $payload;
         }
         // Verify that the signature header is there
         if (!$this->request->hasHeader('X-Hub-Signature-256')) {
             $this->jsonResponse(['status' => 'error', 'message' => 'Missing signature header'], 400);
-            $this->app->getLogger()->warning("Github signature header missing");
+            $this->logger->warning("Github signature header missing");
             return $payload;
         }
         // Verify signature header format
@@ -106,7 +107,7 @@ class WebhookController extends BaseController
 
         if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
             $this->jsonResponse(['status' => 'error', 'message' => 'Bad header format'], 400);
-            $this->app->getLogger()->warning("Bad format for the github signature header");
+            $this->logger->warning("Bad format for the github signature header");
             return $payload;
         }
         //All is well so far - get the request body and validate the signature
@@ -116,7 +117,7 @@ class WebhookController extends BaseController
 
         if ($signatureResult !== true) {
             $this->jsonResponse(['status' => 'error', 'message' => $signatureResult], 401);
-            $this->app->getLogger()->warning("Github signature did not verify");
+            $this->logger->warning("Github signature did not verify");
             return [];
         }
 
@@ -129,14 +130,14 @@ class WebhookController extends BaseController
                 {$payload['repository']['full_name']}"],
                 200
             );
-            $this->app->getLogger()->warning("Repository Id in the request was not correct");
+            $this->logger->warning("Repository Id in the request was not correct");
             return [];
         }
 
         //Handle the ping event here, just send a pong back
         if ($event === 'ping') {
             $this->jsonResponse(['status' => 'ok', 'message' => 'Pong'], 200);
-            $this->app->getLogger()->debug("Got a ping event, sent a pong back");
+            $this->logger->debug("Got a ping event, sent a pong back");
             return [];
         }
 
@@ -165,13 +166,13 @@ class WebhookController extends BaseController
     private function handleRepositoryOperations(string $branch, string $repoUrl): array
     {
         $cloneDir = $this->app->getConfig('REPO_BASE_DIRECTORY') . '/' . basename($repoUrl, '.git');
-        $this->app->getLogger()->debug("Fetching github repo to directory: " . $cloneDir);
+        $this->logger->debug("Fetching github repo to directory: " . $cloneDir);
 
         if (!is_dir($cloneDir)) {
             // Clone the repository if it doesn't exist
             exec("git clone $repoUrl $cloneDir 2>&1", $output, $returnVar);
             if ($returnVar !== 0) {
-                $this->app->getLogger()->error("Failed to clone repository: " . implode(",", $output));
+                $this->logger->error("Failed to clone repository: " . implode(",", $output));
                 return ['status' => 'error', 'message' => 'Failed to clone repository'];
             }
         } else {
@@ -179,7 +180,7 @@ class WebhookController extends BaseController
             chdir($cloneDir);
             exec("git fetch --all 2>&1", $output, $returnVar);
             if ($returnVar !== 0) {
-                $this->app->getLogger()->error("Failed to fetch latest changes: " . implode(",", $output));
+                $this->logger->error("Failed to fetch latest changes: " . implode(",", $output));
                 return ['status' => 'error', 'message' => 'Failed to fetch latest changes'];
             }
         }
@@ -189,18 +190,18 @@ class WebhookController extends BaseController
         // Checkout the branch that was pushed
         exec("git checkout $branch 2>&1", $output, $returnVar);
         if ($returnVar !== 0) {
-            $this->app->getLogger()->error("Failed to checkout branch $branch: " . implode(",", $output));
+            $this->logger->error("Failed to checkout branch $branch: " . implode(",", $output));
             return ['status' => 'error', 'message' => 'Failed to checkout branch'];
         }
         // Pull the latest changes
-        $this->app->getLogger()->debug("Checking out and pulling changes for branch: " . $branch);
+        $this->logger->debug("Checking out and pulling changes for branch: " . $branch);
         exec("git pull origin $branch 2>&1", $output, $returnVar);
         if ($returnVar !== 0) {
-            $this->app->getLogger()->error("Failed to pull latest changes for branch $branch: " . implode("\n", $output));
+            $this->logger->error("Failed to pull latest changes for branch $branch: " . implode("\n", $output));
             return ['status' => 'error', 'message' => 'Failed to pull latest changes'];
         }
 
-        $this->app->getLogger()->info("Successfully updated and checked out branch $branch");
+        $this->logger->info("Successfully updated and checked out branch $branch");
         return ['status' => 'success', 'message' => 'Repository operations completed successfully'];
     }
 
@@ -211,11 +212,11 @@ class WebhookController extends BaseController
         $result = file_put_contents($triggerFile, '');
 
         if ($result === false) {
-            $this->app->getLogger()->error('Failed to create deployment trigger file');
+            $this->logger->error('Failed to create deployment trigger file');
             return false;
         }
 
-        $this->app->getLogger()->info('Deployment trigger file created successfully, deployment job will be run by cron');
+        $this->logger->info('Deployment trigger file created successfully, deployment job will be run by cron');
         return true;
     }
 }

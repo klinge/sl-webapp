@@ -7,16 +7,14 @@ namespace App\Models;
 use PDO;
 use PDOException;
 use Exception;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use App\Utils\Session;
 use InvalidArgumentException;
 
-class Medlem
+class Medlem extends BaseModel
 {
     // database connection and table name
-    private PDO $conn;
     private string $table_name = "Medlem";
-    private Logger $logger;
 
     // Class properties
     public int $id;
@@ -45,10 +43,9 @@ class Medlem
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, Logger $logger, int $id = null)
+    public function __construct(PDO $db, LoggerInterface $logger, int $id = null)
     {
-        $this->conn = $db;
-        $this->logger = $logger;
+        parent::__construct($db, $logger);
 
         if (isset($id)) {
             $result = $this->getDataFromDb($id);

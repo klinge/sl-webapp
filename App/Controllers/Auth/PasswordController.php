@@ -8,9 +8,9 @@ use App\Application;
 use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\View;
-use App\Utils\Email;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 class PasswordController extends AuthBaseController
 {
@@ -21,10 +21,14 @@ class PasswordController extends AuthBaseController
     private UserAuthenticationService $authService;
     private View $view;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
-    {
-        parent::__construct($app, $request);
-        $this->authService = new UserAuthenticationService($this->conn, $app, new Email($app));
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        UserAuthenticationService $userAuthSvc
+    ) {
+        parent::__construct($app, $request, $logger);
+        $this->authService = $userAuthSvc;
         $this->view = new View($this->app);
     }
 

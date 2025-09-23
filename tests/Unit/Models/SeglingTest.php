@@ -10,11 +10,13 @@ use PDOStatement;
 class SeglingTest extends TestCase
 {
     private $mockPDO;
+    private $mockLogger;
     private $mockStatement;
 
     protected function setUp(): void
     {
         $this->mockPDO = $this->createMock(PDO::class);
+        $this->mockLogger = $this->createMock(\Psr\Log\LoggerInterface::class);
         $this->mockStatement = $this->createMock(PDOStatement::class);
     }
 
@@ -31,7 +33,7 @@ class SeglingTest extends TestCase
 
         $this->mockPDO->method('prepare')->willReturn($this->mockStatement);
 
-        $segling = new Segling($this->mockPDO, 1);
+        $segling = new Segling($this->mockPDO, $this->mockLogger, 1);
 
         $this->assertEquals(1, $segling->id);
         $this->assertEquals('2023-01-01', $segling->start_dat);
@@ -48,7 +50,7 @@ class SeglingTest extends TestCase
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage("Segling med id: 999 hittades inte");
 
-        $segling = new Segling($this->mockPDO, 999);
+        $segling = new Segling($this->mockPDO, $this->mockLogger, 999);
         $this->assertNull($segling->id);
     }
 
@@ -57,7 +59,7 @@ class SeglingTest extends TestCase
         $this->mockStatement->method('rowCount')->willReturn(1);
         $this->mockPDO->method('prepare')->willReturn($this->mockStatement);
 
-        $segling = new Segling($this->mockPDO);
+        $segling = new Segling($this->mockPDO, $this->mockLogger);
         $segling->id = 1;
         $segling->start_dat = '2023-01-01';
         $segling->slut_dat = '2023-01-07';
@@ -74,7 +76,7 @@ class SeglingTest extends TestCase
         $this->mockStatement->method('rowCount')->willReturn(1);
         $this->mockPDO->method('prepare')->willReturn($this->mockStatement);
 
-        $segling = new Segling($this->mockPDO);
+        $segling = new Segling($this->mockPDO, $this->mockLogger);
         $segling->id = 1;
 
         $result = $segling->delete();
@@ -88,7 +90,7 @@ class SeglingTest extends TestCase
         $this->mockPDO->method('prepare')->willReturn($this->mockStatement);
         $this->mockPDO->method('lastInsertId')->willReturn('2');
 
-        $segling = new Segling($this->mockPDO);
+        $segling = new Segling($this->mockPDO, $this->mockLogger);
         $segling->start_dat = '2023-01-01';
         $segling->slut_dat = '2023-01-07';
         $segling->skeppslag = 'New Skeppslag';
@@ -110,7 +112,7 @@ class SeglingTest extends TestCase
         $this->mockStatement->method('fetchAll')->willReturn($mockResult);
         $this->mockPDO->method('prepare')->willReturn($this->mockStatement);
 
-        $segling = new Segling($this->mockPDO);
+        $segling = new Segling($this->mockPDO, $this->mockLogger);
         $segling->id = 1;
 
         $result = $segling->getDeltagare();
@@ -120,7 +122,7 @@ class SeglingTest extends TestCase
 
     public function testGetDeltagareByRoleNameMethod()
     {
-        $segling = new Segling($this->mockPDO);
+        $segling = new Segling($this->mockPDO, $this->mockLogger);
         $segling->deltagare = [
             ['medlem_id' => 1, 'fornamn' => 'John', 'efternamn' => 'Doe', 'roll_id' => 1, 'roll_namn' => 'Captain'],
             ['medlem_id' => 2, 'fornamn' => 'Jane', 'efternamn' => 'Smith', 'roll_id' => 2, 'roll_namn' => 'Crew'],

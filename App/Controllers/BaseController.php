@@ -7,27 +7,30 @@ namespace App\Controllers;
 use App\Application;
 use App\Traits\JsonResponder;
 use App\Utils\Session;
-use App\Utils\Database;
-use PDO;
-use PDOException;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Laminas\Diactoros\Response;
+use Monolog\Logger;
+use League\Container\Container;
 
 class BaseController
 {
     //Add the JsonResponder trait
     use JsonResponder;
 
-    protected PDO $conn;
     protected ServerRequestInterface $request;
     protected array $sessionData;
     protected Application $app;
+    protected Logger $logger;
+    protected Container $container;
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
     {
         $this->app = $app;
         $this->request = $request;
+        $this->logger = $logger;
+        $this->container = $app->getContainer();
         $this->initializeSessionData();
-        $this->conn = $this->getDatabaseConn();
     }
 
     protected function initializeSessionData(): void
@@ -38,18 +41,6 @@ class BaseController
             'fornamn' => Session::get('fornamn'),
             'isAdmin' => Session::isAdmin()
         ];
-    }
-
-    private function getDatabaseConn(): PDO|false
-    {
-        try {
-            return Database::getInstance($this->app)->getConnection();
-        } catch (PDOException $e) {
-            $this->app->getLogger()->critical('Failed to connect to database: ' . $e->getMessage(), ['class' => __CLASS__, 'method' => __METHOD__]);
-            Session::setFlashMessage('error', 'Tekniskt fel. Kunde inte öppna databas. Fel: ' . $e->getMessage());
-            header("Location: " . $this->createUrl('home'));
-            return false;
-        }
     }
 
     protected function setCsrfToken(): void
@@ -66,5 +57,11 @@ class BaseController
     protected function createUrl(string $routeName, array $params = []): string
     {
         return $this->app->getRouter()->generate($routeName, $params);
+    }
+
+    protected function notFoundResponse(): ResponseInterface
+    {
+        $response = new Response();
+        return $response->withStatus(404);
     }
 }

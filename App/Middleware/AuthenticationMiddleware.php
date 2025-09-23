@@ -11,7 +11,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
 {
     public function handle(): void
     {
-        $match = $this->app->getRouter()->match();
+        $match = $this->router->match();
 
         // Start by handling api/ajax requests, user does always have to be logged in
         if ($this->isAjaxRequest()) {
@@ -19,7 +19,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
                 $this->jsonResponse(['success' => false, 'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'], 401);
 
                 //Log the exception
-                $this->app->getLogger()->warning('Ajax request, user not logged in. URI: ' .
+                $this->logger->warning('Ajax request, user not logged in. URI: ' .
                     $this->request->getUri()->__toString() .
                     ', Remote IP: ' .
                     $this->request->getServerParams()['REMOTE_ADDR']);
@@ -28,7 +28,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
             }
         } elseif ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
             //Log the exception
-            $this->app->getLogger()->info('Request to protected page, user not logged in. URI: ' .
+            $this->logger->info('Request to protected page, user not logged in. URI: ' .
                 $this->request->getUri()->__toString() .
                 ', Remote IP: ' .
                 $this->request->getServerParams()['REMOTE_ADDR']);
@@ -41,7 +41,7 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
 
             //Redirect user to login page with a 401 Unauthorized status code
             http_response_code(401);
-            header('Location: ' . $this->app->getRouter()->generate('show-login'));
+            header('Location: ' . $this->router->generate('show-login'));
             $this->doExit();
         }
     }

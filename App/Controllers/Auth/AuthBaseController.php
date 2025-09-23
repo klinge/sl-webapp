@@ -8,19 +8,22 @@ use App\Controllers\BaseController;
 use App\Application;
 use andkab\Turnstile\Turnstile;
 use Psr\Http\Message\ServerRequestInterface;
+use Monolog\Logger;
 
 abstract class AuthBaseController extends BaseController
 {
     protected string $turnstileSecret;
     protected string $remoteIp;
     protected Turnstile $turnstile;
+    protected Logger $logger;
 
     //Messages
     protected const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
 
-    public function __construct(Application $app, ServerRequestInterface $request)
+    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
     {
-        parent::__construct($app, $request);
+        parent::__construct($app, $request, $logger);
+        $this->logger = $logger;
         $this->turnstileSecret = $this->app->getConfig('TURNSTILE_SECRET_KEY');
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
         $this->turnstile = new Turnstile($this->turnstileSecret);

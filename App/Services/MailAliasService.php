@@ -9,27 +9,27 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 use Psr\Http\Message\ResponseInterface;
+use Monolog\Logger;
 
 class MailAliasService
 {
     private Client $client;
     private LoggerInterface $logger;
-    private Application $app;
+    private array $config;
     private string $baseUrl;
     private string $username;
     private string $password;
     private ?string $accessToken = null;
 
-    public function __construct(Application $app)
+    public function __construct(Logger $logger, array $config)
     {
         $this->client = new Client();
-        $this->app = $app;
+        $this->config = $config;
+        $this->logger = $logger;
 
-        $this->logger = $this->app->getLogger();
-
-        $this->baseUrl = $this->app->getConfig('SMARTEREMAIL_BASE_URL');
-        $this->username = $this->app->getConfig('SMARTEREMAIL_USERNAME');
-        $this->password = $this->app->getConfig('SMARTEREMAIL_PASSWORD');
+        $this->baseUrl = $this->config['SMARTEREMAIL_BASE_URL'];
+        $this->username = $this->config['SMARTEREMAIL_USERNAME'];
+        $this->password = $this->config['SMARTEREMAIL_PASSWORD'];
     }
 
     private function authenticate(): void

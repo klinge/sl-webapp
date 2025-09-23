@@ -8,19 +8,23 @@ use PHPUnit\Framework\TestCase;
 use App\Controllers\MedlemController;
 use App\Application;
 use App\Models\MedlemRepository;
+use App\Models\BetalningRepository;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
 use PDOStatement;
 use AltoRouter;
+use Monolog\Logger;
 
 class MedlemControllerTest extends TestCase
 {
     private $app;
     private $request;
+    private $logger;
     private $controller;
     private $conn;
     private $medlemRepo;
+    private $betalningRepo;
     private $router;
     private $view;
 
@@ -29,9 +33,11 @@ class MedlemControllerTest extends TestCase
 
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
+        $this->logger = $this->createMock(Logger::class);
         $this->router = $this->createMock(AltoRouter::class);
         $this->conn = $this->createMock(PDO::class);
         $this->view = $this->createMock(View::class);
+        $this->betalningRepo = $this->createMock(BetalningRepository::class);
         $this->medlemRepo = $this->createMock(MedlemRepository::class);
 
         // Mock PDO prepare and statement
@@ -44,45 +50,41 @@ class MedlemControllerTest extends TestCase
 
         $this->conn->method('prepare')->willReturn($pdoStatement);
 
+        // Create and inject mock MailAliasService
+        $mailAliasService = $this->createMock(\App\Services\MailAliasService::class);
+
         // Mock the getAppDir method
         $this->app->method('getAppDir')->willReturn('/path/to/app');
 
-        // Mock the getAppDir method to return a string path
-        $this->app->method('getAppDir')->willReturn('/path/to/app');
+        // Create mock config array
+        $mockConfig = [
+            'SMARTEREMAIL_ENABLED' => '1',
+            'SMARTEREMAIL_ALIASNAME' => 'a_test_alias',
+            'SMARTEREMAIL_BASE_URL' => 'https://test.example.com',
+            'SMARTEREMAIL_USERNAME' => 'testuser',
+            'SMARTEREMAIL_PASSWORD' => 'testpass'
+        ];
 
-        // Mock the config values needed by MailAliasService
+        // Mock the app's getConfig method with specific return values
         $this->app->method('getConfig')
-            ->willReturnMap([
-                ['SMARTEREMAIL_ENABLED', '1'],
-                ['SMARTEREMAIL_ALIASNAME', 'a_test_alias'],
-                ['SMARTEREMAIL_BASE_URL', 'https://test.example.com'],
-                ['SMARTEREMAIL_USERNAME', 'testuser'],
-                ['SMARTEREMAIL_PASSWORD', 'testpass']
-            ]);
+            ->willReturnCallback(function ($key) use ($mockConfig) {
+                if ($key === null) {
+                    return $mockConfig;
+                }
+                return $mockConfig[$key] ?? null;
+            });
 
-        // Mock Database singleton
-        $database = $this->createMock(\App\Utils\Database::class);
-        $database->method('getConnection')
-            ->willReturn($this->conn);
 
-        // Set up Database singleton
-        $reflection = new \ReflectionClass(\App\Utils\Database::class);
-        $instance = $reflection->getProperty('instance');
-        $instance->setAccessible(true);
-        $instance->setValue(null, $database);
-
-        $this->controller = new MedlemController($this->app, $this->request);
-
+        $this->controller = new MedlemController(
+            $this->app,
+            $this->request,
+            $this->logger,
+            $this->conn,
+            $this->betalningRepo
+        );
+        // Inject dependencies using reflection
         $this->setProtectedProperty($this->controller, 'medlemRepo', $this->medlemRepo);
-    }
-
-    protected function tearDown(): void
-    {
-        // Reset Database singleton
-        $reflection = new \ReflectionClass(\App\Utils\Database::class);
-        $instance = $reflection->getProperty('instance');
-        $instance->setAccessible(true);
-        $instance->setValue(null, null);
+        $this->setProtectedProperty($this->controller, 'mailAliasService', $mailAliasService);
     }
 
     private function setupBasicMemberData(): array
@@ -177,7 +179,10 @@ class MedlemControllerTest extends TestCase
 
         $mailAliasService->expects($this->once())
             ->method('updateAlias')
-            ->with('a_test_alias', $this->isType('array'));
+            ->with(
+                $this->equalTo('a_test_alias'),
+                $this->isType('array')
+            );
 
         // Inject services using reflection
         $this->setProtectedProperty($this->controller, 'mailAliasService', $mailAliasService);
@@ -187,14 +192,33 @@ class MedlemControllerTest extends TestCase
 
     public function testUpdateEmailAliasWhenDisabled(): void
     {
-        // Override all config values including the base setup
+        // Override the config to disable email aliases
+        $disabledConfig = [
+            'SMARTEREMAIL_ENABLED' => '0',
+            'SMARTEREMAIL_ALIASNAME' => 'a_test_alias',
+            'SMARTEREMAIL_BASE_URL' => 'https://test.example.com',
+            'SMARTEREMAIL_USERNAME' => 'testuser',
+            'SMARTEREMAIL_PASSWORD' => 'testpass'
+        ];
+
         $this->app = $this->createMock(Application::class);
         $this->app->method('getAppDir')->willReturn('/path/to/app');
         $this->app->method('getConfig')
-            ->willReturn('0');  // Return empty string for all config calls
+            ->willReturnCallback(function ($key) use ($disabledConfig) {
+                if ($key === null) {
+                    return $disabledConfig;
+                }
+                return $disabledConfig[$key] ?? null;
+            });
 
         // Create a fresh controller with our new app mock
-        $this->controller = new MedlemController($this->app, $this->request);
+        $this->controller = new MedlemController(
+            $this->app,
+            $this->request,
+            $this->logger,
+            $this->conn,
+            $this->betalningRepo
+        );
 
         // Mock the mail alias service
         $mailAliasService = $this->createMock(\App\Services\MailAliasService::class);

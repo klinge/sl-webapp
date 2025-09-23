@@ -6,20 +6,15 @@ namespace App\Models;
 
 use PDO;
 use Exception;
-use App\Application;
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
-class MedlemRepository
+class MedlemRepository extends BaseModel
 {
-    // database connection and table name
-    private $conn;
-    private $app;
     public $medlemmar;
 
-    public function __construct(PDO $db, Application $app)
+    public function __construct(PDO $db, LoggerInterface $logger)
     {
-        $this->conn = $db;
-        $this->app = $app;
+        parent::__construct($db, $logger);
     }
 
 
@@ -42,7 +37,7 @@ class MedlemRepository
 
         foreach ($members as $member) {
             try {
-                $medlem = $this->createMedlem($this->conn, $this->app->getLogger(), $member['id']);
+                $medlem = $this->createMedlem($member['id']);
                 $medlemmar[] = $medlem;
             } catch (Exception $e) {
                 //Do nothing right now..
@@ -114,8 +109,8 @@ class MedlemRepository
         return array_filter($result, fn($item) => !empty($item['email']));
     }
 
-    protected function createMedlem(PDO $conn, Logger $logger, int $id): Medlem
+    protected function createMedlem(int $id): Medlem
     {
-        return new Medlem($conn, $logger, $id);
+        return new Medlem($this->conn, $this->logger, $id);
     }
 }

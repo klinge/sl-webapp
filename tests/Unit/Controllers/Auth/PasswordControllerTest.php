@@ -52,27 +52,20 @@ class PasswordControllerTest extends TestCase
         $this->request->method('getServerParams')
             ->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
+        // Mock the logger
+        $logger = $this->createMock(\Monolog\Logger::class);
+
         // Create partial mock of controller, mocking recaptcha validation
         $this->controller = $this->getMockBuilder(PasswordController::class)
-            ->setConstructorArgs([$this->app, $this->request])
+            ->setConstructorArgs([$this->app, $this->request, $logger, $this->authService])
             ->onlyMethods(['validateRecaptcha', 'redirectWithError', 'redirectWithSuccess'])
             ->getMock();
 
-        // Set properties on PasswordController
+        // Override the view property with our mock
         $controllerReflection = new \ReflectionClass(PasswordController::class);
-        foreach (['view', 'authService'] as $property) {
-            $prop = $controllerReflection->getProperty($property);
-            $prop->setAccessible(true);
-            $prop->setValue($this->controller, $this->{$property});
-        }
-
-        // Set properties on AuthBaseController
-        $parentReflection = new \ReflectionClass(get_parent_class($this->controller));
-        foreach (['conn', 'app'] as $property) {
-            $prop = $parentReflection->getProperty($property);
-            $prop->setAccessible(true);
-            $prop->setValue($this->controller, $this->{$property});
-        }
+        $viewProp = $controllerReflection->getProperty('view');
+        $viewProp->setAccessible(true);
+        $viewProp->setValue($this->controller, $this->view);
     }
 
     protected function tearDown(): void

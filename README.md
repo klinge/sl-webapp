@@ -3,6 +3,17 @@
 # SL Member System
 Members and activities database for a sailing club, with an accompanying web-gui.  
 
+## Basic application structure
+* namespaces are used in all new code
+* source code is in the App folder
+* the application architecture divides logic into Controllers, Models and Services
+* web requests are handled via routing (using AltoRoute)
+* PSR-7 requests and responses are implemented using Laminas Diactoros
+* the application uses middleware for authentication and error handling
+* the application uses PHP League Container as its DI Container
+* templates for views are in /public/views
+* type hinting is done everywhere and all new files should have strict_types=1
+
 ## DOING:
 Moved to Github issues
 

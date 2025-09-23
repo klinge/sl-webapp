@@ -5,15 +5,13 @@ declare(strict_types=1);
 namespace App\Models;
 
 use PDO;
+use Psr\Log\LoggerInterface;
 
-class BetalningRepository
+class BetalningRepository extends BaseModel
 {
-    // database connection and table name
-    private $conn;
-
-    public function __construct($db)
+    public function __construct($db, LoggerInterface $logger)
     {
-        $this->conn = $db;
+        parent::__construct($db, $logger);
     }
 
     public function getAll(): array
@@ -59,7 +57,7 @@ class BetalningRepository
         $payments =  $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($payments as $payment) {
-            $betalning = new Betalning($this->conn, $payment);
+            $betalning = new Betalning($this->conn, $this->logger, $payment);
             $betalningar[] = $betalning;
         }
         return $betalningar;

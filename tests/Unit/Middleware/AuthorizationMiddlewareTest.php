@@ -15,16 +15,18 @@ class AuthorizationMiddlewareTest extends TestCase
     private $app;
     private $request;
     private $router;
+    private $logger;
 
     protected function setUp(): void
     {
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->router = $this->createMock(\AltoRouter::class);
+        $this->logger = $this->createMock(\Monolog\Logger::class);
         // Make the mocked Application return the mocked router
         $this->app->method('getRouter')->willReturn($this->router);
 
-        $this->middleware = new AuthorizationMiddlewareFake($this->app, $this->request);
+        $this->middleware = new AuthorizationMiddlewareFake($this->request, $this->router, $this->logger);
 
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 

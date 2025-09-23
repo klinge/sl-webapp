@@ -10,7 +10,7 @@ use App\Application;
 use App\Utils\View;
 use App\Models\MedlemRepository;
 use Psr\Http\Message\ServerRequestInterface;
-use PDO;
+use Monolog\Logger;
 use PDOStatement;
 
 class ReportControllerTest extends TestCase
@@ -19,12 +19,14 @@ class ReportControllerTest extends TestCase
     private $request;
     private $controller;
     private $conn;
+    private $logger;
 
     protected function setUp(): void
     {
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->conn = $this->createMock(\PDO::class);
+        $this->logger = $this->createMock(Logger::class);
 
         //Mock the getAppDir method to return a string path
         $this->app->method('getAppDir')->willReturn('/path/to/app');
@@ -40,7 +42,7 @@ class ReportControllerTest extends TestCase
         $instance->setAccessible(true);
         $instance->setValue(null, $database);
 
-        $this->controller = new ReportController($this->app, $this->request);
+        $this->controller = new ReportController($this->app, $this->request, $this->logger, $this->conn);
     }
 
     protected function tearDown(): void

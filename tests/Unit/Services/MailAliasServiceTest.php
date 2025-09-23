@@ -11,8 +11,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Exception\RequestException;
 use Monolog\Logger;
 
 class MailAliasServiceTest extends TestCase
@@ -27,15 +25,23 @@ class MailAliasServiceTest extends TestCase
         $this->app = $this->createMock(Application::class);
         $this->logger = $this->createMock(Logger::class);
 
+        // Create mock config array with required values
+        $mockConfig = [
+            'SMARTEREMAIL_ENABLED' => "1",
+            'SMARTEREMAIL_BASE_URL' => "https://mail.testdomain.se/",
+            'SMARTEREMAIL_ALIASNAME' => "testalias",
+            'SMARTEREMAIL_USERNAME' => "test@somealias.se",
+            'SMARTEREMAIL_PASSWORD' => "testpass"
+        ];
+
         //Setup mocking of the guzzle http client
         $this->mockQueue = new MockHandler();
         $handler = HandlerStack::create($this->mockQueue);
         $mockedClient = new Client(['handler' => $handler]);
 
-        $this->app->method('getLogger')->willReturn($this->logger);
         $this->app->method('getConfig')->willReturn('test_value');
 
-        $this->service = new MailAliasService($this->app);
+        $this->service = new MailAliasService($this->logger, $mockConfig);
 
         // Inject mocked client using reflection
         $reflection = new \ReflectionClass($this->service);

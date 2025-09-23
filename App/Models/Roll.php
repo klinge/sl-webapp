@@ -5,13 +5,11 @@ declare(strict_types=1);
 namespace App\Models;
 
 use PDO;
+use Psr\Log\LoggerInterface;
 
-class Roll
+class Roll extends BaseModel
 {
-    // database connection and table name
-    private $conn;
     private $table_name = "Roll";
-
     // object properties
     public int $id;
     public string $roll_namn;
@@ -19,9 +17,9 @@ class Roll
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db,)
+    public function __construct(PDO $db, LoggerInterface $logger)
     {
-        $this->conn = $db;
+        parent::__construct($db, $logger);
     }
 
     public function getAll(): array
