@@ -63,7 +63,7 @@ class SeglingControllerTest extends TestCase
     public function testList(): void
     {
         $seglingData = [['id' => 1, 'skeppslag' => 'Test']];
-        
+
         $this->seglingRepo->expects($this->once())
             ->method('getAllWithDeltagare')
             ->willReturn($seglingData);
