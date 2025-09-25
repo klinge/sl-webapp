@@ -15,17 +15,17 @@ $APP_DIR = $viewData['APP_DIR'];
     <link rel="icon" type="image/x-icon" href="/assets/img/favicon.ico" sizes="48x48">
     <!-- Bootstrap CSS -->
     <!-- Using Bootswatch to get some styling -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.3/flatly/bootstrap.min.css"
-        integrity="sha512-qoT4KwnRpAQ9uczPsw7GunsNmhRnYwSlE2KRCUPRQHSkDuLulCtDXuC2P/P6oqr3M5hoGagUG9pgHDPkD2zCDA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/5.3.8/flatly/bootstrap.min.css"
+        integrity="sha512-6cPfXE7P+s3gLoNVw8XfKNI3nc0kKcDIhZzlFp81ZLRcueIq2ayKiHcT9YT7Z+q0+61MKhvVaSaV5PmG7jEsKA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <!-- original Bootstrap CSS
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"  
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
      -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css"
-        integrity="sha512-dPXYcDub/aeb08c63jRq/k6GaKccl256JQy/AnOq7CAnEZ9FzSL9wSbcZkMp4R26vBsMLFYH4kQ67/bbV8XaCQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- SRI added with https://www.srihash.org/ -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.1.7/r-3.0.3/datatables.min.css"
-        integrity="sha256-qcXOziv3iQk6tMT0dQjmzw8tnGA2RUXZuSZVnoXgHaM=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" 
+        integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.datatables.net/v/bs5/dt-2.3.4/r-3.0.6/datatables.min.css" rel="stylesheet" 
+        integrity="sha384-lJPMqOyMYJxDSod7M351pXKxm/S/4UeremFqSqSpWy6Y31ubhocgp6ZQj7K9KwP2" crossorigin="anonymous">
+     
     <link rel="stylesheet" href="<?php echo $APP_DIR ?>/assets/css/site.css" crossorigin="anonymous">
 
     <title><?php echo $page_title; ?> | SL Medlem</title>
