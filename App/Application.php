@@ -8,6 +8,7 @@ use Dotenv\Dotenv;
 use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
 use Monolog\Logger;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\ServerRequestFactory;
 use League\Container\Container;
 use App\Config\RouteConfig;
@@ -17,6 +18,7 @@ use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
+use App\Utils\ResponseEmitter;
 use Exception;
 
 /**
@@ -312,7 +314,13 @@ class Application
             //Check that the controller has the requested method and call it
             if (method_exists($controllerClass, $action)) {
                 $controllerInstance = $this->container->get($controllerClass);
-                $controllerInstance->{$action}($params);
+                $response = $controllerInstance->{$action}($params);
+
+                // Handle PSR-7 Response objects
+                if ($response instanceof ResponseInterface) {
+                    $emitter = new ResponseEmitter();
+                    $emitter->emit($response);
+                }
             } else {
                 //Maybe also throw a 404 error here?
                 $this->logger->error('Error: can not call ' . $controller . '#' . $action);

@@ -216,10 +216,23 @@ class SeglingController extends BaseController
 
     public function deleteMedlemFromSegling(): ResponseInterface
     {
-        $data = $this->request->getParsedBody();
+        // Handle JSON request body
+        $contentType = $this->request->getHeaderLine('Content-Type');
+        if (strpos($contentType, 'application/json') !== false) {
+            $body = $this->request->getBody();
+            if ($body->isSeekable()) {
+                $body->rewind();
+            }
+            $json = $body->getContents();
+            $data = json_decode($json, true);
+        } else {
+            $data = $this->request->getParsedBody();
+        }
 
         $seglingId = $data['segling_id'] ?? null;
         $medlemId = $data['medlem_id'] ?? null;
+
+
 
         if (!$seglingId || !$medlemId) {
             $this->logger->warning("Failed to delete medlem from segling. Invalid data. Medlem: " . $medlemId . " Segling: " . $seglingId);

@@ -186,6 +186,7 @@ $roller = $viewData['roles'];
                             this.closest('tr').remove();
                         } else {
                             alert('Ett fel uppstod vid borttagning av deltagaren.');
+                            console.error('Error:', data);
                         }
                     })
                     .catch(error => console.error('Error:', error));
