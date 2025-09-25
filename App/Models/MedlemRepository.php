@@ -109,6 +109,21 @@ class MedlemRepository extends BaseModel
         return array_filter($result, fn($item) => !empty($item['email']));
     }
 
+    /**
+     * Retrieves a member by ID.
+     *
+     * @param int $id The member ID
+     * @return Medlem|null The Medlem object or null if not found
+     */
+    public function getById(int $id): ?Medlem
+    {
+        try {
+            return $this->createMedlem($id);
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
     protected function createMedlem(int $id): Medlem
     {
         return new Medlem($this->conn, $this->logger, $id);

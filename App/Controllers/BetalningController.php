@@ -8,6 +8,7 @@ use Exception;
 use App\Models\Betalning;
 use App\Models\BetalningRepository;
 use App\Models\Medlem;
+use App\Models\MedlemRepository;
 use App\Utils\Sanitizer;
 use App\Utils\View;
 use App\Utils\Session;
@@ -23,20 +24,26 @@ class BetalningController extends BaseController
 {
     private View $view;
     private BetalningRepository $betalningRepo;
+    private MedlemRepository $medlemRepo;
     private ?string $welcomeEmailEnabled = "0";
     private PDO $conn;
+    private Email $email;
 
     public function __construct(
         Application $app,
         ServerRequestInterface $request,
         Logger $logger,
         PDO $conn,
-        BetalningRepository $betalningRepo
+        BetalningRepository $betalningRepo,
+        MedlemRepository $medlemRepo,
+        Email $email
     ) {
         parent::__construct($app, $request, $logger);
         $this->conn = $conn;
         $this->view = new View($this->app);
         $this->betalningRepo = $betalningRepo;
+        $this->medlemRepo = $medlemRepo;
+        $this->email = $email;
         $this->welcomeEmailEnabled = $this->app->getConfig('WELCOME_MAIL_ENABLED');
     }
 
@@ -65,7 +72,14 @@ class BetalningController extends BaseController
     public function getMedlemBetalning(array $params): void
     {
         $id = (int) $params['id'];
-        $medlem = new Medlem($this->conn, $this->logger, $id);
+        $medlem = $this->medlemRepo->getById($id);
+        if (!$medlem) {
+            $this->view->render('viewBetalning', [
+                'success' => false,
+                'title' => 'Medlem hittades inte'
+            ]);
+            return;
+        }
         $namn = $medlem->getNamn();
         $result = $this->betalningRepo->getBetalningForMedlem($id);
 
@@ -150,10 +164,9 @@ class BetalningController extends BaseController
             $this->logger->info('sendWelcomeEmailOnFirstPayment: Sending mail is disabled');
             return false;
         }
-        //Try to create a member frrom the id, fail if not found
-        try {
-            $member = new Medlem($this->conn, $this->logger, $memberId);
-        } catch (Exception $e) {
+        //Try to get member from repository, fail if not found
+        $member = $this->medlemRepo->getById($memberId);
+        if (!$member) {
             $this->logger->warning('sendWelcomeEmailonFirstPaymen: Member not found. MemberId: ' . $memberId);
             return false;
         }
@@ -168,9 +181,8 @@ class BetalningController extends BaseController
         }
         //No welcome mail was sent and we have an email adress for the member
         $data = ['fornamn' => $member->fornamn, 'efternamn' => $member->efternamn];
-        $email = new Email($this->app);
         try {
-            $email->send(EmailType::WELCOME, $member->email, 'Välkommen till föreningen Sofia Linnea', $data);
+            $this->email->send(EmailType::WELCOME, $member->email, 'Välkommen till föreningen Sofia Linnea', $data);
             $this->logger->info('sendWelcomeEmailOnFirstPayment: Welcome email sent to: ' . $member->email);
             //Update the status on the member
             $member->skickat_valkomstbrev = true;

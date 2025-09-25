@@ -7,8 +7,10 @@ namespace Tests\Unit\Controllers;
 use PHPUnit\Framework\TestCase;
 use App\Controllers\BetalningController;
 use App\Models\BetalningRepository;
+use App\Models\MedlemRepository;
 use App\Application;
 use App\Utils\View;
+use App\Utils\Email;
 use Psr\Http\Message\ServerRequestInterface;
 use PDO;
 use PDOStatement;
@@ -21,7 +23,9 @@ class BetalningControllerTest extends TestCase
     private $controller;
     private $conn;
     private $betalningRepo;
+    private $medlemRepo;
     private $view;
+    private $email;
     private $pdoStatement;
 
     protected function setUp(): void
@@ -32,6 +36,8 @@ class BetalningControllerTest extends TestCase
         $this->logger = $this->createMock(\Monolog\Logger::class);
         $this->view = $this->createMock(View::class);
         $this->betalningRepo = $this->createMock(BetalningRepository::class);
+        $this->medlemRepo = $this->createMock(MedlemRepository::class);
+        $this->email = $this->createMock(Email::class);
 
         // Create PDO and statement mocks
         $this->pdoStatement = $this->createMock(PDOStatement::class);
@@ -48,7 +54,9 @@ class BetalningControllerTest extends TestCase
             $this->request,
             $this->logger,
             $this->conn,
-            $this->betalningRepo
+            $this->betalningRepo,
+            $this->medlemRepo,
+            $this->email
         );
 
         $this->setProtectedProperty($this->controller, 'view', $this->view);
@@ -112,6 +120,15 @@ class BetalningControllerTest extends TestCase
             ['id' => 2, 'belopp' => 200, 'namn' => 'Test Person']
         ];
 
+        // Mock medlem object
+        $mockMedlem = $this->createMock(\App\Models\Medlem::class);
+        $mockMedlem->method('getNamn')->willReturn('Test Person');
+        
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(1)
+            ->willReturn($mockMedlem);
+
         //Used by GetMedlemBetalning
         $this->pdoStatement->method('fetch')->willReturn($this->getTestMemberData());
 
@@ -134,6 +151,15 @@ class BetalningControllerTest extends TestCase
     public function testGetMedlemBetalningNoResults(): void
     {
         $params = ['id' => 1];
+
+        // Mock medlem object
+        $mockMedlem = $this->createMock(\App\Models\Medlem::class);
+        $mockMedlem->method('getNamn')->willReturn('Test Person');
+        
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(1)
+            ->willReturn($mockMedlem);
 
         // Set up member data for the Medlem object
         $this->pdoStatement->method('fetch')->willReturn($this->getTestMemberData());
