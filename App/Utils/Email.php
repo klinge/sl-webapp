@@ -8,15 +8,18 @@ use App\Application;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use PHPMailer\PHPMailer\SMTP;
+use Monolog\Logger;
 
 class Email
 {
     private $mailer;
     private $app;
+    private Logger $logger;
 
-    public function __construct(Application $app)
+    public function __construct(Application $app, Logger $logger)
     {
         $this->app = $app;
+        $this->logger = $logger;
         $this->mailer = new PHPMailer(true);
         $this->configure();
     }
@@ -81,13 +84,13 @@ class Email
             }
             $this->mailer->Subject = $templateSubject;
             $this->mailer->Body = $template;
-            $this->app->getLogger()->info("Email::{$type->value} email sent to: {$to}.");
+            $this->logger->info("Email::{$type->value} email sent to: {$to}.");
             $this->mailer->send();
 
             unset($this->mailer);
             return true;
         } catch (Exception $e) {
-            $this->app->getLogger()->warning("Email::{$type->value} email could not be sent to: {$to}. Email body: {$template}");
+            $this->logger->warning("Email::{$type->value} email could not be sent to: {$to}. Email body: {$template}");
             throw new Exception("Email could not be sent. Mailer Error: {$this->mailer->ErrorInfo}");
         }
     }

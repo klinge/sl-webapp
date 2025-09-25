@@ -28,6 +28,9 @@ class ContainerConfigurator
         $container->add(Session::class);
         $container->add(\App\Utils\View::class)
             ->addArgument(Application::class);
+        $container->add(\App\Utils\Email::class)
+            ->addArgument(Application::class)
+            ->addArgument(Logger::class);
 
         // Add service providers
         $container->addServiceProvider(new DatabaseServiceProvider());
