@@ -7,16 +7,19 @@ use App\Application;
 use App\Utils\Email;
 use App\Utils\EmailType;
 use PHPMailer\PHPMailer\Exception;
+use Monolog\Logger;
 use ReflectionClass;
 
 class EmailTest extends TestCase
 {
     private $app;
+    private $logger;
     private $email;
 
     protected function setUp(): void
     {
         $this->app = $this->createMock(Application::class);
+        $this->logger = $this->createMock(Logger::class);
 
         // Mock each config call individually
         $this->app->expects($this->any())
@@ -34,7 +37,7 @@ class EmailTest extends TestCase
                 return $configs[$key] ?? null;
             });
 
-        $this->email = new Email($this->app);
+        $this->email = new Email($this->app, $this->logger);
     }
 
     public function testConfiguration()
