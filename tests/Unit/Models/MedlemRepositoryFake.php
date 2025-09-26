@@ -13,7 +13,7 @@ class MedlemRepositoryFake extends MedlemRepository
     {
         // Create a simple test double that extends Medlem
         // @codingStandardsIgnoreLine
-        return new class($id) extends Medlem {
+        return new class ($id) extends Medlem {
             public function __construct($id)
             {
                 // Empty constructor to avoid database calls
