@@ -5,24 +5,30 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Application;
+use App\Services\Github\GitHubService;
+use App\Services\Github\GitRepositoryService;
+use App\Services\Github\DeploymentService;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class WebhookController extends BaseController
 {
-    private string $githubSecret = '';
     private string $remoteIp;
 
-    private const REPOSITORY_ID = 781366756;
-
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
-    {
+    public function __construct(
+        Application $app,
+        ServerRequestInterface $request,
+        Logger $logger,
+        private GitHubService $githubService,
+        private GitRepositoryService $gitRepositoryService,
+        private DeploymentService $deploymentService
+    ) {
         parent::__construct($app, $request, $logger);
-        $this->githubSecret = $this->app->getConfig('GITHUB_WEBHOOK_SECRET');
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
     }
 
-    public function handle(): void
+    public function handle(): ResponseInterface
     {
         $this->logger->info(
             'Starting to process webhook call from: ' . $this->remoteIp,
@@ -37,33 +43,82 @@ class WebhookController extends BaseController
             ['class' => __CLASS__, 'function' => __FUNCTION__]
         );
 
-        $payload = $this->verifyRequest();
+        $verificationResult = $this->verifyRequest();
 
-        //If payload is empty, it was a ping request or it didn't pass the verification
-        if (!$payload) {
-            exit;
+        // Handle verification failures with appropriate responses
+        if (!$verificationResult) {
+            if (!$this->request->hasHeader('X-GitHub-Event')) {
+                return $this->jsonResponse(['status' => 'error', 'message' => 'Missing event header'], 400);
+            }
+
+            $event = $this->request->getHeader('X-GitHub-Event')[0] ?? '';
+
+            if ($event !== 'push' && $event !== 'ping') {
+                return $this->jsonResponse(['status' => 'error', 'message' => 'Event not supported'], 400);
+            }
+
+            if (!$this->request->hasHeader('X-Hub-Signature-256')) {
+                return $this->jsonResponse(['status' => 'error', 'message' => 'Missing signature header'], 400);
+            }
+
+            $signature = $this->request->getHeader('X-Hub-Signature-256')[0] ?? '';
+            $signature_parts = explode('=', $signature);
+
+            if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
+                return $this->jsonResponse(['status' => 'error', 'message' => 'Bad header format'], 400);
+            }
+
+            $rawBody = (string) $this->request->getBody();
+
+            if (!$this->githubService->validateSignature($rawBody, $signature_parts[1])) {
+                return $this->jsonResponse(['status' => 'error', 'message' => 'Invalid signature'], 401);
+            }
+
+            $payload = json_decode($rawBody, true);
+
+            if (!$this->githubService->isValidRepository($payload)) {
+                return $this->jsonResponse(
+                    ['status' => 'ignored', 'message' => "Not handling requests for this repo, {$payload['repository']['full_name']}"],
+                    200
+                );
+            }
+
+            if ($event === 'ping') {
+                return $this->jsonResponse(['status' => 'ok', 'message' => 'Pong'], 200);
+            }
+
+            return $this->jsonResponse(['status' => 'ok', 'message' => 'Request processed']);
         }
-        $branch = str_replace('refs/heads/', '', $payload['ref']);
+
+        $payload = $verificationResult;
+        $branch = $this->githubService->extractBranchName($payload['ref']);
+
         // Check if it's a release branch
-        if (!preg_match('/^release\/v\d+(\.\d+)?$/', $branch)) {
-            $this->jsonResponse(['status' => 'ignored', 'message' => 'Not a push to the release branch']);
+        if (!$this->githubService->isReleaseBranch($branch)) {
             $this->logger->debug('Not a push to the release branch', ['class' => __CLASS__, 'function' => __FUNCTION__]);
-            exit;
-        } else {
-            $this->jsonResponse(['status' => 'success', 'message' => 'Successfully received a push on the release branch']);
-            $this->logger->info('Received a push on the release branch. Continuing to deploy.. ');
+            return $this->jsonResponse(['status' => 'ignored', 'message' => 'Not a push to the release branch']);
         }
+
+        $this->logger->info('Received a push on the release branch. Continuing to deploy.. ');
+
         $repoUrl = $payload['repository']['clone_url'];
-        $result = $this->handleRepositoryOperations($branch, $repoUrl);
+        $result = $this->gitRepositoryService->updateRepository($branch, $repoUrl);
         if ($result['status'] !== 'success') {
             $this->logger->error(
                 "Error occurred while handling repository operations. Message: {$result['message']}",
                 ['class' => __CLASS__, 'function' => __FUNCTION__]
             );
-            exit;
+            return $this->jsonResponse(['status' => 'error', 'message' => $result['message']], 500);
         }
+
         //Finally schedule the deploy of the repository to the web server
-        $this->scheduleDeployment();
+        $deploymentScheduled = $this->deploymentService->scheduleDeployment();
+
+        if (!$deploymentScheduled) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'Failed to schedule deployment'], 500);
+        }
+
+        return $this->jsonResponse(['status' => 'success', 'message' => 'Successfully received push and scheduled deployment']);
     }
 
     /**
@@ -83,7 +138,6 @@ class WebhookController extends BaseController
 
         // Verify that it's a github webhook request
         if (!$this->request->hasHeader('X-GitHub-Event')) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'Missing event header'], 400);
             $this->logger->warning("Missing X-GitHub-Event header. Headers was: " . json_encode($this->request->getHeaders()));
             return $payload;
         } else {
@@ -91,13 +145,11 @@ class WebhookController extends BaseController
         }
         // Verify that it's ping or a push
         if (!empty($event) && $event !== 'push' && $event !== 'ping') {
-            $this->jsonResponse(['status' => 'error', 'message' => 'Event not supported'], 400);
             $this->logger->warning("Github event was not push or ping");
             return $payload;
         }
         // Verify that the signature header is there
         if (!$this->request->hasHeader('X-Hub-Signature-256')) {
-            $this->jsonResponse(['status' => 'error', 'message' => 'Missing signature header'], 400);
             $this->logger->warning("Github signature header missing");
             return $payload;
         }
@@ -106,17 +158,13 @@ class WebhookController extends BaseController
         $signature_parts = explode('=', $signature);
 
         if (count($signature_parts) != 2 || $signature_parts[0] != 'sha256') {
-            $this->jsonResponse(['status' => 'error', 'message' => 'Bad header format'], 400);
             $this->logger->warning("Bad format for the github signature header");
             return $payload;
         }
         //All is well so far - get the request body and validate the signature
         $rawBody = (string) $this->request->getBody();
 
-        $signatureResult = $this->validateSignature($rawBody, $signature_parts[1], $this->githubSecret);
-
-        if ($signatureResult !== true) {
-            $this->jsonResponse(['status' => 'error', 'message' => $signatureResult], 401);
+        if (!$this->githubService->validateSignature($rawBody, $signature_parts[1])) {
             $this->logger->warning("Github signature did not verify");
             return [];
         }
@@ -124,99 +172,18 @@ class WebhookController extends BaseController
         $payload = json_decode($rawBody, true);
 
         //Lastly check that the request was for the correct repository
-        if ($payload['repository']['id'] !== self::REPOSITORY_ID) {
-            $this->jsonResponse(
-                ['status' => 'ignored', 'message' => "Not handling requests for this repo,
-                {$payload['repository']['full_name']}"],
-                200
-            );
+        if (!$this->githubService->isValidRepository($payload)) {
             $this->logger->warning("Repository Id in the request was not correct");
             return [];
         }
 
         //Handle the ping event here, just send a pong back
         if ($event === 'ping') {
-            $this->jsonResponse(['status' => 'ok', 'message' => 'Pong'], 200);
             $this->logger->debug("Got a ping event, sent a pong back");
             return [];
         }
 
         //Return paylod, empty array if there were any errors
         return $payload;
-    }
-
-    private function validateSignature(string $rawRequestBody, string $signature, string $secret): bool|string
-    {
-        //Calculate the expected signature
-        //$utf8Body = mb_convert_encoding($rawRequestBody, 'UTF-8', 'ASCII');
-        $calculatedSignature = hash_hmac('sha256', $rawRequestBody, $secret, false);
-
-        //Compare it to the actual signature
-        $hashOk = hash_equals($calculatedSignature, $signature);
-        if ($hashOk) {
-            return true;
-        } else {
-            return "Request signature: {$signature}, calulated signature: {$calculatedSignature}";
-        }
-    }
-
-    /**
-     * @return array{status: string, message: string}
-     */
-    private function handleRepositoryOperations(string $branch, string $repoUrl): array
-    {
-        $cloneDir = $this->app->getConfig('REPO_BASE_DIRECTORY') . '/' . basename($repoUrl, '.git');
-        $this->logger->debug("Fetching github repo to directory: " . $cloneDir);
-
-        if (!is_dir($cloneDir)) {
-            // Clone the repository if it doesn't exist
-            exec("git clone $repoUrl $cloneDir 2>&1", $output, $returnVar);
-            if ($returnVar !== 0) {
-                $this->logger->error("Failed to clone repository: " . implode(",", $output));
-                return ['status' => 'error', 'message' => 'Failed to clone repository'];
-            }
-        } else {
-            // If the repository already exists, fetch the latest changes
-            chdir($cloneDir);
-            exec("git fetch --all 2>&1", $output, $returnVar);
-            if ($returnVar !== 0) {
-                $this->logger->error("Failed to fetch latest changes: " . implode(",", $output));
-                return ['status' => 'error', 'message' => 'Failed to fetch latest changes'];
-            }
-        }
-        // Change to the cloned directory (if not already there)
-        chdir($cloneDir);
-
-        // Checkout the branch that was pushed
-        exec("git checkout $branch 2>&1", $output, $returnVar);
-        if ($returnVar !== 0) {
-            $this->logger->error("Failed to checkout branch $branch: " . implode(",", $output));
-            return ['status' => 'error', 'message' => 'Failed to checkout branch'];
-        }
-        // Pull the latest changes
-        $this->logger->debug("Checking out and pulling changes for branch: " . $branch);
-        exec("git pull origin $branch 2>&1", $output, $returnVar);
-        if ($returnVar !== 0) {
-            $this->logger->error("Failed to pull latest changes for branch $branch: " . implode("\n", $output));
-            return ['status' => 'error', 'message' => 'Failed to pull latest changes'];
-        }
-
-        $this->logger->info("Successfully updated and checked out branch $branch");
-        return ['status' => 'success', 'message' => 'Repository operations completed successfully'];
-    }
-
-
-    private function scheduleDeployment(): bool
-    {
-        $triggerFile = $this->app->getConfig('TRIGGER_FILE_DIRECTORY') . '/deploy_' . time() . '.trigger';
-        $result = file_put_contents($triggerFile, '');
-
-        if ($result === false) {
-            $this->logger->error('Failed to create deployment trigger file');
-            return false;
-        }
-
-        $this->logger->info('Deployment trigger file created successfully, deployment job will be run by cron');
-        return true;
     }
 }

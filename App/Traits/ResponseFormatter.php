@@ -9,8 +9,28 @@ use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
 use App\Utils\ResponseEmitter;
 
+/**
+ * ResponseFormatter Trait
+ *
+ * Handles traditional web form responses with redirects and flash messages.
+ * Used for server-side form processing where users are redirected to different
+ * pages after form submission with success/error messages displayed via session flash.
+ *
+ * Use this trait for:
+ * - Traditional HTML form submissions
+ * - User-facing web pages with redirects
+ * - Success/error messages that persist across page loads
+ *
+ * For API/AJAX responses, use JsonResponder trait instead.
+ */
 trait ResponseFormatter
 {
+    /**
+     * Redirect to a route with an optional success message.
+     *
+     * @param string $route The route name to redirect to
+     * @param string $message Optional success message to display on the target page
+     */
     protected function redirectWithSuccess(string $route, string $message = ''): void
     {
         if (!empty($message)) {
@@ -20,18 +40,37 @@ trait ResponseFormatter
         $this->emitRedirect($route);
     }
 
+    /**
+     * Redirect to a route with an error message.
+     *
+     * @param string $route The route name to redirect to
+     * @param string $message Error message to display on the target page
+     */
     protected function redirectWithError(string $route, string $message): void
     {
         Session::setFlashMessage('error', $message);
         $this->emitRedirect($route);
     }
 
+    /**
+     * Render a view with an error message (no redirect).
+     *
+     * @param string $view The view template to render
+     * @param string $message Error message to display on the current page
+     * @param array $data Additional data to pass to the view
+     */
     protected function renderWithError(string $view, string $message, array $data = []): void
     {
         Session::setFlashMessage('error', $message);
         $this->view->render($view, $data);
     }
 
+    /**
+     * Internal method to emit a redirect response.
+     *
+     * @param string $route The route name to redirect to
+     * @return ResponseInterface The redirect response
+     */
     private function emitRedirect(string $route): ResponseInterface
     {
         $response = new RedirectResponse($this->app->getRouter()->generate($route));

@@ -12,6 +12,9 @@ use App\ServiceProviders\DatabaseServiceProvider;
 use App\ServiceProviders\LoggerServiceProvider;
 use App\ServiceProviders\AuthServiceProvider;
 use App\ServiceProviders\ModelServiceProvider;
+use App\Services\Github\GitHubService;
+use App\Services\Github\GitRepositoryService;
+use App\Services\Github\DeploymentService;
 use App\Utils\Session;
 use App\Utils\View;
 use Monolog\Logger;
@@ -30,6 +33,16 @@ class ContainerConfigurator
             ->addArgument(Application::class);
         $container->add(\App\Utils\Email::class)
             ->addArgument(Application::class)
+            ->addArgument(Logger::class);
+
+        // Webhook services
+        $container->add(GitHubService::class)
+            ->addArgument($app->getConfig('GITHUB_WEBHOOK_SECRET'));
+        $container->add(GitRepositoryService::class)
+            ->addArgument($app->getConfig('REPO_BASE_DIRECTORY'))
+            ->addArgument(Logger::class);
+        $container->add(DeploymentService::class)
+            ->addArgument($app->getConfig('TRIGGER_FILE_DIRECTORY'))
             ->addArgument(Logger::class);
 
         // Add service providers
