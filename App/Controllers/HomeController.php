@@ -8,6 +8,7 @@ use App\Application;
 use App\Utils\Session;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class HomeController extends BaseController
@@ -20,25 +21,25 @@ class HomeController extends BaseController
         $this->view = new View($this->app);
     }
 
-    public function index(): void
+    public function index(): ResponseInterface
     {
         //if user is not logged in show login page, if user is logged in redirect to admin or user homepage
         if (!Session::isLoggedIn()) {
-            $this->view->render('login/viewLogin');
+            return $this->view->render('login/viewLogin');
         } elseif (Session::isAdmin()) {
-            $this->view->render('home');
+            return $this->view->render('home');
         } else {
-            $this->view->render('user/index');
+            return $this->view->render('user/index');
         }
     }
 
-    public function pageNotFound()
+    public function pageNotFound(): ResponseInterface
     {
-        $this->view->render('404');
+        return $this->view->render('404');
     }
 
-    public function technicalError()
+    public function technicalError(): ResponseInterface
     {
-        $this->view->render('viewTechnicalError');
+        return $this->view->render('viewTechnicalError');
     }
 }

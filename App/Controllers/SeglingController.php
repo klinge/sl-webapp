@@ -45,7 +45,7 @@ class SeglingController extends BaseController
         $this->roll = $roll;
     }
 
-    public function list()
+    public function list(): ResponseInterface
     {
         $result = $this->seglingRepo->getAllWithDeltagare();
 
@@ -55,10 +55,10 @@ class SeglingController extends BaseController
             "newAction" => $this->app->getRouter()->generate('segling-show-create'),
             "items" => $result
         ];
-        $this->view->render('viewSegling', $data);
+        return $this->view->render('viewSegling', $data);
     }
 
-    public function edit(array $params): ?ResponseInterface
+    public function edit(array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $formAction = $this->app->getRouter()->generate('segling-save', ['id' => $id]);
@@ -100,8 +100,7 @@ class SeglingController extends BaseController
             "allaKockar" => $allaKockar,
             "formUrl" => $formAction
         ];
-        $this->view->render('viewSeglingEdit', $data);
-        return null;
+        return $this->view->render('viewSeglingEdit', $data);
     }
 
     public function save(array $params): ResponseInterface
@@ -142,14 +141,14 @@ class SeglingController extends BaseController
         return new RedirectResponse($redirectUrl);
     }
 
-    public function showCreate()
+    public function showCreate(): ResponseInterface
     {
         $formAction = $this->app->getRouter()->generate('segling-create');
         $data = [
             "title" => "Skapa ny segling",
             "formUrl" => $formAction
         ];
-        $this->view->render('viewSeglingNew', $data);
+        return $this->view->render('viewSeglingNew', $data);
     }
 
     public function create(): ResponseInterface

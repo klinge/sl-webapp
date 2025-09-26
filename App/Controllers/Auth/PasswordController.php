@@ -10,6 +10,7 @@ use App\Traits\ResponseFormatter;
 use App\Utils\View;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class PasswordController extends AuthBaseController
@@ -32,16 +33,15 @@ class PasswordController extends AuthBaseController
         $this->view = new View($this->app);
     }
 
-    public function showRequestPwd(): void
+    public function showRequestPwd(): ResponseInterface
     {
-        $this->view->render(self::NEWPASSWORD_VIEW);
+        return $this->view->render(self::NEWPASSWORD_VIEW);
     }
 
-    public function sendPwdRequestToken(): void
+    public function sendPwdRequestToken(): ResponseInterface
     {
         if (!$this->validateRecaptcha()) {
-            $this->renderWithError(self::NEWPASSWORD_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
-            return;
+            return $this->renderWithError(self::NEWPASSWORD_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
         }
 
         $email = $this->request->getParsedBody()['email'] ?? '';
@@ -55,10 +55,10 @@ class PasswordController extends AuthBaseController
             Session::setFlashMessage('error', 'Kunde inte skicka mail för lösenordsåterställning. Försök igen.');
         }
 
-        $this->view->render(self::NEWPASSWORD_VIEW);
+        return $this->view->render(self::NEWPASSWORD_VIEW);
     }
 
-    public function showResetPassword(array $params): void
+    public function showResetPassword(array $params): ResponseInterface
     {
         $result = $this->authService->validateResetToken($params['token']);
 
@@ -68,14 +68,13 @@ class PasswordController extends AuthBaseController
                 'token' => $params['token']
             ];
             $this->setCsrfToken();
-            $this->view->render(self::RESET_PASSWORD_VIEW, $viewData);
-            return;
+            return $this->view->render(self::RESET_PASSWORD_VIEW, $viewData);
         }
 
-        $this->redirectWithError('show-request-password', $result['message']);
+        return $this->redirectWithError('show-request-password', $result['message']);
     }
 
-    public function resetAndSavePassword(): void
+    public function resetAndSavePassword(): ResponseInterface
     {
         $formData = $this->request->getParsedBody();
         $result = $this->authService->resetPassword($formData);
@@ -86,10 +85,9 @@ class PasswordController extends AuthBaseController
                 'email' => $formData['email'],
                 'token' => $formData['token']
             ];
-            $this->view->render(self::RESET_PASSWORD_VIEW, $viewData);
-            return;
+            return $this->view->render(self::RESET_PASSWORD_VIEW, $viewData);
         }
 
-        $this->redirectWithSuccess('login', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
+        return $this->redirectWithSuccess('login', 'Ditt lösenord är uppdaterat. Du kan nu logga in med ditt nya lösenord.');
     }
 }

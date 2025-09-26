@@ -50,10 +50,10 @@ class View
      *
      * @param string $template The name of the template file (without .php extension)
      * @param array $data Additional data to be passed to the view
-     * @return bool It the view was rendered successfully or not
+     * @return ResponseInterface The rendered HTML response
      * @throws \Exception If the view file is not found
      */
-    public function render(string $template, array $data = []): bool
+    public function render(string $template, array $data = []): ResponseInterface
     {
         //TODO Keeps having data in the viewData array even if it would be better to just juse key:value-pairs
         $viewData = array_merge($data, Session::getSessionDataForViews());
@@ -73,15 +73,11 @@ class View
         include $filePath;
         $result = ob_get_clean();
 
-        //set properties on the response object
-        $this->response = new \Laminas\Diactoros\Response\HtmlResponse(
+        //Return the response object without emitting
+        return new \Laminas\Diactoros\Response\HtmlResponse(
             $result,
             200
         );
-
-        //Finally emit the view in the response object
-        $this->emitter->emit($this->response);
-        return true;
     }
 
     /**

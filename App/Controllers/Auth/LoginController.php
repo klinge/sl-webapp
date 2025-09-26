@@ -12,6 +12,7 @@ use App\Traits\ResponseFormatter;
 use App\Utils\View;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use PDO;
 use Monolog\Logger;
 
@@ -53,10 +54,10 @@ class LoginController extends AuthBaseController
      *
      * This method sets the CSRF token and then renders the login view template.
      */
-    public function showLogin(): void
+    public function showLogin(): ResponseInterface
     {
         $this->setCsrfToken();
-        $this->view->render(self::LOGIN_VIEW);
+        return $this->view->render(self::LOGIN_VIEW);
     }
 
     /**
@@ -65,14 +66,13 @@ class LoginController extends AuthBaseController
      * Validates reCAPTCHA, authenticates user credentials,
      * and manages session upon successful login.
      *
-     * @return void
+     * @return ResponseInterface
      */
-    public function login(): void
+    public function login(): ResponseInterface
     {
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
-            $this->renderWithError(self::LOGIN_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
-            return;
+            return $this->renderWithError(self::LOGIN_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
         }
 
         $providedEmail = $this->request->getParsedBody()['email'] ?? '';
@@ -80,8 +80,7 @@ class LoginController extends AuthBaseController
 
         if (empty($providedEmail) || empty($providedPassword)) {
             $this->logger->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
-            $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
-            return;
+            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
         }
 
         $result = $this->medlemRepo->getMemberByEmail($providedEmail);
@@ -89,22 +88,19 @@ class LoginController extends AuthBaseController
         //User not found
         if (!$result) {
             $this->logger->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
-            $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
-            return;
+            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
         }
         //Catch exception if medlem not found, should not happen since we already checked for it
         try {
             $medlem = new Medlem($this->conn, $this->logger, $result['id']);
         } catch (\Exception $e) {
             $this->logger->error("Technical error. Could not create member object for member id: " . $result['id']);
-            $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
-            return;
+            return $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
         }
         //Fail if passwork did not verify
         if (!$this->passwordService->verifyPassword($providedPassword, $medlem->password)) {
             $this->logger->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->remoteIp);
-            $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
-            return;
+            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
         $this->logger->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->remoteIp);
@@ -124,7 +120,7 @@ class LoginController extends AuthBaseController
             $route = 'user-home';
         }
         Session::remove('redirect_url');
-        $this->redirectWithSuccess($route);
+        return $this->redirectWithSuccess($route);
     }
 
     /**
@@ -132,13 +128,13 @@ class LoginController extends AuthBaseController
      *
      * Removes user session data and redirects to the login page.
      *
-     * @return void
+     * @return ResponseInterface
      */
-    public function logout(): void
+    public function logout(): ResponseInterface
     {
         Session::remove('user_id');
         Session::remove('fornamn');
         Session::destroy();
-        $this->redirectWithSuccess('show-login');
+        return $this->redirectWithSuccess('show-login');
     }
 }

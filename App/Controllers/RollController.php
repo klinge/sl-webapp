@@ -9,6 +9,7 @@ use App\Models\MedlemRepository;
 use App\Models\Roll;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class RollController extends BaseController
@@ -31,20 +32,20 @@ class RollController extends BaseController
         $this->medlemRepo = $medlemRepo;
     }
 
-    public function list(): void
+    public function list(): ResponseInterface
     {
         $roller = $this->roll->getAll();
         $data = [
             "title" => "Visa roller",
             "items" => $roller
         ];
-        $this->view->render('viewRoller', $data);
+        return $this->view->render('viewRoller', $data);
     }
 
-    public function membersInRole(array $params): void
+    public function membersInRole(array $params): ResponseInterface
     {
         $rollId = (int) $params['id'];
         $result = $this->medlemRepo->getMembersByRollId($rollId);
-        $this->jsonResponse($result);
+        return $this->jsonResponse($result);
     }
 }

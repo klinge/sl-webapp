@@ -6,6 +6,7 @@ namespace App\Middleware;
 
 use App\Config\RouteConfig;
 use App\Utils\Session;
+use App\Utils\ResponseEmitter;
 
 class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInterface
 {
@@ -16,7 +17,9 @@ class AuthenticationMiddleware extends BaseMiddleware implements MiddlewareInter
         // Start by handling api/ajax requests, user does always have to be logged in
         if ($this->isAjaxRequest()) {
             if (!Session::get('user_id')) {
-                $this->jsonResponse(['success' => false, 'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'], 401);
+                $response = $this->jsonResponse(['success' => false, 'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'], 401);
+                $emitter = new ResponseEmitter();
+                $emitter->emit($response);
 
                 //Log the exception
                 $this->logger->warning('Ajax request, user not logged in. URI: ' .

@@ -17,6 +17,7 @@ use App\Utils\EmailType;
 use App\Application;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use PDO;
 use Monolog\Logger;
 
@@ -47,7 +48,7 @@ class BetalningController extends BaseController
         $this->welcomeEmailEnabled = $this->app->getConfig('WELCOME_MAIL_ENABLED');
     }
 
-    public function list(): void
+    public function list(): ResponseInterface
     {
         $result = $this->betalningRepo->getAllWithName();
 
@@ -56,7 +57,7 @@ class BetalningController extends BaseController
             "title" => "Betalningslista",
             "items" => $result
         ];
-        $this->view->render('viewBetalning', $data);
+        return $this->view->render('viewBetalning', $data);
     }
 
     public function getBetalning(array $params): Betalning
@@ -69,16 +70,15 @@ class BetalningController extends BaseController
         return $betalning;
     }
 
-    public function getMedlemBetalning(array $params): void
+    public function getMedlemBetalning(array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $medlem = $this->medlemRepo->getById($id);
         if (!$medlem) {
-            $this->view->render('viewBetalning', [
+            return $this->view->render('viewBetalning', [
                 'success' => false,
                 'title' => 'Medlem hittades inte'
             ]);
-            return;
         }
         $namn = $medlem->getNamn();
         $result = $this->betalningRepo->getBetalningForMedlem($id);
@@ -95,10 +95,10 @@ class BetalningController extends BaseController
                 "title" => "Inga betalningar hittades"
             ];
         }
-        $this->view->render('viewBetalning', $data);
+        return $this->view->render('viewBetalning', $data);
     }
     //This function is called via a javascript fetch POST in the viewBetalning.php view
-    public function createBetalning(array $params): void
+    public function createBetalning(array $params): ResponseInterface
     {
         $betalning = new Betalning($this->conn, $this->logger);
         $parsedBody = $this->request->getParsedBody();
@@ -106,7 +106,7 @@ class BetalningController extends BaseController
         //Check for mandatory fields
         if (empty($parsedBody['belopp']) || empty($parsedBody['datum']) || empty($parsedBody['avser_ar'])) {
             // Handle missing values, e.g., return an error message or redirect to the form
-            $this->jsonResponse(['success' => false, 'message' => 'Belopp, datum, and avser_ar are required fields.']);
+            return $this->jsonResponse(['success' => false, 'message' => 'Belopp, datum, and avser_ar are required fields.']);
         }
 
         //Sanitize user input
@@ -129,7 +129,7 @@ class BetalningController extends BaseController
         $input_ok = $betalning->medlem_id && $betalning->datum && $betalning->belopp && $betalning->avser_ar;
 
         if (!$input_ok) {
-            $this->jsonResponse(['success' => false, 'message' => 'Invalid input']);
+            return $this->jsonResponse(['success' => false, 'message' => 'Invalid input']);
         }
 
         // Create the betalning
@@ -138,23 +138,24 @@ class BetalningController extends BaseController
             $sentMail = $this->sendWelcomeEmailOnFirstPayment($betalning->medlem_id);
             $this->logger->info('Betalning created successfully. Id of betalning: ' . $result['id'] .
                 '. Registered by: ' . Session::get('user_id'));
-            $this->jsonResponse(['success' => true, 'message' => 'Betalning created successfully. Id of betalning: ' . $result['id']]);
+            return $this->jsonResponse(['success' => true, 'message' => 'Betalning created successfully. Id of betalning: ' . $result['id']]);
         } catch (Exception $e) {
             $this->logger->warning('Error creating Betalning: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error creating Betalning: ' . $e->getMessage()]);
+            return $this->jsonResponse(['success' => false, 'message' => 'Error creating Betalning: ' . $e->getMessage()]);
         }
     }
 
-    public function deleteBetalning(array $params): void
+    public function deleteBetalning(array $params): ResponseInterface
     {
         $id = $params['id'];
         $betalning = new Betalning($this->conn, $this->logger);
         $betalning->get($id);
         try {
             $betalning->delete();
+            return $this->jsonResponse(['success' => true, 'message' => 'Betalning deleted successfully']);
         } catch (Exception $e) {
             $this->logger->warning('Error deleting Betalning: ' . $e->getMessage());
-            $this->jsonResponse(['success' => false, 'message' => 'Error deleting Betalning: ' . $e->getMessage()]);
+            return $this->jsonResponse(['success' => false, 'message' => 'Error deleting Betalning: ' . $e->getMessage()]);
         }
     }
 

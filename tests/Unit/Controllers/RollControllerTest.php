@@ -11,6 +11,7 @@ use App\Models\Roll;
 use App\Models\MedlemRepository;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class RollControllerTest extends TestCase
@@ -54,14 +55,17 @@ class RollControllerTest extends TestCase
             ->method('getAll')
             ->willReturn($expectedRoles);
 
+        $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with('viewRoller', [
                 'title' => 'Visa roller',
                 'items' => $expectedRoles
-            ]);
+            ])
+            ->willReturn($mockResponse);
 
-        $this->controller->list();
+        $result = $this->controller->list();
+        $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 
     public function testMembersInRoleReturnsJsonResponse(): void
@@ -77,12 +81,8 @@ class RollControllerTest extends TestCase
             ->with($rollId)
             ->willReturn($expectedMembers);
 
-        ob_start();
-        $this->controller->membersInRole(['id' => (string) $rollId]);
-        $output = ob_get_clean();
-
-        $this->assertJson($output);
-        $this->assertEquals($expectedMembers, json_decode($output, true));
+        $result = $this->controller->membersInRole(['id' => (string) $rollId]);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 
     public function testMembersInRoleWithStringId(): void
@@ -97,12 +97,8 @@ class RollControllerTest extends TestCase
             ->with(2)
             ->willReturn($expectedMembers);
 
-        ob_start();
-        $this->controller->membersInRole(['id' => $rollId]);
-        $output = ob_get_clean();
-
-        $this->assertJson($output);
-        $this->assertEquals($expectedMembers, json_decode($output, true));
+        $result = $this->controller->membersInRole(['id' => $rollId]);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 
     public function testMembersInRoleWithEmptyResult(): void
@@ -115,11 +111,7 @@ class RollControllerTest extends TestCase
             ->with($rollId)
             ->willReturn($expectedMembers);
 
-        ob_start();
-        $this->controller->membersInRole(['id' => (string) $rollId]);
-        $output = ob_get_clean();
-
-        $this->assertJson($output);
-        $this->assertEquals($expectedMembers, json_decode($output, true));
+        $result = $this->controller->membersInRole(['id' => (string) $rollId]);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 }

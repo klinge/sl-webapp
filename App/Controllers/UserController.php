@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Application;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class UserController extends BaseController
@@ -19,12 +20,12 @@ class UserController extends BaseController
         $this->view = new View($this->app);
     }
 
-    public function home()
+    public function home(): ResponseInterface
     {
         //Put everyting in the data variable that is used by the view
         $data = [
             "title" => "Medlemssidan..",
         ];
-        $this->view->render('/user/index', $data);
+        return $this->view->render('/user/index', $data);
     }
 }

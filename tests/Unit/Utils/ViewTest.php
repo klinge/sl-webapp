@@ -29,17 +29,13 @@ class ViewTest extends TestCase
         $this->view = new View($this->app);
     }
 
-    public function testRenderCreatesHtmlResponse()
+    public function testRenderReturnsHtmlResponse()
     {
-        ob_start();
-        $this->view->render('test');
-        ob_end_clean();
-
-        $property = $this->makeResponseAccessible('response');
-        $response = $property->getValue($this->view);
+        $response = $this->view->render('test');
 
         $this->assertInstanceOf(HtmlResponse::class, $response);
         $this->assertEquals(200, $response->getStatusCode());
+        $this->assertStringContainsString('Test Template', (string) $response->getBody());
     }
 
     public function testRenderThrowsExceptionForNonExistentTemplate()
@@ -50,16 +46,20 @@ class ViewTest extends TestCase
         $this->view->render('nonexistent');
     }
 
-    public function testAssignAddsDataToViewArray()
+    public function testAssignDataIsAvailableInTemplate()
     {
+        // Create a template that uses assigned data
+        file_put_contents($this->tempDir . '/public/views/data_test.php', 
+            '<html><body><?= $testKey ?? "" ?> - <?= $numberKey ?? "" ?></body></html>');
+        
         $this->view->assign('testKey', 'testValue');
         $this->view->assign('numberKey', 42);
 
-        $property = $this->makeResponseAccessible('data');
-        $data = $property->getValue($this->view);
-
-        $this->assertEquals('testValue', $data['testKey']);
-        $this->assertEquals(42, $data['numberKey']);
+        $response = $this->view->render('data_test');
+        $body = (string) $response->getBody();
+        
+        $this->assertStringContainsString('testValue', $body);
+        $this->assertStringContainsString('42', $body);
     }
 
     protected function makeResponseAccessible(string $propertyName): \ReflectionProperty
@@ -73,7 +73,10 @@ class ViewTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up temp files
-        unlink($this->tempDir . '/public/views/test.php');
+        $files = glob($this->tempDir . '/public/views/*.php');
+        foreach ($files as $file) {
+            unlink($file);
+        }
         rmdir($this->tempDir . '/public/views');
         rmdir($this->tempDir . '/public');
         rmdir($this->tempDir);

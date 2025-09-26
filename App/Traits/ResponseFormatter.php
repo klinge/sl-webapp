@@ -31,13 +31,13 @@ trait ResponseFormatter
      * @param string $route The route name to redirect to
      * @param string $message Optional success message to display on the target page
      */
-    protected function redirectWithSuccess(string $route, string $message = ''): void
+    protected function redirectWithSuccess(string $route, string $message = ''): ResponseInterface
     {
         if (!empty($message)) {
             Session::setFlashMessage('success', $message);
         }
 
-        $this->emitRedirect($route);
+        return $this->createRedirect($route);
     }
 
     /**
@@ -46,10 +46,10 @@ trait ResponseFormatter
      * @param string $route The route name to redirect to
      * @param string $message Error message to display on the target page
      */
-    protected function redirectWithError(string $route, string $message): void
+    protected function redirectWithError(string $route, string $message): ResponseInterface
     {
         Session::setFlashMessage('error', $message);
-        $this->emitRedirect($route);
+        return $this->createRedirect($route);
     }
 
     /**
@@ -59,10 +59,10 @@ trait ResponseFormatter
      * @param string $message Error message to display on the current page
      * @param array $data Additional data to pass to the view
      */
-    protected function renderWithError(string $view, string $message, array $data = []): void
+    protected function renderWithError(string $view, string $message, array $data = []): ResponseInterface
     {
         Session::setFlashMessage('error', $message);
-        $this->view->render($view, $data);
+        return $this->view->render($view, $data);
     }
 
     /**
@@ -71,13 +71,8 @@ trait ResponseFormatter
      * @param string $route The route name to redirect to
      * @return ResponseInterface The redirect response
      */
-    private function emitRedirect(string $route): ResponseInterface
+    private function createRedirect(string $route): ResponseInterface
     {
-        $response = new RedirectResponse($this->app->getRouter()->generate($route));
-
-        $responseEmitter = new ResponseEmitter();
-        $responseEmitter->emit($response);
-
-        return $response;
+        return new RedirectResponse($this->app->getRouter()->generate($route));
     }
 }

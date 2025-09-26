@@ -11,6 +11,7 @@ use App\Models\MedlemRepository;
 use App\Models\BetalningRepository;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use PDO;
 use PDOStatement;
 use AltoRouter;
@@ -132,7 +133,8 @@ class MedlemControllerTest extends TestCase
         $this->app->method('getRouter')
             ->willReturn($this->router);
 
-        // Assert view is rendered with correct data
+        // Mock view to return a response
+        $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with(
@@ -142,16 +144,18 @@ class MedlemControllerTest extends TestCase
                     'items' => $expectedMembers,
                     'newAction' => '/medlem/new'
                 ]
-            );
+            )
+            ->willReturn($mockResponse);
 
         // Inject mock view into controller
         $this->setProtectedProperty($this->controller, 'view', $this->view);
 
-        // Execute the method
-        $this->controller->listAll();
+        // Execute the method and verify it returns a response
+        $response = $this->controller->listAll();
+        $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 
-    public function testListJsonOutputsCorrectJsonResponse(): void
+    public function testListJsonReturnsCorrectJsonResponse(): void
     {
         // Mock the expected data from repository
         $expectedMembers = $this->setupBasicMemberData();
@@ -161,14 +165,12 @@ class MedlemControllerTest extends TestCase
             ->method('getAll')
             ->willReturn($expectedMembers);
 
-        // Start output buffering to capture the JSON response
-        ob_start();
-        $this->controller->listJson();
-        $output = ob_get_clean();
-
-        // Verify the output is valid JSON and matches our expected data
-        $this->assertJson($output);
-        $this->assertEquals($expectedMembers, json_decode($output, true));
+        // Execute the method and verify it returns a JSON response
+        $response = $this->controller->listJson();
+        
+        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals('application/json', $response->getHeader('Content-Type')[0]);
+        $this->assertEquals($expectedMembers, json_decode((string) $response->getBody(), true));
     }
 
 

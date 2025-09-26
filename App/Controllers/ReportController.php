@@ -8,6 +8,7 @@ use App\Application;
 use App\Utils\View;
 use App\Models\MedlemRepository;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use PDO;
 use Monolog\Logger;
 
@@ -25,15 +26,15 @@ class ReportController extends BaseController
         $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
     }
 
-    public function show(): void
+    public function show(): ResponseInterface
     {
         $data = [
             "title" => "Rapporter",
         ];
-        $this->view->render('reports/viewRapporter', $data);
+        return $this->view->render('reports/viewRapporter', $data);
     }
 
-    public function showPaymentReport(): void
+    public function showPaymentReport(): ResponseInterface
     {
         //Set current year
         $currentYear = (int) date('Y');
@@ -83,10 +84,10 @@ class ReportController extends BaseController
             "title" => "Rapport: Ej gottstående medlemmar",
             "items" => $result
         ];
-        $this->view->render('reports/viewReportResults', $data);
+        return $this->view->render('reports/viewReportResults', $data);
     }
 
-    public function showMemberEmails(): void
+    public function showMemberEmails(): ResponseInterface
     {
         $mailList = $this->medlemRepo->getEmailForActiveMembers();
 
@@ -94,6 +95,6 @@ class ReportController extends BaseController
             "title" => "Rapport: Email till aktiva medlemmar",
             "items" => $mailList
         ];
-        $this->view->render('reports/viewReportResults', $data);
+        return $this->view->render('reports/viewReportResults', $data);
     }
 }

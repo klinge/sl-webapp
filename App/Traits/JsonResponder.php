@@ -25,7 +25,7 @@ use App\Utils\ResponseEmitter;
 trait JsonResponder
 {
     /**
-     * Create and emit a JSON response.
+     * Create a JSON response without emitting it.
      *
      * @param array $data The data to encode as JSON
      * @param int $statusCode HTTP status code (default: 200)
@@ -34,21 +34,6 @@ trait JsonResponder
      */
     protected function jsonResponse(array $data, int $statusCode = 200, array $headers = []): ResponseInterface
     {
-        $response = new \Laminas\Diactoros\Response\JsonResponse($data, $statusCode, $headers);
-
-        $this->emitJsonResponse($response);
-
-        return $response;
-    }
-
-    /**
-     * Internal method to emit a JSON response.
-     *
-     * @param ResponseInterface $response The response to emit
-     */
-    private function emitJsonResponse(ResponseInterface $response): void
-    {
-        $emitter = new ResponseEmitter();
-        $emitter->emit($response);
+        return new \Laminas\Diactoros\Response\JsonResponse($data, $statusCode, $headers);
     }
 }

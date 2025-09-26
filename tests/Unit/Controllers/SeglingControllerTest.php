@@ -73,15 +73,18 @@ class SeglingControllerTest extends TestCase
             ->with('segling-show-create')
             ->willReturn('/segling/create');
 
+        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with('viewSegling', [
                 'title' => 'Bokningslista',
                 'newAction' => '/segling/create',
                 'items' => $seglingData
-            ]);
+            ])
+            ->willReturn($mockResponse);
 
-        $this->controller->list();
+        $result = $this->controller->list();
+        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
     }
 
     public function testEditWithValidId(): void
@@ -115,12 +118,14 @@ class SeglingControllerTest extends TestCase
             ->with('segling-save', ['id' => 1])
             ->willReturn('/segling/save/1');
 
+        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
-            ->with('viewSeglingEdit', $this->isType('array'));
+            ->with('viewSeglingEdit', $this->isType('array'))
+            ->willReturn($mockResponse);
 
         $result = $this->controller->edit(['id' => '1']);
-        $this->assertNull($result);
+        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
     }
 
     public function testEditWithInvalidId(): void
@@ -224,14 +229,17 @@ class SeglingControllerTest extends TestCase
             ->with('segling-create')
             ->willReturn('/segling/create');
 
+        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with('viewSeglingNew', [
                 'title' => 'Skapa ny segling',
                 'formUrl' => '/segling/create'
-            ]);
+            ])
+            ->willReturn($mockResponse);
 
-        $this->controller->showCreate();
+        $result = $this->controller->showCreate();
+        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
     }
 
     public function testCreateSuccess(): void

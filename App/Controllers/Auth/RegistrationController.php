@@ -10,6 +10,7 @@ use App\Traits\ResponseFormatter;
 use App\Utils\Session;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 
 class RegistrationController extends AuthBaseController
@@ -28,38 +29,36 @@ class RegistrationController extends AuthBaseController
         $this->view = new View($this->app);
     }
 
-    public function showRegister(): void
+    public function showRegister(): ResponseInterface
     {
         $this->setCsrfToken();
-        $this->view->render(self::REGISTER_VIEW);
+        return $this->view->render(self::REGISTER_VIEW);
     }
 
-    public function register(): void
+    public function register(): ResponseInterface
     {
         if (!$this->validateRecaptcha()) {
-            $this->renderWithError(self::REGISTER_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
-            return;
+            return $this->renderWithError(self::REGISTER_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
         }
 
         $result = $this->userAuthService->registerUser($this->request->getParsedBody());
 
         if (!$result['success']) {
-            $this->redirectWithError('show-register', $result['message']);
-            return;
+            return $this->redirectWithError('show-register', $result['message']);
         }
 
         Session::setFlashMessage('success', 'E-post med verifieringslänk har skickats till din e-postadress.');
-        $this->view->render('login/viewLogin');
+        return $this->view->render('login/viewLogin');
     }
 
-    public function activate(array $params): void
+    public function activate(array $params): ResponseInterface
     {
         $result = $this->userAuthService->activateAccount($params['token']);
 
         if (!$result['success']) {
-            $this->redirectWithError('login', $result['message']);
+            return $this->redirectWithError('login', $result['message']);
         } else {
-            $this->redirectWithSuccess('login', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
+            return $this->redirectWithSuccess('login', 'Ditt konto är nu aktiverat. Du kan nu logga in.');
         }
     }
 }

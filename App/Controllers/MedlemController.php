@@ -16,6 +16,7 @@ use App\Services\MedlemDataValidatorService;
 use App\Application;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use PDO;
 use Monolog\Logger;
 
@@ -64,7 +65,7 @@ class MedlemController extends BaseController
      *
      * Fetches all members from the repository and renders them in a view.
      */
-    public function listAll(): void
+    public function listAll(): ResponseInterface
     {
         $result = $this->medlemRepo->getAll();
 
@@ -74,13 +75,13 @@ class MedlemController extends BaseController
             "items" => $result,
             'newAction' => $this->app->getRouter()->generate('medlem-new')
         ];
-        $this->view->render('viewMedlem', $data);
+        return $this->view->render('viewMedlem', $data);
     }
 
-    public function listJson(): void
+    public function listJson(): ResponseInterface
     {
         $result = $this->medlemRepo->getAll();
-        $this->jsonResponse($result);
+        return $this->jsonResponse($result);
     }
 
     /**
@@ -91,7 +92,7 @@ class MedlemController extends BaseController
      *
      * @param array $params The route parameters, must contain 'id'
      */
-    public function edit(array $params): void
+    public function edit(array $params): ResponseInterface
     {
         $id = (int) $params['id'];
 
@@ -118,10 +119,9 @@ class MedlemController extends BaseController
                 'deleteAction' => $this->app->getRouter()->generate('medlem-delete')
             ];
 
-            $this->view->render('viewMedlemEdit', $data);
+            return $this->view->render('viewMedlemEdit', $data);
         } catch (Exception $e) {
-            $this->redirectWithError('medlem-list', 'Kunde inte hämta medlem!');
-            return;
+            return $this->redirectWithError('medlem-list', 'Kunde inte hämta medlem!');
         }
     }
 
@@ -132,7 +132,7 @@ class MedlemController extends BaseController
      *
      * @param array $params The route parameters, must contain 'id'
      */
-    public function update(array $params): void
+    public function update(array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->logger, $id);
@@ -144,21 +144,20 @@ class MedlemController extends BaseController
                 if ($this->validator->hasEmailChanged()) {
                     $this->updateEmailAliases();
                 }
-                $this->redirectWithSuccess(
+                return $this->redirectWithSuccess(
                     'medlem-list',
                     'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' uppdaterad!'
                 );
             } catch (Exception $e) {
-                $this->redirectWithError('medlem-list', 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
+                return $this->redirectWithError('medlem-list', 'Kunde inte uppdatera medlem! Fel: ' . $e->getMessage());
             }
         } else {
             //Error messages are set in the MedlemDataValidatorService so just redirect
             if (isset($medlem->id)) {
-                $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
+                return $this->redirectWithError('medlem-edit', '');
             } else {
-                $redirectUrl = $this->app->getRouter()->generate('medlem-new');
+                return $this->redirectWithError('medlem-new', '');
             }
-            $this->emitRedirect($redirectUrl);
         }
     }
 
@@ -170,9 +169,9 @@ class MedlemController extends BaseController
      * 2. Prepares data for the view
      * 3. Renders the 'viewMedlemNew' template with the prepared data.
      *
-     * @return void
+     * @return ResponseInterface
      */
-    public function showNewForm(): void
+    public function showNewForm(): ResponseInterface
     {
         $roll = new Roll($this->conn, $this->logger);
         $roller = $roll->getAll();
@@ -183,7 +182,7 @@ class MedlemController extends BaseController
             //Used in the view to set the proper action url for the form
             'formAction' => $this->app->getRouter()->generate('medlem-create')
         ];
-        $this->view->render('viewMedlemNew', $data);
+        return $this->view->render('viewMedlemNew', $data);
     }
 
     /**
@@ -197,10 +196,10 @@ class MedlemController extends BaseController
      * 4. Sets a flash message indicating the result of the operation.
      * 5. Redirects to the member list page.
      *
-     * @return void
+     * @return ResponseInterface
      * @throws Exception If there's an error during the member creation process
      */
-    public function create(): void
+    public function create(): ResponseInterface
     {
         $medlem = new Medlem($this->conn, $this->logger);
         $postData = $this->request->getParsedBody();
@@ -210,12 +209,12 @@ class MedlemController extends BaseController
                 $medlem->create();
                 $this->updateEmailAliases();
 
-                $this->redirectWithSuccess(
+                return $this->redirectWithSuccess(
                     'medlem-list',
                     'Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' skapad!'
                 );
             } catch (Exception $e) {
-                $this->redirectWithError(
+                return $this->redirectWithError(
                     'medlem-create',
                     'Kunde inte skapa medlem! Fel: ' . $e->getMessage()
                 );
@@ -223,11 +222,10 @@ class MedlemController extends BaseController
         } else {
             //Error messages are set in the MedlemDataValidatorService so just redirect
             if (isset($medlem->id)) {
-                $redirectUrl = $this->app->getRouter()->generate('medlem-edit', ['id' => $medlem->id]);
+                return $this->redirectWithError('medlem-edit', '');
             } else {
-                $redirectUrl = $this->app->getRouter()->generate('medlem-new');
+                return $this->redirectWithError('medlem-new', '');
             }
-            $this->emitRedirect($redirectUrl);
         }
     }
 
@@ -240,7 +238,7 @@ class MedlemController extends BaseController
      *
      * @throws Exception If there's an error during the deletion process
      */
-    public function delete(): void
+    public function delete(): ResponseInterface
     {
         $id = (int) $this->request->getParsedBody()['id'];
         try {
@@ -250,10 +248,10 @@ class MedlemController extends BaseController
 
             $this->logger->info('Medlem ' . $medlem->fornamn . ' ' . $medlem->efternamn . ' borttagen av: ' . Session::get('user_id'));
             // Set the URL and redirect
-            $this->redirectWithSuccess('medlem-list', 'Medlem borttagen!');
+            return $this->redirectWithSuccess('medlem-list', 'Medlem borttagen!');
         } catch (Exception $e) {
             $this->logger->warning('Kunde inte ta bort medlem: ' . $e->getMessage());
-            $this->redirectWithError('medlem-list', 'Kunde inte ta bort medlem! Fel: ' . $e->getMessage());
+            return $this->redirectWithError('medlem-list', 'Kunde inte ta bort medlem! Fel: ' . $e->getMessage());
         }
     }
 
