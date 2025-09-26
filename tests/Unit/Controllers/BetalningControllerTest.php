@@ -123,7 +123,7 @@ class BetalningControllerTest extends TestCase
         // Mock medlem object
         $mockMedlem = $this->createMock(\App\Models\Medlem::class);
         $mockMedlem->method('getNamn')->willReturn('Test Person');
-        
+
         $this->medlemRepo->expects($this->once())
             ->method('getById')
             ->with(1)
@@ -155,7 +155,7 @@ class BetalningControllerTest extends TestCase
         // Mock medlem object
         $mockMedlem = $this->createMock(\App\Models\Medlem::class);
         $mockMedlem->method('getNamn')->willReturn('Test Person');
-        
+
         $this->medlemRepo->expects($this->once())
             ->method('getById')
             ->with(1)

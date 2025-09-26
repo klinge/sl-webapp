@@ -26,11 +26,7 @@ class View
     /** @var array Data to be passed to the view */
     private $data = [];
 
-    /** @var ResponseInterface Response to be emitted */
-    private ResponseInterface $response;
 
-    /** @var ResponseEmitter Helper class to emit the respose created */
-    private ResponseEmitter $emitter;
 
     /**
      * Constructor
@@ -42,7 +38,6 @@ class View
         $this->app = $app;
         $this->appDir = $this->app->getAppDir();
         $this->rootPath = $this->app->getRootDir();
-        $this->emitter = new ResponseEmitter();
     }
 
     /**

@@ -167,7 +167,7 @@ class MedlemControllerTest extends TestCase
 
         // Execute the method and verify it returns a JSON response
         $response = $this->controller->listJson();
-        
+
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals('application/json', $response->getHeader('Content-Type')[0]);
         $this->assertEquals($expectedMembers, json_decode((string) $response->getBody(), true));

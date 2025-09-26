@@ -49,15 +49,17 @@ class ViewTest extends TestCase
     public function testAssignDataIsAvailableInTemplate()
     {
         // Create a template that uses assigned data
-        file_put_contents($this->tempDir . '/public/views/data_test.php', 
-            '<html><body><?= $testKey ?? "" ?> - <?= $numberKey ?? "" ?></body></html>');
-        
+        file_put_contents(
+            $this->tempDir . '/public/views/data_test.php',
+            '<html><body><?= $testKey ?? "" ?> - <?= $numberKey ?? "" ?></body></html>'
+        );
+
         $this->view->assign('testKey', 'testValue');
         $this->view->assign('numberKey', 42);
 
         $response = $this->view->render('data_test');
         $body = (string) $response->getBody();
-        
+
         $this->assertStringContainsString('testValue', $body);
         $this->assertStringContainsString('42', $body);
     }

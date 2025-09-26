@@ -50,7 +50,7 @@ class ResponseFormatterTest extends TestCase
             ->willReturn($this->router);
 
         $response = $this->callProtectedMethod($this->testClass, 'redirectWithSuccess', ['success-route', 'Success message']);
-        
+
         $this->assertEquals('Success message', Session::get('flash_message')['message']);
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
@@ -67,7 +67,7 @@ class ResponseFormatterTest extends TestCase
             ->willReturn($this->router);
 
         $response = $this->callProtectedMethod($this->testClass, 'redirectWithError', ['error-route', 'Error message']);
-        
+
         $this->assertEquals('Error message', Session::get('flash_message')['message']);
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertInstanceOf(ResponseInterface::class, $response);
