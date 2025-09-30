@@ -6,53 +6,41 @@ namespace App\Middleware;
 
 use App\Utils\Session;
 use App\Config\RouteConfig;
+use App\Middleware\Contracts\RequestHandlerInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
+use Laminas\Diactoros\Response\RedirectResponse;
 
-class AuthorizationMiddleware extends BaseMiddleware implements MiddlewareInterface
+class AuthorizationMiddleware extends BaseMiddleware
 {
-    /**
-     * Middleware that handles authorization for incoming requests.
-     *
-     * This method checks if the current user has the necessary permissions to access
-     * the requested route. It performs the following checks:
-     * 1. If the user is an admin
-     * 2. If the route doesn't require login
-     * 3. If it's a route that is (non-admin) user-accessible
-     *
-     * If none of these conditions are met, it handles the unauthorized access by either:
-     * - Sending a JSON response for AJAX requests
-     * - Setting a flash message and redirecting for regular requests
-     *
-     * @return void
-     */
-    public function handle(): void
+    public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         $match = $this->router->match();
         if ($match) {
             $routeName = $match['name'];
-            //admins can access everything so just return..
+            // Admins can access everything
             if (Session::isAdmin()) {
-                return;
+                return $handler->handle($request);
             }
-            //Anyone can access user routes and routes that don't require login so just return;
+            // Anyone can access user routes and routes that don't require login
             if ($this->isUserRoute($routeName) || $this->isOpenRoute($routeName)) {
-                return;
+                return $handler->handle($request);
             }
             // If we get here the user is not admin and it's a protected route
-            if ($this->isAjaxRequest()) {
-                $this->jsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.', 401]);
+            $this->logger->info('Request to an admin page, user is not admin. URI: ' . $request->getUri()->__toString() .
+                ', Remote IP: ' . $request->getServerParams()['REMOTE_ADDR'] .
+                ', User ID: ' . Session::get('user_id'));
+
+            if ($this->isAjaxRequest($request)) {
+                return $this->jsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.'], 401);
             } else {
                 Session::setFlashMessage('error', 'Du måste vara administratör för att se denna sida.');
-                header('Location: ' . $this->router->generate('user-home'));
+                return new RedirectResponse($this->router->generate('user-home'));
             }
-            //Log the exception
-            $this->logger->info('Request to an admin page, user is not admin. URI: ' . $this->request->getUri()->__toString() .
-                ', Remote IP: ' . $this->request->getServerParams()['REMOTE_ADDR'] .
-                ', User ID: ' . Session::get('user_id'));
-            $this->doExit();
-        } else {
-            //If no route was found just exit, 404 errors are handled elsewhere
-            $this->doExit();
         }
+
+        // If no route was found, continue to handler (404 errors are handled elsewhere)
+        return $handler->handle($request);
     }
 
     protected function isOpenRoute(string $routeName): bool

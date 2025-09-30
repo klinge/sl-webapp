@@ -21,7 +21,7 @@ class LoggerServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()->add(Logger::class, function () {
             $config = $this->getContainer()->get('config');
-            $logger = new Logger($config['LOG_NAME']);
+            $logger = new Logger($config['LOG_NAME'] ?? 'sl-webapp');
 
             try {
                 if ($config['APP_ENV'] === 'DEV') {
@@ -30,7 +30,7 @@ class LoggerServiceProvider extends AbstractServiceProvider
 
                     $logger->pushHandler(new StreamHandler($logPath, Level::Debug));
                 } else {
-                    $logger->pushHandler(new StreamHandler($config['LOG_DIR'] . '/app.log', $config['LOG_LEVEL']));
+                    $logger->pushHandler(new StreamHandler(($config['LOG_DIR'] ?? '/tmp') . '/app.log', $config['LOG_LEVEL'] ?? Level::Warning));
                 }
             } catch (\Exception $e) {
                 // Fallback to system logger or stderr

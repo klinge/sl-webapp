@@ -28,7 +28,7 @@ class LoginControllerTest extends TestCase
     protected function setUp(): void
     {
         // Start session for tests
-        session_start();
+        Session::start();
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->medlemRepo = $this->createMock(MedlemRepository::class);
