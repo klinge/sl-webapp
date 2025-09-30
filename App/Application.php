@@ -105,7 +105,7 @@ class Application
     private function loadEnvironment(): void
     {
         $dotenv = Dotenv::createImmutable($this->rootDir);
-        $dotenv->load();
+        $dotenv->safeLoad();
     }
 
     /**
