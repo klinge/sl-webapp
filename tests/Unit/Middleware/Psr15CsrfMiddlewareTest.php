@@ -34,10 +34,10 @@ class Psr15CsrfMiddlewareTest extends TestCase
         $this->uri = $this->createMock(UriInterface::class);
 
         $this->middleware = new CsrfMiddleware($this->router, $this->logger);
-        
+
         $this->request->method('getUri')->willReturn($this->uri);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
-        
+
         // Clear session before each test
         $_SESSION = [];
     }
@@ -90,7 +90,7 @@ class Psr15CsrfMiddlewareTest extends TestCase
         $this->request->method('getMethod')->willReturn('POST');
         $this->request->method('getHeaderLine')->with('Content-Type')->willReturn('application/x-www-form-urlencoded');
         $this->request->method('getParsedBody')->willReturn(['csrf_token' => 'valid_token']);
-        
+
         $_SESSION['csrf_token'] = 'valid_token';
 
         $this->logger->expects($this->once())
@@ -116,7 +116,7 @@ class Psr15CsrfMiddlewareTest extends TestCase
         $this->request->method('getParsedBody')->willReturn(['csrf_token' => 'invalid_token']);
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
         $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
-        
+
         $_SESSION['csrf_token'] = 'valid_token';
 
         $this->logger->expects($this->once())
@@ -136,9 +136,9 @@ class Psr15CsrfMiddlewareTest extends TestCase
         $this->request->method('getHeaderLine')->with('Content-Type')->willReturn('application/x-www-form-urlencoded');
         $this->request->method('getParsedBody')->willReturn(['csrf_token' => 'invalid_token']);
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
-        
+
         $_SESSION['csrf_token'] = 'valid_token';
-        
+
         $this->router->method('generate')->with('tech-error')->willReturn('/error');
 
         $this->logger->expects($this->once())
@@ -155,11 +155,11 @@ class Psr15CsrfMiddlewareTest extends TestCase
         $this->uri->method('getPath')->willReturn('/test');
         $this->request->method('getMethod')->willReturn('POST');
         $this->request->method('getHeaderLine')->with('Content-Type')->willReturn('application/json');
-        
+
         $body = $this->createMock(StreamInterface::class);
         $body->method('getContents')->willReturn('{"csrf_token": "valid_token"}');
         $this->request->method('getBody')->willReturn($body);
-        
+
         $_SESSION['csrf_token'] = 'valid_token';
 
         $expectedResponse = $this->createMock(ResponseInterface::class);

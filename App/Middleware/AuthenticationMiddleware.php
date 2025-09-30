@@ -26,7 +26,7 @@ class AuthenticationMiddleware extends BaseMiddleware
                     $request->getServerParams()['REMOTE_ADDR']);
 
                 return $this->jsonResponse([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'
                 ], 401);
             }

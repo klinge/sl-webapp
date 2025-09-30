@@ -29,7 +29,7 @@ class ApplicationHandlerTest extends TestCase
         $this->container = $this->createMock(Container::class);
 
         $this->app->method('getContainer')->willReturn($this->container);
-        
+
         $this->handler = new ApplicationHandler($this->app, $this->router);
     }
 
@@ -41,7 +41,7 @@ class ApplicationHandlerTest extends TestCase
 
         $this->assertInstanceOf(HtmlResponse::class, $response);
         $this->assertEquals(404, $response->getStatusCode());
-        $this->assertStringContainsString('404', (string)$response->getBody());
+        $this->assertStringContainsString('404', (string) $response->getBody());
     }
 
 
@@ -52,7 +52,7 @@ class ApplicationHandlerTest extends TestCase
             'target' => 'NonExistentController#testAction',
             'params' => []
         ];
-        
+
         $this->router->method('match')->willReturn($match);
 
         $this->expectException(\Exception::class);
@@ -63,21 +63,21 @@ class ApplicationHandlerTest extends TestCase
 
     public function testHandleCallableTarget(): void
     {
-        $callable = function($request) {
+        $callable = function ($request) {
             return new HtmlResponse('Callable Response');
         };
-        
+
         $match = [
             'target' => $callable,
             'params' => []
         ];
-        
+
         $this->router->method('match')->willReturn($match);
 
         $response = $this->handler->handle($this->request);
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertStringContainsString('Callable Response', (string)$response->getBody());
+        $this->assertStringContainsString('Callable Response', (string) $response->getBody());
     }
 
     public function testHandleThrowsExceptionForInvalidTarget(): void
@@ -86,7 +86,7 @@ class ApplicationHandlerTest extends TestCase
             'target' => 'invalid_target_format',
             'params' => []
         ];
-        
+
         $this->router->method('match')->willReturn($match);
 
         $this->expectException(\Exception::class);
@@ -94,6 +94,4 @@ class ApplicationHandlerTest extends TestCase
 
         $this->handler->handle($this->request);
     }
-
-
 }

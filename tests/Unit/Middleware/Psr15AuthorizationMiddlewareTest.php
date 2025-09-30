@@ -35,7 +35,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         $this->uri = $this->createMock(UriInterface::class);
 
         $this->middleware = new AuthorizationMiddleware($this->router, $this->logger);
-        
+
         $this->request->method('getUri')->willReturn($this->uri);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
         $this->uri->method('__toString')->willReturn('/test/path');
@@ -117,7 +117,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     {
         Session::remove('is_admin');
         $this->router->method('match')->willReturn(['name' => 'medlem-list']);
-        
+
         // Setup AJAX request
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
         $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
@@ -137,7 +137,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         Session::remove('is_admin');
         $this->router->method('match')->willReturn(['name' => 'medlem-list']);
         $this->router->method('generate')->with('user-home')->willReturn('/user');
-        
+
         // Setup non-AJAX request
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
 
