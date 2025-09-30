@@ -41,7 +41,9 @@ class Session
 
     public static function destroy(): void
     {
-        session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
     }
 
     public static function isLoggedIn(): bool

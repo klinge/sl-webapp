@@ -13,7 +13,9 @@ use Laminas\Diactoros\ServerRequestFactory;
 use League\Container\Container;
 use App\Config\RouteConfig;
 use App\Config\ContainerConfigurator;
-use App\Middleware\MiddlewareInterface;
+use App\Middleware\Contracts\MiddlewareInterface;
+use App\Middleware\Contracts\MiddlewareStack;
+use App\Middleware\ApplicationHandler;
 use App\Middleware\AuthorizationMiddleware;
 use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
@@ -38,7 +40,7 @@ class Application
     private array $config = [];
     private $container;
     private ?AltoRouter $router = null;
-    private array $middlewares = [];
+    private MiddlewareStack $middlewareStack;
     private string $rootDir = '';
     private ServerRequestInterface $psrRequest;
     private Logger $logger;
@@ -59,12 +61,12 @@ class Application
         );
         $this->setupContainer();
         $this->logger = $this->container->get(Logger::class);
-
+        $this->setupMiddlewareStack();
 
         // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this->psrRequest, $this->router, $this->logger));
-        $this->addMiddleware(new AuthorizationMiddleware($this->psrRequest, $this->router, $this->logger));
-        $this->addMiddleware(new CsrfMiddleware($this->psrRequest, $this->router, $this->logger));
+        $this->addMiddleware(new AuthenticationMiddleware($this->router, $this->logger));
+        $this->addMiddleware(new AuthorizationMiddleware($this->router, $this->logger));
+        $this->addMiddleware(new CsrfMiddleware($this->router, $this->logger));
     }
 
     private function setupContainer(): void
@@ -168,9 +170,9 @@ class Application
      *
      * @param ?string $key The environment variable to retrieve
      *
-     * @return array|string|null The entire config array, the value of the environment variable or null if the key is not found
+     * @return array|string|bool|null The entire config array, the value of the environment variable or null if the key is not found
      */
-    public function getConfig(?string $key): array|string|null
+    public function getConfig(?string $key): array|string|bool|null
     {
         if ($key === null) {
             return $this->config;
@@ -215,12 +217,15 @@ class Application
         //Only require a secure connection for production
         $isProduction = $this->getAppEnv() === 'PROD';
 
-        session_set_cookie_params([
-            'lifetime' => 3600,
-            'secure' => $isProduction,
-            'httponly' => true,
-            'samesite' => 'Strict',
-        ]);
+        // Only set cookie params if session is not already active
+        if (session_status() === PHP_SESSION_NONE) {
+            session_set_cookie_params([
+                'lifetime' => 3600,
+                'secure' => $isProduction,
+                'httponly' => true,
+                'samesite' => 'Strict',
+            ]);
+        }
 
         Session::start();
 
@@ -252,108 +257,30 @@ class Application
     }
 
     /**
-     * Adds a middleware to the application. The middleware must implement
-     * the MiddlewareInterface.
-     *
-     * @param MiddlewareInterface $middleware The middleware instance to add
-     *
-     * @return void
+     * Sets up the PSR-15 compliant middleware stack.
+     */
+    private function setupMiddlewareStack(): void
+    {
+        $applicationHandler = new ApplicationHandler($this, $this->router);
+        $this->middlewareStack = new MiddlewareStack($applicationHandler);
+    }
+
+    /**
+     * Adds a middleware to the application stack.
      */
     public function addMiddleware(MiddlewareInterface $middleware): void
     {
-        $this->middlewares[] = $middleware;
+        $this->middlewareStack->add($middleware);
     }
 
     /**
-     * Runs all registered middlewares.
-     *
-     * This method iterates over the registered middlewares and calls the `handle`
-     * method on each middleware instance.
-     *
-     * @return void
-     */
-    public function runMiddleware(): void
-    {
-        foreach ($this->middlewares as $middleware) {
-            $middleware->handle();
-        }
-    }
-
-    /**
-     * Dispatches the request to the appropriate controller and action.
-     *
-     * This method handles the dispatching of the request based on the matched route.
-     * If the matched route target is a string in the format "controller#action", it
-     * will instantiate the specified controller class, check if the action method
-     * exists, and call it with the provided parameters.
-     *
-     * If the matched route target is a callable (closure), it will call the closure
-     * with the provided parameters.
-     *
-     * @param array $match The matched route information
-     * @param ServerRequestInterface $request The current request object
-     *
-     * @return void
-     *
-     * @throws Exception If the controller class is not found
-     */
-    private function dispatch(array $match, ServerRequestInterface $request): void
-    {
-        //If we have a string with a # then it's a controller action pair
-        if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
-            //Parse the match to get controller, action and params
-            list($controller, $action) = explode('#', $match['target']);
-            $params = $match['params'];
-
-            //Autoloading does not work with dynamically created classes, manually load the class
-            $controllerClass = "App\\Controllers\\{$controller}";
-            if (!class_exists($controllerClass)) {
-                throw new Exception("Controller class {$controllerClass} not found");
-            }
-
-            //Check that the controller has the requested method and call it
-            if (method_exists($controllerClass, $action)) {
-                $controllerInstance = $this->container->get($controllerClass);
-                $response = $controllerInstance->{$action}($params);
-
-                // Handle PSR-7 Response objects
-                if ($response instanceof ResponseInterface) {
-                    $emitter = new ResponseEmitter();
-                    $emitter->emit($response);
-                }
-            } else {
-                //Maybe also throw a 404 error here?
-                $this->logger->error('Error: can not call ' . $controller . '#' . $action);
-            }
-        } elseif (is_callable($match['target'])) {
-            //Handle the case then the target is a closure
-            call_user_func_array($match['target'], $match['params']);
-        } else {
-            $this->logger->error('Invalid call to dispatch(). $match was: ' . json_encode($match, JSON_PRETTY_PRINT));
-            header($this->psrRequest->getServerParams()['SERVER_PROTOCOL'] . ' 404 Not Found');
-        }
-    }
-
-    /**
-     * Runs the application.
-     *
-     * This method is the entry point for the application. It matches the current
-     * request against the defined routes, and if a match is found, it dispatches
-     * the request to the appropriate controller and action. If no match is found,
-     * it handles the 404 error.
-     *
-     * @return void
+     * Runs the application through the PSR-15 middleware stack.
      */
     public function run(): void
     {
-        // Match the current request
-        $match = $this->router->match();
-        // Handle the route match and execute the appropriate controller
-        if ($match === false) {
-            echo "404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!";
-            // here you can handle 404
-        } else {
-            $this->dispatch($match, $this->psrRequest);
-        }
+        $response = $this->middlewareStack->handle($this->psrRequest);
+
+        $emitter = new ResponseEmitter();
+        $emitter->emit($response);
     }
 }

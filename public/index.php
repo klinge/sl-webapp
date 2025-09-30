@@ -6,8 +6,6 @@ require_once __DIR__ . '/../vendor/autoload.php';
 
 // Bootstrap the application
 $app = new App\Application();
-// Then run any middleware
-$app->runMiddleware();
-// Finally run the main application
+// Run the application through PSR-15 middleware stack
 $app->run();
 exit;
