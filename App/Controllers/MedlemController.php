@@ -73,7 +73,7 @@ class MedlemController extends BaseController
         $data = [
             "title" => "Medlemmar",
             "items" => $result,
-            'newAction' => $this->app->getRouter()->generate('medlem-new')
+            'newAction' => $this->createUrl('medlem-new')
         ];
         return $this->view->render('viewMedlem', $data);
     }
@@ -113,10 +113,10 @@ class MedlemController extends BaseController
                 'seglingar' => $seglingar,
                 'betalningar' => $betalningar,
                 //Used in the view to set the proper action url for the form
-                'formAction' => $this->app->getRouter()->generate('medlem-update', ['id' => $id]),
-                'createBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
-                'listBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
-                'deleteAction' => $this->app->getRouter()->generate('medlem-delete')
+                'formAction' => $this->createUrl('medlem-update', ['id' => $id]),
+                'createBetalningAction' => $this->createUrl('betalning-medlem', ['id' => $id]),
+                'listBetalningAction' => $this->createUrl('betalning-medlem', ['id' => $id]),
+                'deleteAction' => $this->createUrl('medlem-delete')
             ];
 
             return $this->view->render('viewMedlemEdit', $data);
@@ -180,7 +180,7 @@ class MedlemController extends BaseController
             "title" => "Lägg till medlem",
             "roller" => $roller,
             //Used in the view to set the proper action url for the form
-            'formAction' => $this->app->getRouter()->generate('medlem-create')
+            'formAction' => $this->createUrl('medlem-create')
         ];
         return $this->view->render('viewMedlemNew', $data);
     }

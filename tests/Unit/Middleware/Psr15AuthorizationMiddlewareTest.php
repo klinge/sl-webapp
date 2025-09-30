@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
-use AltoRouter;
+use League\Route\Router;
 use Monolog\Logger;
 
 class Psr15AuthorizationMiddlewareTest extends TestCase
@@ -29,7 +29,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     protected function setUp(): void
     {
         $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->logger = $this->createMock(Logger::class);
         $this->handler = $this->createMock(RequestHandlerInterface::class);
         $this->uri = $this->createMock(UriInterface::class);
@@ -39,6 +39,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         $this->request->method('getUri')->willReturn($this->uri);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
         $this->uri->method('__toString')->willReturn('/test/path');
+        $this->uri->method('getPath')->willReturn('/test/path');
 
         Session::start();
         Session::set('user_id', '123');
@@ -49,9 +50,10 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         Session::destroy();
     }
 
-    public function testProcessNoRouteFoundCallsHandler(): void
+    public function testProcessUnknownRouteWithAdminCallsHandler(): void
     {
-        $this->router->method('match')->willReturn(false);
+        Session::set('is_admin', true);
+        $this->uri->method('getPath')->willReturn('/unknown/path');
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())
@@ -67,7 +69,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessAdminUserCanAccessAdminPage(): void
     {
         Session::set('is_admin', true);
-        $this->router->method('match')->willReturn(['name' => 'medlem-list']);
+        $this->uri->method('getPath')->willReturn('/admin/page');
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())
@@ -83,15 +85,24 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessNonAdminUserCanAccessUserRoute(): void
     {
         Session::remove('is_admin');
-        $this->router->method('match')->willReturn(['name' => 'user-home']);
+        Session::set('user_id', 123); // User must be logged in
+        
+        // Create fresh mocks for this test
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn('/user');
+        $uri->method('__toString')->willReturn('/user');
+        
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('getUri')->willReturn($uri);
+        $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())
             ->method('handle')
-            ->with($this->request)
+            ->with($request)
             ->willReturn($expectedResponse);
 
-        $response = $this->middleware->process($this->request, $this->handler);
+        $response = $this->middleware->process($request, $this->handler);
 
         $this->assertSame($expectedResponse, $response);
     }
@@ -99,16 +110,25 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessNonAdminUserCanAccessOpenRoute(): void
     {
         Session::remove('is_admin');
+        Session::set('user_id', 123); // User must be logged in
         RouteConfig::$noLoginRequiredRoutes = ['show-login'];
-        $this->router->method('match')->willReturn(['name' => 'show-login']);
+        
+        // Create fresh mocks for this test
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn('/login');
+        $uri->method('__toString')->willReturn('/login');
+        
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('getUri')->willReturn($uri);
+        $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())
             ->method('handle')
-            ->with($this->request)
+            ->with($request)
             ->willReturn($expectedResponse);
 
-        $response = $this->middleware->process($this->request, $this->handler);
+        $response = $this->middleware->process($request, $this->handler);
 
         $this->assertSame($expectedResponse, $response);
     }
@@ -116,7 +136,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessNonAdminUserCannotAccessAdminPageAjaxRequest(): void
     {
         Session::remove('is_admin');
-        $this->router->method('match')->willReturn(['name' => 'medlem-list']);
+        $this->uri->method('getPath')->willReturn('/admin/page');
 
         // Setup AJAX request
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
@@ -135,8 +155,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessNonAdminUserCannotAccessAdminPageNonAjaxRequest(): void
     {
         Session::remove('is_admin');
-        $this->router->method('match')->willReturn(['name' => 'medlem-list']);
-        $this->router->method('generate')->with('user-home')->willReturn('/user');
+        $this->uri->method('getPath')->willReturn('/admin/page');
 
         // Setup non-AJAX request
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);

@@ -15,9 +15,10 @@ class AuthorizationMiddleware extends BaseMiddleware
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $match = $this->router->match();
-        if ($match) {
-            $routeName = $match['name'];
+        $path = $request->getUri()->getPath();
+        $routeName = $this->getRouteNameFromPath($path);
+        
+        if ($routeName) {
             // Admins can access everything
             if (Session::isAdmin()) {
                 return $handler->handle($request);
@@ -35,12 +36,29 @@ class AuthorizationMiddleware extends BaseMiddleware
                 return $this->jsonResponse(['success' => false, 'message' => 'Du måste vara administratör för att få komma åt denna resurs.'], 401);
             } else {
                 Session::setFlashMessage('error', 'Du måste vara administratör för att se denna sida.');
-                return new RedirectResponse($this->router->generate('user-home'));
+                return new RedirectResponse('/user');
             }
         }
 
         // If no route was found, continue to handler (404 errors are handled elsewhere)
         return $handler->handle($request);
+    }
+
+    private function getRouteNameFromPath(string $path): ?string
+    {
+        // Simple path-to-route-name mapping for authorization check
+        $pathToRoute = [
+            '/' => 'home',
+            '/login' => 'show-login',
+            '/logout' => 'logout',
+            '/auth/register' => 'show-register',
+            '/auth/bytlosenord' => 'show-request-password',
+            '/webhooks/git/handle' => 'git-webhook-listener',
+            '/error' => 'tech-error',
+            '/user' => 'user-home',
+        ];
+
+        return $pathToRoute[$path] ?? 'protected-route';
     }
 
     protected function isOpenRoute(string $routeName): bool

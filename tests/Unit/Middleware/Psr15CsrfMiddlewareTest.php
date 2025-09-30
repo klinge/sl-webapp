@@ -13,7 +13,7 @@ use Psr\Http\Message\UriInterface;
 use Psr\Http\Message\StreamInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
-use AltoRouter;
+use League\Route\Router;
 use Monolog\Logger;
 
 class Psr15CsrfMiddlewareTest extends TestCase
@@ -28,7 +28,7 @@ class Psr15CsrfMiddlewareTest extends TestCase
     protected function setUp(): void
     {
         $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->logger = $this->createMock(Logger::class);
         $this->handler = $this->createMock(RequestHandlerInterface::class);
         $this->uri = $this->createMock(UriInterface::class);
@@ -139,7 +139,7 @@ class Psr15CsrfMiddlewareTest extends TestCase
 
         $_SESSION['csrf_token'] = 'valid_token';
 
-        $this->router->method('generate')->with('tech-error')->willReturn('/error');
+        // No router methods needed since middleware uses hardcoded redirect path
 
         $this->logger->expects($this->once())
             ->method('warning')

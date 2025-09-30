@@ -52,7 +52,7 @@ class SeglingController extends BaseController
         //Put everyting in the data variable that is used by the view
         $data = [
             "title" => "Bokningslista",
-            "newAction" => $this->app->getRouter()->generate('segling-show-create'),
+            "newAction" => $this->createUrl('segling-show-create'),
             "items" => $result
         ];
         return $this->view->render('viewSegling', $data);
@@ -61,7 +61,7 @@ class SeglingController extends BaseController
     public function edit(array $params): ResponseInterface
     {
         $id = (int) $params['id'];
-        $formAction = $this->app->getRouter()->generate('segling-save', ['id' => $id]);
+        $formAction = $this->createUrl('segling-save', ['id' => $id]);
 
         $segling = $this->seglingRepo->getById($id);
         if (!$segling) {
@@ -118,7 +118,7 @@ class SeglingController extends BaseController
 
         if ($this->seglingRepo->updateSegling($id, $cleanValues)) {
             Session::setFlashMessage('success', 'Segling uppdaterad!');
-            $redirectUrl = $this->app->getRouter()->generate('segling-list');
+            $redirectUrl = $this->createUrl('segling-list');
             return new RedirectResponse($redirectUrl);
         } else {
             $return = ['success' => false, 'message' => 'Kunde inte uppdatera seglingen. Försök igen.'];
@@ -137,13 +137,13 @@ class SeglingController extends BaseController
             Session::setFlashMessage('error', 'Kunde inte ta bort seglingen. Försök igen.');
             $this->logger->warning('Failed to delete segling: ' . $id . ' User: ' . Session::get('user_id'));
         }
-        $redirectUrl = $this->app->getRouter()->generate('segling-list');
+        $redirectUrl = $this->createUrl('segling-list');
         return new RedirectResponse($redirectUrl);
     }
 
     public function showCreate(): ResponseInterface
     {
-        $formAction = $this->app->getRouter()->generate('segling-create');
+        $formAction = $this->createUrl('segling-create');
         $data = [
             "title" => "Skapa ny segling",
             "formUrl" => $formAction
@@ -165,7 +165,7 @@ class SeglingController extends BaseController
         //Check if requires indata is there, fail otherwise
         if (empty($cleanValues['startdat']) || empty($cleanValues['slutdat']) || empty($cleanValues['skeppslag'])) {
             Session::setFlashMessage('error', 'Indata saknades. Kunde inte spara seglingen. Försök igen.');
-            $redirectUrl = $this->app->getRouter()->generate('segling-show-create');
+            $redirectUrl = $this->createUrl('segling-show-create');
             return new RedirectResponse($redirectUrl);
         }
 
@@ -173,11 +173,11 @@ class SeglingController extends BaseController
 
         if ($result) {
             Session::setFlashMessage('success', 'Seglingen är nu skapad!');
-            $redirectUrl = $this->app->getRouter()->generate('segling-edit', ['id' => $result]);
+            $redirectUrl = $this->createUrl('segling-edit', ['id' => $result]);
             return new RedirectResponse($redirectUrl);
         } else {
             Session::setFlashMessage('error', 'Kunde inte spara till databas. Försök igen.');
-            $redirectUrl = $this->app->getRouter()->generate('segling-show-create');
+            $redirectUrl = $this->createUrl('segling-show-create');
             return new RedirectResponse($redirectUrl);
         }
     }

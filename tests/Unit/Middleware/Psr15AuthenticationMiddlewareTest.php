@@ -14,7 +14,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
-use AltoRouter;
+use League\Route\Router;
 use Monolog\Logger;
 
 class Psr15AuthenticationMiddlewareTest extends TestCase
@@ -29,7 +29,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
     protected function setUp(): void
     {
         $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->logger = $this->createMock(Logger::class);
         $this->handler = $this->createMock(RequestHandlerInterface::class);
         $this->uri = $this->createMock(UriInterface::class);
@@ -39,6 +39,44 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
         $this->request->method('getUri')->willReturn($this->uri);
         $this->uri->method('__toString')->willReturn('/test/path');
+        $this->uri->method('getPath')->willReturn('/test/path');
+        
+        // Reset RouteConfig to default state
+        RouteConfig::$noLoginRequiredRoutes = [
+            'show-login',
+            'show-register',
+            'login',
+            'logout',
+            'register',
+            'register-activate',
+            'show-request-password',
+            'handle-request-password',
+            'show-reset-password',
+            'reset-password',
+            '404',
+            'home',
+            'git-webhook-listener'
+        ];
+    }
+
+    protected function tearDown(): void
+    {
+        // Reset RouteConfig to default state
+        RouteConfig::$noLoginRequiredRoutes = [
+            'show-login',
+            'show-register',
+            'login',
+            'logout',
+            'register',
+            'register-activate',
+            'show-request-password',
+            'handle-request-password',
+            'show-reset-password',
+            'reset-password',
+            '404',
+            'home',
+            'git-webhook-listener'
+        ];
     }
 
     public function testProcessAjaxRequestWithoutLoginReturnsJsonError(): void
@@ -83,8 +121,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         // Setup non-AJAX request to protected route
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
 
-        $this->router->method('match')->willReturn(['name' => 'protected-route']);
-        $this->router->method('generate')->with('show-login')->willReturn('/login');
+        // No need to mock router methods since middleware uses path-based routing
 
         Session::remove('user_id');
 
@@ -103,7 +140,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         // Setup request to protected route with logged in user
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
 
-        $this->router->method('match')->willReturn(['name' => 'protected-route']);
+        // No need to mock router methods since middleware uses path-based routing
 
         Session::set('user_id', 76);
 
@@ -120,20 +157,30 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
 
     public function testProcessPublicRouteWithoutLoginCallsNextHandler(): void
     {
-        RouteConfig::$noLoginRequiredRoutes = ['public-route'];
-
-        $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
-        $this->router->method('match')->willReturn(['name' => 'public-route']);
-
+        // Ensure session is started and user_id is cleared
+        Session::start();
         Session::remove('user_id');
+        
+        // Ensure show-login is in the no-login-required routes
+        RouteConfig::$noLoginRequiredRoutes = ['show-login'];
+
+        // Create fresh mocks for this test to avoid conflicts
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn('/login');
+        $uri->method('__toString')->willReturn('/login');
+        
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
+        $request->method('getUri')->willReturn($uri);
+        $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())
             ->method('handle')
-            ->with($this->request)
+            ->with($request)
             ->willReturn($expectedResponse);
 
-        $response = $this->middleware->process($this->request, $this->handler);
+        $response = $this->middleware->process($request, $this->handler);
 
         $this->assertSame($expectedResponse, $response);
     }

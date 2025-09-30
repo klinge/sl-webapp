@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use App\Traits\ResponseFormatter;
 use App\Utils\Session;
 use App\Application;
-use AltoRouter;
+use League\Route\Router;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Psr\Http\Message\ResponseInterface;
 
@@ -20,7 +20,7 @@ class ResponseFormatterTest extends TestCase
     {
         // Create mock objects
         $this->app = $this->createMock(Application::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
 
         // Create an anonymous test class that uses the ResponseFormatter trait
         $this->testClass = new class {
@@ -37,17 +37,23 @@ class ResponseFormatterTest extends TestCase
             {
                 $this->view = $view;
             }
+            
+            protected function createUrl(string $routeName, array $params = []): string
+            {
+                $router = $this->app->getRouter();
+                $route = $router->getNamedRoute($routeName);
+                return $route->getPath($params);
+            }
         };
         $this->testClass->setApp($this->app);
     }
 
     public function testRedirectWithSuccessReturnsRedirectResponse()
     {
-        $this->router->method('generate')
-            ->willReturn('/success-route');
-
-        $this->app->method('getRouter')
-            ->willReturn($this->router);
+        $mockRoute = $this->createMock(\League\Route\Route::class);
+        $mockRoute->method('getPath')->willReturn('/success-route');
+        $this->router->method('getNamedRoute')->willReturn($mockRoute);
+        $this->app->method('getRouter')->willReturn($this->router);
 
         $response = $this->callProtectedMethod($this->testClass, 'redirectWithSuccess', ['success-route', 'Success message']);
 
@@ -60,11 +66,10 @@ class ResponseFormatterTest extends TestCase
 
     public function testRedirectWithErrorReturnsRedirectResponse()
     {
-        $this->router->method('generate')
-            ->willReturn('/error-route');
-
-        $this->app->method('getRouter')
-            ->willReturn($this->router);
+        $mockRoute = $this->createMock(\League\Route\Route::class);
+        $mockRoute->method('getPath')->willReturn('/error-route');
+        $this->router->method('getNamedRoute')->willReturn($mockRoute);
+        $this->app->method('getRouter')->willReturn($this->router);
 
         $response = $this->callProtectedMethod($this->testClass, 'redirectWithError', ['error-route', 'Error message']);
 

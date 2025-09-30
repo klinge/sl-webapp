@@ -36,14 +36,8 @@ class LoginControllerTest extends TestCase
         $this->conn = $this->createMock(\PDO::class);
         $this->view = $this->createMock(View::class);
 
-        // Create mock router
-        $router = $this->createMock(\AltoRouter::class);
-        $router->method('generate')
-            ->willReturnMap([
-                ['home', '/'],
-                ['user-home', '/user'],
-                ['show-login', '/login']
-            ]);
+        // Create mock router - League Route doesn't have generate method
+        $router = $this->createMock(\League\Route\Router::class);
 
         // Configure app to return our mock router
         $this->app->method('getRouter')

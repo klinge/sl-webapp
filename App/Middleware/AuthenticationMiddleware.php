@@ -15,7 +15,8 @@ class AuthenticationMiddleware extends BaseMiddleware
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $match = $this->router->match();
+        $path = $request->getUri()->getPath();
+        $routeName = $this->getRouteNameFromPath($path);
 
         // Handle AJAX requests - user must be logged in
         if ($this->isAjaxRequest($request)) {
@@ -30,20 +31,36 @@ class AuthenticationMiddleware extends BaseMiddleware
                     'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'
                 ], 401);
             }
-        } elseif ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
+        } elseif ($routeName && !in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
             $this->logger->info('Request to protected page, user not logged in. URI: ' .
                 $request->getUri()->__toString() .
                 ', Remote IP: ' .
                 $request->getServerParams()['REMOTE_ADDR']);
 
             // Store the current URL for redirect after login
-            Session::set('redirect_url', $match['name']);
+            Session::set('redirect_url', $routeName);
             Session::setFlashMessage('error', 'Du måste vara inloggad för att se denna sida.');
 
-            return new RedirectResponse($this->router->generate('show-login'), 401);
+            return new RedirectResponse('/login', 401);
         }
 
         // Continue to next middleware or handler
         return $handler->handle($request);
+    }
+
+    private function getRouteNameFromPath(string $path): ?string
+    {
+        // Simple path-to-route-name mapping for authentication check
+        $pathToRoute = [
+            '/' => 'home',
+            '/login' => 'show-login',
+            '/logout' => 'logout',
+            '/auth/register' => 'show-register',
+            '/auth/bytlosenord' => 'show-request-password',
+            '/webhooks/git/handle' => 'git-webhook-listener',
+            '/error' => 'tech-error',
+        ];
+
+        return $pathToRoute[$path] ?? 'protected-route';
     }
 }

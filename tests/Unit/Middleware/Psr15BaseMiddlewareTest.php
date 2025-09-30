@@ -9,7 +9,7 @@ use App\Middleware\BaseMiddleware;
 use App\Middleware\Contracts\RequestHandlerInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use AltoRouter;
+use League\Route\Router;
 use Monolog\Logger;
 
 class Psr15BaseMiddlewareTest extends TestCase
@@ -22,7 +22,7 @@ class Psr15BaseMiddlewareTest extends TestCase
     protected function setUp(): void
     {
         $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->logger = $this->createMock(Logger::class);
 
         // Create a concrete implementation for testing

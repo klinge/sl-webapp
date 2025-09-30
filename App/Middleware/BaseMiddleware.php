@@ -9,16 +9,16 @@ use Psr\Http\Message\ServerRequestInterface;
 use Monolog\Logger;
 use App\Traits\JsonResponder;
 use App\Middleware\Contracts\MiddlewareInterface;
-use AltoRouter;
+use League\Route\Router;
 
 abstract class BaseMiddleware implements MiddlewareInterface
 {
     use JsonResponder;
 
-    protected AltoRouter $router;
+    protected Router $router;
     protected Logger $logger;
 
-    public function __construct(AltoRouter $router, Logger $logger)
+    public function __construct(Router $router, Logger $logger)
     {
         $this->router = $router;
         $this->logger = $logger;

@@ -73,6 +73,6 @@ trait ResponseFormatter
      */
     private function createRedirect(string $route): ResponseInterface
     {
-        return new RedirectResponse($this->app->getRouter()->generate($route));
+        return new RedirectResponse($this->createUrl($route));
     }
 }

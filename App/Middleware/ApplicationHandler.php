@@ -10,58 +10,25 @@ use App\Middleware\Contracts\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
-use AltoRouter;
+use League\Route\Router;
+use League\Route\Http\Exception\NotFoundException;
 use Exception;
 
 class ApplicationHandler implements RequestHandlerInterface
 {
     public function __construct(
         private Application $app,
-        private AltoRouter $router
+        private Router $router
     ) {
     }
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $match = $this->router->match();
-
-        if ($match === false) {
+        try {
+            return $this->router->dispatch($request);
+        } catch (NotFoundException $e) {
             return new HtmlResponse("404 - Ingen mappning för denna url. Och dessutom borde detta aldrig kunna hända!!", 404);
-        }
-
-        return $this->dispatch($match, $request);
-    }
-
-    private function dispatch(array $match, ServerRequestInterface $request): ResponseInterface
-    {
-        if (is_string($match['target']) && strpos($match['target'], "#") !== false) {
-            list($controller, $action) = explode('#', $match['target']);
-            $params = $match['params'];
-
-            $controllerClass = "App\\Controllers\\{$controller}";
-            if (!class_exists($controllerClass)) {
-                throw new Exception("Controller class {$controllerClass} not found");
-            }
-
-            if (method_exists($controllerClass, $action)) {
-                $controllerInstance = $this->app->getContainer()->get($controllerClass);
-                $response = $controllerInstance->{$action}($params);
-
-                // Ensure we always return a ResponseInterface
-                if ($response instanceof ResponseInterface) {
-                    return $response;
-                } else {
-                    // Handle legacy controllers that might not return ResponseInterface
-                    return new HtmlResponse($response ?? '', 200);
-                }
-            } else {
-                throw new Exception("Method {$action} not found in {$controllerClass}");
-            }
-        } elseif (is_callable($match['target'])) {
-            $result = call_user_func_array($match['target'], [$request, ...$match['params']]);
-            return $result instanceof ResponseInterface ? $result : new HtmlResponse($result ?? '', 200);
-        } else {
-            throw new Exception('Invalid route target');
         }
     }
 }
+

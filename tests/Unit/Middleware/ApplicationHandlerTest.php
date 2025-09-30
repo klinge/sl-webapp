@@ -10,7 +10,7 @@ use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response\HtmlResponse;
-use AltoRouter;
+use League\Route\Router;
 use League\Container\Container;
 
 class ApplicationHandlerTest extends TestCase
@@ -24,7 +24,7 @@ class ApplicationHandlerTest extends TestCase
     protected function setUp(): void
     {
         $this->app = $this->createMock(Application::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->container = $this->createMock(Container::class);
 
@@ -35,63 +35,27 @@ class ApplicationHandlerTest extends TestCase
 
     public function testHandleReturns404ForNoRouteMatch(): void
     {
-        $this->router->method('match')->willReturn(false);
+        $notFoundResponse = new HtmlResponse('Not Found', 404);
+        $this->router->method('dispatch')->willReturn($notFoundResponse);
 
         $response = $this->handler->handle($this->request);
 
-        $this->assertInstanceOf(HtmlResponse::class, $response);
-        $this->assertEquals(404, $response->getStatusCode());
-        $this->assertStringContainsString('404', (string) $response->getBody());
+        $this->assertSame($notFoundResponse, $response);
     }
 
 
 
-    public function testHandleThrowsExceptionForNonExistentController(): void
+    public function testHandleDispatchesRequestToRouter(): void
     {
-        $match = [
-            'target' => 'NonExistentController#testAction',
-            'params' => []
-        ];
-
-        $this->router->method('match')->willReturn($match);
-
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Controller class App\\Controllers\\NonExistentController not found');
-
-        $this->handler->handle($this->request);
-    }
-
-    public function testHandleCallableTarget(): void
-    {
-        $callable = function ($request) {
-            return new HtmlResponse('Callable Response');
-        };
-
-        $match = [
-            'target' => $callable,
-            'params' => []
-        ];
-
-        $this->router->method('match')->willReturn($match);
+        $expectedResponse = new HtmlResponse('Success');
+        $this->router->method('dispatch')->willReturn($expectedResponse);
 
         $response = $this->handler->handle($this->request);
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertStringContainsString('Callable Response', (string) $response->getBody());
+        $this->assertSame($expectedResponse, $response);
     }
 
-    public function testHandleThrowsExceptionForInvalidTarget(): void
-    {
-        $match = [
-            'target' => 'invalid_target_format',
-            'params' => []
-        ];
 
-        $this->router->method('match')->willReturn($match);
 
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Invalid route target');
 
-        $this->handler->handle($this->request);
-    }
 }
