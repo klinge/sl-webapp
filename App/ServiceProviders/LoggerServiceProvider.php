@@ -21,7 +21,7 @@ class LoggerServiceProvider extends AbstractServiceProvider
     {
         $this->getContainer()->add(Logger::class, function () {
             $config = $this->getContainer()->get('config');
-            $logger = new Logger($config['LOG_NAME']);
+            $logger = new Logger($config['LOG_NAME'] ?? 'sl-webapp');
 
             try {
                 if ($config['APP_ENV'] === 'DEV') {
