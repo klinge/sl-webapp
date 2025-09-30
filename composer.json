@@ -7,7 +7,8 @@
         "andkab/php-turnstile": "^1.0",
         "laminas/laminas-diactoros": "^3.5",
         "guzzlehttp/guzzle": "^7.0",
-        "league/container": "^5.1"
+        "league/container": "^5.1",
+        "league/route": "^6.2"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^4.0",
