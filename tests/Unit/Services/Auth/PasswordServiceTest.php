@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Services;
+namespace Tests\Unit\Services\Auth;
 
 use PHPUnit\Framework\TestCase;
 use App\Services\Auth\PasswordService;
