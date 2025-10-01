@@ -45,7 +45,7 @@ class RouteConfig
             $route->map('POST', '/create', 'App\\Controllers\\BetalningController::createBetalning')->setName('betalning-create');
             $route->map('POST', '/delete/{id:number}', 'App\\Controllers\\BetalningController::deleteBetalning')->setName('betalning-delete');
         });
-        
+
         $router->group('/segling', function (\League\Route\RouteGroup $route) {
             $route->map('GET', '/', 'App\\Controllers\\SeglingController::list')->setName('segling-list');
             $route->map('GET', '/{id:number}', 'App\\Controllers\\SeglingController::edit')->setName('segling-edit');
@@ -56,7 +56,7 @@ class RouteConfig
             $route->map('POST', '/medlem', 'App\\Controllers\\SeglingController::saveMedlem')->setName('segling-medlem-save');
             $route->map('POST', '/medlem/delete', 'App\\Controllers\\SeglingController::deleteMedlemFromSegling')->setName('segling-medlem-delete');
         });
-        
+
 
         $router->get('/roller', 'App\\Controllers\\RollController::list')->setName('roll-list');
         $router->get('/roller/{id:number}/medlem', 'App\\Controllers\\RollController::membersInRole')->setName('roll-medlemmar');
@@ -81,6 +81,5 @@ class RouteConfig
         $router->post('/webhooks/git/handle', 'App\\Controllers\\WebhookController::handle')->setName('git-webhook-listener');
 
         $router->get('/error', 'App\\Controllers\\HomeController::technicalError')->setName('tech-error');
-
     }
 }
