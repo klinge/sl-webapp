@@ -54,8 +54,4 @@ class ApplicationHandlerTest extends TestCase
 
         $this->assertSame($expectedResponse, $response);
     }
-
-
-
-
 }

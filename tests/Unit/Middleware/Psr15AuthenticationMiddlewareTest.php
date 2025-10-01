@@ -40,7 +40,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         $this->request->method('getUri')->willReturn($this->uri);
         $this->uri->method('__toString')->willReturn('/test/path');
         $this->uri->method('getPath')->willReturn('/test/path');
-        
+
         // Reset RouteConfig to default state
         RouteConfig::$noLoginRequiredRoutes = [
             'show-login',
@@ -160,7 +160,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         // Ensure session is started and user_id is cleared
         Session::start();
         Session::remove('user_id');
-        
+
         // Ensure show-login is in the no-login-required routes
         RouteConfig::$noLoginRequiredRoutes = ['show-login'];
 
@@ -168,7 +168,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/login');
         $uri->method('__toString')->willReturn('/login');
-        
+
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
         $request->method('getUri')->willReturn($uri);

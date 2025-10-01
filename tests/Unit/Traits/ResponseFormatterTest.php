@@ -37,7 +37,7 @@ class ResponseFormatterTest extends TestCase
             {
                 $this->view = $view;
             }
-            
+
             protected function createUrl(string $routeName, array $params = []): string
             {
                 $router = $this->app->getRouter();

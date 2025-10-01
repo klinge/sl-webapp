@@ -86,12 +86,12 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     {
         Session::remove('is_admin');
         Session::set('user_id', 123); // User must be logged in
-        
+
         // Create fresh mocks for this test
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/user');
         $uri->method('__toString')->willReturn('/user');
-        
+
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('getUri')->willReturn($uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
@@ -112,12 +112,12 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         Session::remove('is_admin');
         Session::set('user_id', 123); // User must be logged in
         RouteConfig::$noLoginRequiredRoutes = ['show-login'];
-        
+
         // Create fresh mocks for this test
         $uri = $this->createMock(UriInterface::class);
         $uri->method('getPath')->willReturn('/login');
         $uri->method('__toString')->willReturn('/login');
-        
+
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('getUri')->willReturn($uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);

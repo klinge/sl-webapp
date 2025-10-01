@@ -86,7 +86,7 @@ class Application
     private function setupRouter(): void
     {
         $this->router = new Router();
-        
+
         // Set up the application strategy with container for dependency injection
         $strategy = new \League\Route\Strategy\ApplicationStrategy();
         $strategy->setContainer($this->container);

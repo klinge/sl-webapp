@@ -37,7 +37,7 @@ class UserAuthenticationServiceTest extends TestCase
         $mockRoute = $this->createMock(\League\Route\Route::class);
         $mockRoute->method('getPath')->willReturn('/auth/activate');
         $this->router->method('getNamedRoute')->willReturn($mockRoute);
-        
+
         $this->app->method('getRouter')->willReturn($this->router);
         $this->app->method('getConfig')->willReturn('http://test.com');
 

@@ -48,7 +48,7 @@ class SeglingControllerTest extends TestCase
 
         // Mock router's getNamedRoute method
         $mockRoute = $this->createMock(\League\Route\Route::class);
-        $mockRoute->method('getPath')->willReturnCallback(function($params = []) {
+        $mockRoute->method('getPath')->willReturnCallback(function ($params = []) {
             // Return appropriate URLs based on the route being requested
             return '/segling/new'; // Default for tests
         });
