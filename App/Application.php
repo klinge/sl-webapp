@@ -260,7 +260,7 @@ class Application
      */
     private function setupMiddlewareStack(): void
     {
-        $applicationHandler = new ApplicationHandler($this->router);
+        $applicationHandler = new ApplicationHandler($this, $this->router);
         $this->middlewareStack = new MiddlewareStack($applicationHandler);
     }
 

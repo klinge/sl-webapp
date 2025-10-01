@@ -28,28 +28,35 @@ class RouteConfig
     {
         $router->get('/', 'App\\Controllers\\HomeController::index')->setName('home');
 
-        $router->get('/medlem', 'App\\Controllers\\MedlemController::listAll')->setName('medlem-list');
-        $router->get('/medlem/json', 'App\\Controllers\\MedlemController::listJson')->setName('medlem-list-json');
-        $router->get('/medlem/{id:number}', 'App\\Controllers\\MedlemController::edit')->setName('medlem-edit');
-        $router->post('/medlem/{id:number}', 'App\\Controllers\\MedlemController::update')->setName('medlem-update');
-        $router->get('/medlem/new', 'App\\Controllers\\MedlemController::showNewForm')->setName('medlem-new');
-        $router->post('/medlem/new', 'App\\Controllers\\MedlemController::create')->setName('medlem-create');
-        $router->post('/medlem/delete', 'App\\Controllers\\MedlemController::delete')->setName('medlem-delete');
+        $router->group('/medlem', function (\League\Route\RouteGroup $route) {
+            $route->map('GET', '/', 'App\\Controllers\\MedlemController::listAll')->setName('medlem-list');
+            $route->map('GET', '/json', 'App\\Controllers\\MedlemController::listJson')->setName('medlem-list-json');
+            $route->map('GET', '/{id:number}', 'App\\Controllers\\MedlemController::edit')->setName('medlem-edit');
+            $route->map('POST', '/{id:number}', 'App\\Controllers\\MedlemController::update')->setName('medlem-update');
+            $route->map('GET', '/new', 'App\\Controllers\\MedlemController::showNewForm')->setName('medlem-new');
+            $route->map('POST', '/new', 'App\\Controllers\\MedlemController::create')->setName('medlem-create');
+            $route->map('POST', '/delete', 'App\\Controllers\\MedlemController::delete')->setName('medlem-delete');
+        });
 
-        $router->get('/betalning', 'App\\Controllers\\BetalningController::list')->setName('betalning-list');
-        $router->get('/betalning/{id:number}', 'App\\Controllers\\BetalningController::getBetalning')->setName('betalning-edit');
-        $router->get('/betalning/medlem/{id:number}', 'App\\Controllers\\BetalningController::getMedlemBetalning')->setName('betalning-medlem');
-        $router->post('/betalning/create', 'App\\Controllers\\BetalningController::createBetalning')->setName('betalning-create');
-        $router->post('/betalning/delete/{id:number}', 'App\\Controllers\\BetalningController::deleteBetalning')->setName('betalning-delete');
-
-        $router->get('/segling', 'App\\Controllers\\SeglingController::list')->setName('segling-list');
-        $router->get('/segling/{id:number}', 'App\\Controllers\\SeglingController::edit')->setName('segling-edit');
-        $router->post('/segling/{id:number}', 'App\\Controllers\\SeglingController::save')->setName('segling-save');
-        $router->get('/segling/new', 'App\\Controllers\\SeglingController::showCreate')->setName('segling-show-create');
-        $router->post('/segling/new', 'App\\Controllers\\SeglingController::create')->setName('segling-create');
-        $router->post('/segling/delete/{id:number}', 'App\\Controllers\\SeglingController::delete')->setName('segling-delete');
-        $router->post('/segling/medlem', 'App\\Controllers\\SeglingController::saveMedlem')->setName('segling-medlem-save');
-        $router->post('/segling/medlem/delete', 'App\\Controllers\\SeglingController::deleteMedlemFromSegling')->setName('segling-medlem-delete');
+        $router->group('/betalning', function (\League\Route\RouteGroup $route) {
+            $route->map('GET', '/', 'App\\Controllers\\BetalningController::list')->setName('betalning-list');
+            $route->map('GET', '/{id:number}', 'App\\Controllers\\BetalningController::getBetalning')->setName('betalning-edit');
+            $route->map('GET', '/medlem/{id:number}', 'App\\Controllers\\BetalningController::getMedlemBetalning')->setName('betalning-medlem');
+            $route->map('POST', '/create', 'App\\Controllers\\BetalningController::createBetalning')->setName('betalning-create');
+            $route->map('POST', '/delete/{id:number}', 'App\\Controllers\\BetalningController::deleteBetalning')->setName('betalning-delete');
+        });
+        
+        $router->group('/segling', function (\League\Route\RouteGroup $route) {
+            $route->map('GET', '/', 'App\\Controllers\\SeglingController::list')->setName('segling-list');
+            $route->map('GET', '/{id:number}', 'App\\Controllers\\SeglingController::edit')->setName('segling-edit');
+            $route->map('POST', '/{id:number}', 'App\\Controllers\\SeglingController::save')->setName('segling-save');
+            $route->map('GET', '/new', 'App\\Controllers\\SeglingController::showCreate')->setName('segling-show-create');
+            $route->map('POST', '/new', 'App\\Controllers\\SeglingController::create')->setName('segling-create');
+            $route->map('POST', '/delete/{id:number}', 'App\\Controllers\\SeglingController::delete')->setName('segling-delete');
+            $route->map('POST', '/medlem', 'App\\Controllers\\SeglingController::saveMedlem')->setName('segling-medlem-save');
+            $route->map('POST', '/medlem/delete', 'App\\Controllers\\SeglingController::deleteMedlemFromSegling')->setName('segling-medlem-delete');
+        });
+        
 
         $router->get('/roller', 'App\\Controllers\\RollController::list')->setName('roll-list');
         $router->get('/roller/{id:number}/medlem', 'App\\Controllers\\RollController::membersInRole')->setName('roll-medlemmar');
@@ -75,7 +82,5 @@ class RouteConfig
 
         $router->get('/error', 'App\\Controllers\\HomeController::technicalError')->setName('tech-error');
 
-        // Catch-all route for 404
-        $router->map('GET', '/{path:.*}', 'App\\Controllers\\HomeController::pageNotFound')->setName('404');
     }
 }
