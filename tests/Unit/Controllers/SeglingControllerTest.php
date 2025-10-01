@@ -123,7 +123,7 @@ class SeglingControllerTest extends TestCase
             ->with('viewSeglingEdit', $this->isType('array'))
             ->willReturn($mockResponse);
 
-        $result = $this->controller->edit(['id' => '1']);
+        $result = $this->controller->edit($this->request, ['id' => '1']);
         $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
     }
 
@@ -134,7 +134,7 @@ class SeglingControllerTest extends TestCase
             ->with(999)
             ->willReturn(null);
 
-        $result = $this->controller->edit(['id' => '999']);
+        $result = $this->controller->edit($this->request, ['id' => '999']);
         $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
         $this->assertEquals(404, $result->getStatusCode());
     }
@@ -155,7 +155,7 @@ class SeglingControllerTest extends TestCase
             ->with(1, $this->isType('array'))
             ->willReturn(true);
 
-        $result = $this->controller->save(['id' => '1']);
+        $result = $this->controller->save($this->request, ['id' => '1']);
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
@@ -174,7 +174,7 @@ class SeglingControllerTest extends TestCase
             ->method('updateSegling')
             ->willReturn(false);
 
-        $result = $this->controller->save(['id' => '1']);
+        $result = $this->controller->save($this->request, ['id' => '1']);
         $this->assertInstanceOf(JsonResponse::class, $result);
     }
 
@@ -188,7 +188,7 @@ class SeglingControllerTest extends TestCase
         $this->logger->expects($this->once())
             ->method('info');
 
-        $result = $this->controller->delete(['id' => '1']);
+        $result = $this->controller->delete($this->request, ['id' => '1']);
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
@@ -202,7 +202,7 @@ class SeglingControllerTest extends TestCase
         $this->logger->expects($this->once())
             ->method('warning');
 
-        $result = $this->controller->delete(['id' => '1']);
+        $result = $this->controller->delete($this->request, ['id' => '1']);
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 

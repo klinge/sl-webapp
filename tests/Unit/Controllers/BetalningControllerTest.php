@@ -145,7 +145,7 @@ class BetalningControllerTest extends TestCase
             ->method('render')
             ->with('viewBetalning', $expectedViewData);
 
-        $this->controller->getMedlemBetalning($params);
+        $this->controller->getMedlemBetalning($this->request, $params);
     }
 
     public function testGetMedlemBetalningNoResults(): void
@@ -178,7 +178,7 @@ class BetalningControllerTest extends TestCase
             ->method('render')
             ->with('viewBetalning', $expectedViewData);
 
-        $this->controller->getMedlemBetalning($params);
+        $this->controller->getMedlemBetalning($this->request, $params);
     }
 
     public function testNoWelcomeEmailWhenDisabled(): void

@@ -38,8 +38,8 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
 
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
         $this->request->method('getUri')->willReturn($this->uri);
-        $this->uri->method('__toString')->willReturn('/test/path');
-        $this->uri->method('getPath')->willReturn('/test/path');
+        $this->uri->method('__toString')->willReturn('/protected/path');
+        $this->uri->method('getPath')->willReturn('/protected/path');
 
         // Reset RouteConfig to default state
         RouteConfig::$noLoginRequiredRoutes = [
@@ -84,6 +84,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         // Setup AJAX request
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
         $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
+        $this->request->method('getAttribute')->with('route_name')->willReturn('protected-route');
 
         Session::remove('user_id');
 
@@ -102,6 +103,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         // Setup AJAX request with logged in user
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(true);
         $this->request->method('getHeader')->with('X-Requested-With')->willReturn(['XMLHttpRequest']);
+        $this->request->method('getAttribute')->with('route_name')->willReturn('protected-route');
 
         Session::set('user_id', 123);
 
@@ -121,7 +123,32 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         // Setup non-AJAX request to protected route
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
 
-        // No need to mock router methods since middleware uses path-based routing
+        // Use a path that will be treated as protected (not in the path mapping)
+        $uri = $this->createMock(UriInterface::class);
+        $uri->method('getPath')->willReturn('/medlem/list');
+        $uri->method('__toString')->willReturn('/medlem/list');
+
+        $request = $this->createMock(ServerRequestInterface::class);
+        $request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
+        $request->method('getUri')->willReturn($uri);
+        $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
+        $request->method('getAttribute')->with('route_name')->willReturn('medlem-list');
+
+        // Temporarily remove 'home' from no-login-required routes so the default route is protected
+        RouteConfig::$noLoginRequiredRoutes = [
+            'show-login',
+            'show-register',
+            'login',
+            'logout',
+            'register',
+            'register-activate',
+            'show-request-password',
+            'handle-request-password',
+            'show-reset-password',
+            'reset-password',
+            '404',
+            'git-webhook-listener'
+        ];
 
         Session::remove('user_id');
 
@@ -129,7 +156,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
             ->method('info')
             ->with($this->stringContains('Request to protected page, user not logged in'));
 
-        $response = $this->middleware->process($this->request, $this->handler);
+        $response = $this->middleware->process($request, $this->handler);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals(401, $response->getStatusCode());
@@ -139,8 +166,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
     {
         // Setup request to protected route with logged in user
         $this->request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
-
-        // No need to mock router methods since middleware uses path-based routing
+        $this->request->method('getAttribute')->with('route_name')->willReturn('medlem-list');
 
         Session::set('user_id', 76);
 
@@ -173,6 +199,7 @@ class Psr15AuthenticationMiddlewareTest extends TestCase
         $request->method('hasHeader')->with('X-Requested-With')->willReturn(false);
         $request->method('getUri')->willReturn($uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
+        $request->method('getAttribute')->with('route_name')->willReturn('show-login');
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())

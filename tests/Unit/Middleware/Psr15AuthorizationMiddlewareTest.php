@@ -38,6 +38,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
 
         $this->request->method('getUri')->willReturn($this->uri);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
+        $this->request->method('getAttribute')->with('route_name')->willReturn('protected-route');
         $this->uri->method('__toString')->willReturn('/test/path');
         $this->uri->method('getPath')->willReturn('/test/path');
 
@@ -95,6 +96,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('getUri')->willReturn($uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
+        $request->method('getAttribute')->with('route_name')->willReturn('user-home');
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())
@@ -121,6 +123,7 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
         $request = $this->createMock(ServerRequestInterface::class);
         $request->method('getUri')->willReturn($uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
+        $request->method('getAttribute')->with('route_name')->willReturn('show-login');
 
         $expectedResponse = $this->createMock(ResponseInterface::class);
         $this->handler->expects($this->once())

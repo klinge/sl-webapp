@@ -10,13 +10,18 @@ use App\Middleware\Contracts\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
+use League\Route\Route;
 
 class AuthenticationMiddleware extends BaseMiddleware
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $path = $request->getUri()->getPath();
-        $routeName = $this->getRouteNameFromPath($path);
+        $routeName = $request->getAttribute('route_name');
+
+        if (!$routeName) {
+            $this->logger->error('No route name found in request attributes. Path: ' . $request->getUri()->getPath());
+            throw new \RuntimeException('Route name not set on request. League Route integration issue.');
+        }
 
         // Handle AJAX requests - user must be logged in
         if ($this->isAjaxRequest($request)) {
@@ -31,7 +36,7 @@ class AuthenticationMiddleware extends BaseMiddleware
                     'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'
                 ], 401);
             }
-        } elseif ($routeName && !in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
+        } elseif (!in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
             $this->logger->info('Request to protected page, user not logged in. URI: ' .
                 $request->getUri()->__toString() .
                 ', Remote IP: ' .
@@ -46,21 +51,5 @@ class AuthenticationMiddleware extends BaseMiddleware
 
         // Continue to next middleware or handler
         return $handler->handle($request);
-    }
-
-    private function getRouteNameFromPath(string $path): string
-    {
-        // Simple path-to-route-name mapping for authentication check
-        $pathToRoute = [
-            '/' => 'home',
-            '/login' => 'show-login',
-            '/logout' => 'logout',
-            '/auth/register' => 'show-register',
-            '/auth/bytlosenord' => 'show-request-password',
-            '/webhooks/git/handle' => 'git-webhook-listener',
-            '/error' => 'tech-error',
-        ];
-
-        return $pathToRoute[$path] ?? 'home';
     }
 }
