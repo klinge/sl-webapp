@@ -8,7 +8,6 @@ use League\Container\ServiceProvider\AbstractServiceProvider;
 use App\Services\Auth\UserAuthenticationService;
 use App\Services\Auth\PasswordService;
 use Monolog\Logger;
-use AltoRouter;
 use App\Utils\Email;
 use PDO;
 
@@ -29,7 +28,6 @@ class AuthServiceProvider extends AbstractServiceProvider
         $this->getContainer()->add(UserAuthenticationService::class)
             ->addArgument(PDO::class)
             ->addArgument(Logger::class)
-            ->addArgument(AltoRouter::class)
             ->addArgument(Email::class)
             ->addArgument('config');
     }

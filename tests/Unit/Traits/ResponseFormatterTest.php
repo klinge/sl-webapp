@@ -18,11 +18,10 @@ class ResponseFormatterTest extends TestCase
 
     protected function setUp(): void
     {
-        // Create mock objects
         $this->app = $this->createMock(Application::class);
         $this->router = $this->createMock(Router::class);
+        $this->app->method('getRouter')->willReturn($this->router);
 
-        // Create an anonymous test class that uses the ResponseFormatter trait
         $this->testClass = new class {
             use ResponseFormatter;
 
@@ -48,44 +47,34 @@ class ResponseFormatterTest extends TestCase
         $this->testClass->setApp($this->app);
     }
 
-    public function testRedirectWithSuccessReturnsRedirectResponse()
+    /**
+     * @dataProvider redirectTestProvider
+     */
+    public function testRedirectMethods($method, $routeName, $message, $expectedPath)
     {
-        $mockRoute = $this->createMock(\League\Route\Route::class);
-        $mockRoute->method('getPath')->willReturn('/success-route');
-        $this->router->method('getNamedRoute')->willReturn($mockRoute);
-        $this->app->method('getRouter')->willReturn($this->router);
+        $this->setupMockRoute($expectedPath);
 
-        $response = $this->callProtectedMethod($this->testClass, 'redirectWithSuccess', ['success-route', 'Success message']);
+        $response = $this->callProtectedMethod($this->testClass, $method, [$routeName, $message]);
 
-        $this->assertEquals('Success message', Session::get('flash_message')['message']);
+        $this->assertEquals($message, Session::get('flash_message')['message']);
         $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals(302, $response->getStatusCode());
-        $this->assertEquals('/success-route', $response->getHeader('Location')[0]);
+        $this->assertEquals($expectedPath, $response->getHeader('Location')[0]);
     }
 
-    public function testRedirectWithErrorReturnsRedirectResponse()
+    public static function redirectTestProvider()
     {
-        $mockRoute = $this->createMock(\League\Route\Route::class);
-        $mockRoute->method('getPath')->willReturn('/error-route');
-        $this->router->method('getNamedRoute')->willReturn($mockRoute);
-        $this->app->method('getRouter')->willReturn($this->router);
-
-        $response = $this->callProtectedMethod($this->testClass, 'redirectWithError', ['error-route', 'Error message']);
-
-        $this->assertEquals('Error message', Session::get('flash_message')['message']);
-        $this->assertInstanceOf(RedirectResponse::class, $response);
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-        $this->assertEquals(302, $response->getStatusCode());
-        $this->assertEquals('/error-route', $response->getHeader('Location')[0]);
+        return [
+            ['redirectWithSuccess', 'success-route', 'Success message', '/success-route'],
+            ['redirectWithError', 'error-route', 'Error message', '/error-route'],
+        ];
     }
 
     public function testRenderWithErrorReturnsHtmlResponse()
     {
         $view = $this->createMock(\App\Utils\View::class);
         $mockResponse = $this->createMock(ResponseInterface::class);
-
-        $this->testClass->setview($view);
+        $this->testClass->setView($view);
 
         $view->expects($this->once())
             ->method('render')
@@ -96,6 +85,13 @@ class ResponseFormatterTest extends TestCase
 
         $this->assertEquals('Error message', Session::get('flash_message')['message']);
         $this->assertInstanceOf(ResponseInterface::class, $response);
+    }
+
+    private function setupMockRoute($path)
+    {
+        $mockRoute = $this->createMock(\League\Route\Route::class);
+        $mockRoute->method('getPath')->willReturn($path);
+        $this->router->method('getNamedRoute')->willReturn($mockRoute);
     }
 
     private function callProtectedMethod($object, $methodName, array $parameters = [])

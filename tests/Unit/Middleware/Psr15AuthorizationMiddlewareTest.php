@@ -38,7 +38,9 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
 
         $this->request->method('getUri')->willReturn($this->uri);
         $this->request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
-        $this->request->method('getAttribute')->with('route_name')->willReturn('protected-route');
+        $this->request->method('getAttribute')->willReturnMap([
+            ['route_name', null, 'protected-route']
+        ]);
         $this->uri->method('__toString')->willReturn('/test/path');
         $this->uri->method('getPath')->willReturn('/test/path');
 
@@ -86,15 +88,10 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessNonAdminUserCanAccessUserRoute(): void
     {
         Session::remove('is_admin');
-        Session::set('user_id', 123); // User must be logged in
-
-        // Create fresh mocks for this test
-        $uri = $this->createMock(UriInterface::class);
-        $uri->method('getPath')->willReturn('/user');
-        $uri->method('__toString')->willReturn('/user');
+        Session::set('user_id', 123);
 
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getUri')->willReturn($uri);
+        $request->method('getUri')->willReturn($this->uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
         $request->method('getAttribute')->with('route_name')->willReturn('user-home');
 
@@ -112,16 +109,11 @@ class Psr15AuthorizationMiddlewareTest extends TestCase
     public function testProcessNonAdminUserCanAccessOpenRoute(): void
     {
         Session::remove('is_admin');
-        Session::set('user_id', 123); // User must be logged in
+        Session::set('user_id', 123);
         RouteConfig::$noLoginRequiredRoutes = ['show-login'];
 
-        // Create fresh mocks for this test
-        $uri = $this->createMock(UriInterface::class);
-        $uri->method('getPath')->willReturn('/login');
-        $uri->method('__toString')->willReturn('/login');
-
         $request = $this->createMock(ServerRequestInterface::class);
-        $request->method('getUri')->willReturn($uri);
+        $request->method('getUri')->willReturn($this->uri);
         $request->method('getServerParams')->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
         $request->method('getAttribute')->with('route_name')->willReturn('show-login');
 
