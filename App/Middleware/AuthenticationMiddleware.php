@@ -48,7 +48,7 @@ class AuthenticationMiddleware extends BaseMiddleware
         return $handler->handle($request);
     }
 
-    private function getRouteNameFromPath(string $path): ?string
+    private function getRouteNameFromPath(string $path): string
     {
         // Simple path-to-route-name mapping for authentication check
         $pathToRoute = [
@@ -61,6 +61,6 @@ class AuthenticationMiddleware extends BaseMiddleware
             '/error' => 'tech-error',
         ];
 
-        return $pathToRoute[$path] ?? 'protected-route';
+        return $pathToRoute[$path] ?? 'home';
     }
 }

@@ -17,7 +17,7 @@ class AuthorizationMiddleware extends BaseMiddleware
     {
         $path = $request->getUri()->getPath();
         $routeName = $this->getRouteNameFromPath($path);
-        
+
         if ($routeName) {
             // Admins can access everything
             if (Session::isAdmin()) {
@@ -44,7 +44,7 @@ class AuthorizationMiddleware extends BaseMiddleware
         return $handler->handle($request);
     }
 
-    private function getRouteNameFromPath(string $path): ?string
+    private function getRouteNameFromPath(string $path): string
     {
         // Simple path-to-route-name mapping for authorization check
         $pathToRoute = [

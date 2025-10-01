@@ -42,7 +42,7 @@ class RollController extends BaseController
         return $this->view->render('viewRoller', $data);
     }
 
-    public function membersInRole(array $params): ResponseInterface
+    public function membersInRole(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $rollId = (int) $params['id'];
         $result = $this->medlemRepo->getMembersByRollId($rollId);

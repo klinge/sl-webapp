@@ -90,9 +90,10 @@ class MedlemController extends BaseController
      * Fetches member data, roles, sailings, and payments for the specified member ID
      * and renders them in an edit view.
      *
+     * @param ServerRequestInterface $request The request object
      * @param array $params The route parameters, must contain 'id'
      */
-    public function edit(array $params): ResponseInterface
+    public function edit(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
 
@@ -130,9 +131,10 @@ class MedlemController extends BaseController
      *
      * Sanitizes input data, updates the member record, and redirects to the member list.
      *
+     * @param ServerRequestInterface $request The request object
      * @param array $params The route parameters, must contain 'id'
      */
-    public function update(array $params): ResponseInterface
+    public function update(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->logger, $id);

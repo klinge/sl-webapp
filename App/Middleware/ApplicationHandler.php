@@ -17,7 +17,6 @@ use Exception;
 class ApplicationHandler implements RequestHandlerInterface
 {
     public function __construct(
-        private Application $app,
         private Router $router
     ) {
     }
@@ -31,4 +30,3 @@ class ApplicationHandler implements RequestHandlerInterface
         }
     }
 }
-

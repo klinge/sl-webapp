@@ -60,7 +60,7 @@ if (isset($data['items'])) {
         let rowData = row.data();
         let id = rowData[0]; // First column contains ID
 
-        window.location.href = `/betalning/${id}`;
+        window.location.href = `/betalning/medlem/${id}`;
     });
 </script>
 

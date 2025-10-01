@@ -51,7 +51,7 @@ class RegistrationController extends AuthBaseController
         return $this->view->render('login/viewLogin');
     }
 
-    public function activate(array $params): ResponseInterface
+    public function activate(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $result = $this->userAuthService->activateAccount($params['token']);
 

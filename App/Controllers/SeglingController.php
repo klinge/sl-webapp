@@ -58,7 +58,7 @@ class SeglingController extends BaseController
         return $this->view->render('viewSegling', $data);
     }
 
-    public function edit(array $params): ResponseInterface
+    public function edit(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $formAction = $this->createUrl('segling-save', ['id' => $id]);
@@ -103,7 +103,7 @@ class SeglingController extends BaseController
         return $this->view->render('viewSeglingEdit', $data);
     }
 
-    public function save(array $params): ResponseInterface
+    public function save(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
 
@@ -126,7 +126,7 @@ class SeglingController extends BaseController
         }
     }
 
-    public function delete(array $params): ResponseInterface
+    public function delete(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
 
