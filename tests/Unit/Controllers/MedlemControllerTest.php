@@ -235,6 +235,43 @@ class MedlemControllerTest extends TestCase
         $this->controller->updateEmailAliases();
     }
 
+    public function testControllerMethodsExist(): void
+    {
+        // Test that all required methods exist and are callable
+        $this->assertTrue(method_exists($this->controller, 'edit'));
+        $this->assertTrue(method_exists($this->controller, 'update'));
+        $this->assertTrue(method_exists($this->controller, 'showNewForm'));
+        $this->assertTrue(method_exists($this->controller, 'create'));
+        $this->assertTrue(method_exists($this->controller, 'delete'));
+    }
+
+    public function testControllerHasRequiredDependencies(): void
+    {
+        // Test that controller has the required dependencies injected
+        $reflection = new \ReflectionClass($this->controller);
+        
+        $this->assertTrue($reflection->hasProperty('view'));
+        $this->assertTrue($reflection->hasProperty('medlemRepo'));
+        $this->assertTrue($reflection->hasProperty('betalningRepo'));
+        $this->assertTrue($reflection->hasProperty('validator'));
+        $this->assertTrue($reflection->hasProperty('mailAliasService'));
+    }
+
+    public function testValidatorServiceIntegration(): void
+    {
+        // Test that validator service can be mocked and injected
+        $validator = $this->createMock(\App\Services\MedlemDataValidatorService::class);
+        $this->setProtectedProperty($this->controller, 'validator', $validator);
+        
+        // Verify the validator was injected
+        $reflection = new \ReflectionClass($this->controller);
+        $property = $reflection->getProperty('validator');
+        $property->setAccessible(true);
+        $injectedValidator = $property->getValue($this->controller);
+        
+        $this->assertInstanceOf(\App\Services\MedlemDataValidatorService::class, $injectedValidator);
+    }
+
     private function setProtectedProperty(object $protectedClass, string $property, object $objectToInject): void
     {
         // Inject service using reflection
