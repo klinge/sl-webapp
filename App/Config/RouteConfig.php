@@ -9,7 +9,7 @@ use App\Middleware\RequireAuthenticationMiddleware;
 class RouteConfig
 {
     // Central place to put all the applications routes
-    public static function createAppRoutes(Router $router)
+    public static function createAppRoutes(Router $router, $container = null)
     {
         $router->get('/', 'App\\Controllers\\HomeController::index')->setName('home');
 
@@ -28,7 +28,7 @@ class RouteConfig
                 ->setName('medlem-create');
             $route->map('POST', '/delete', 'App\\Controllers\\MedlemController::delete')
                 ->setName('medlem-delete');
-        })->middlewares([new RequireAdminMiddleware()]);
+        })->middlewares([$container->get(RequireAdminMiddleware::class)]);
 
         $router->group('/betalning', function (\League\Route\RouteGroup $route) {
             $route->map('GET', '/', 'App\\Controllers\\BetalningController::list')
@@ -41,7 +41,7 @@ class RouteConfig
                 ->setName('betalning-create');
             $route->map('POST', '/delete/{id:number}', 'App\\Controllers\\BetalningController::deleteBetalning')
                 ->setName('betalning-delete');
-        })->middlewares([new RequireAdminMiddleware()]);
+        })->middlewares([$container->get(RequireAdminMiddleware::class)]);
 
         $router->group('/segling', function (\League\Route\RouteGroup $route) {
             $route->map('GET', '/', 'App\\Controllers\\SeglingController::list')
@@ -60,7 +60,7 @@ class RouteConfig
                 ->setName('segling-medlem-save');
             $route->map('POST', '/medlem/delete', 'App\\Controllers\\SeglingController::deleteMedlemFromSegling')
                 ->setName('segling-medlem-delete');
-        })->middlewares([new RequireAdminMiddleware()]);
+        })->middlewares([$container->get(RequireAdminMiddleware::class)]);
 
 
         $router->group('/roller', function (\League\Route\RouteGroup $route) {
@@ -68,7 +68,7 @@ class RouteConfig
                 ->setName('roll-list');
             $route->map('GET', '/{id:number}/medlem', 'App\\Controllers\\RollController::membersInRole')
                 ->setName('roll-medlemmar');
-        })->middlewares([new RequireAdminMiddleware()]);
+        })->middlewares([$container->get(RequireAdminMiddleware::class)]);
 
         $router->group('/auth', function (\League\Route\RouteGroup $route) {
             $route->map('GET', '/register', 'App\\Controllers\\Auth\\RegistrationController::showRegister')
@@ -98,12 +98,12 @@ class RouteConfig
                 ->setName('report-payment');
             $route->map('GET', '/member-emails', 'App\\Controllers\\ReportController::showMemberEmails')
                 ->setName('report-member-emails');
-        })->middlewares([new RequireAdminMiddleware()]);
+        })->middlewares([$container->get(RequireAdminMiddleware::class)]);
 
         $router->group('/user', function (\League\Route\RouteGroup $route) {
             $route->map('GET', '/', 'App\\Controllers\\UserController::home')
                 ->setName('user-home');
-        })->middlewares([new RequireAuthenticationMiddleware()]);
+        })->middlewares([$container->get(RequireAuthenticationMiddleware::class)]);
 
         $router->post('/webhooks/git/handle', 'App\\Controllers\\WebhookController::handle')->setName('git-webhook-listener');
 

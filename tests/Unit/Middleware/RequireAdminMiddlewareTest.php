@@ -19,7 +19,8 @@ class RequireAdminMiddlewareTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->middleware = new RequireAdminMiddleware();
+        $logger = $this->createMock(\Monolog\Logger::class);
+        $this->middleware = new RequireAdminMiddleware($logger);
         $this->handler = $this->createMock(RequestHandlerInterface::class);
         Session::start();
         Session::destroy();
@@ -33,12 +34,12 @@ class RequireAdminMiddlewareTest extends TestCase
 
     public function testRedirectsToLoginWhenNotAuthenticated(): void
     {
-        $request = (new ServerRequest())->withAttribute('route_name', 'admin-route');
+        $request = (new ServerRequest())->withUri(new \Laminas\Diactoros\Uri('/medlem'));
         $response = $this->middleware->process($request, $this->handler);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/login', $response->getHeaderLine('Location'));
-        $this->assertEquals('admin-route', Session::get('redirect_url'));
+        $this->assertEquals('/medlem', Session::get('redirect_url'));
     }
 
     public function testRedirectsToUserWhenAuthenticatedButNotAdmin(): void

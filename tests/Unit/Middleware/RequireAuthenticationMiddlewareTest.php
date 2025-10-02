@@ -19,7 +19,8 @@ class RequireAuthenticationMiddlewareTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->middleware = new RequireAuthenticationMiddleware();
+        $logger = $this->createMock(\Monolog\Logger::class);
+        $this->middleware = new RequireAuthenticationMiddleware($logger);
         $this->handler = $this->createMock(RequestHandlerInterface::class);
         Session::start();
         Session::destroy();
@@ -33,12 +34,12 @@ class RequireAuthenticationMiddlewareTest extends TestCase
 
     public function testRedirectsToLoginWhenNotAuthenticated(): void
     {
-        $request = (new ServerRequest())->withAttribute('route_name', 'test-route');
+        $request = (new ServerRequest())->withUri(new \Laminas\Diactoros\Uri('/medlem'));
         $response = $this->middleware->process($request, $this->handler);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);
         $this->assertEquals('/login', $response->getHeaderLine('Location'));
-        $this->assertEquals('test-route', Session::get('redirect_url'));
+        $this->assertEquals('/medlem', Session::get('redirect_url'));
     }
 
     public function testContinuesToHandlerWhenAuthenticated(): void
@@ -56,9 +57,9 @@ class RequireAuthenticationMiddlewareTest extends TestCase
         $this->assertSame($expectedResponse, $response);
     }
 
-    public function testRedirectsToLoginWhenNoRouteNameAttribute(): void
+    public function testRedirectsToLoginWhenPathIsRoot(): void
     {
-        $request = new ServerRequest(); // No route_name attribute
+        $request = (new ServerRequest())->withUri(new \Laminas\Diactoros\Uri('/'));
         $response = $this->middleware->process($request, $this->handler);
 
         $this->assertInstanceOf(RedirectResponse::class, $response);

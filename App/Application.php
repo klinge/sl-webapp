@@ -89,7 +89,7 @@ class Application
         $this->router->setStrategy($strategy);
 
         // Routes are created from the Config/RouteConfig class
-        RouteConfig::createAppRoutes($this->router);
+        RouteConfig::createAppRoutes($this->router, $this->container);
     }
 
     /**
