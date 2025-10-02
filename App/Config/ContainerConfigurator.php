@@ -50,6 +50,11 @@ class ContainerConfigurator
         $container->addServiceProvider(new AuthServiceProvider());
         $container->addServiceProvider(new ModelServiceProvider());
 
+        // Register middleware
+        $container->add(\App\Middleware\RequireAdminMiddleware::class)
+            ->addArgument(Logger::class);
+        $container->add(\App\Middleware\RequireAuthenticationMiddleware::class)
+            ->addArgument(Logger::class);
 
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);

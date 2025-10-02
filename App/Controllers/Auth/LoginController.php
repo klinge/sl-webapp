@@ -113,7 +113,12 @@ class LoginController extends AuthBaseController
         if ($medlem->isAdmin) {
             Session::set('is_admin', true);
             //Check if there is a redirect url and if so redirect the user back there otherwise to homepage
-            $route = Session::get('redirect_url') ?? 'home';
+            $redirectUrl = Session::get('redirect_url');
+            if ($redirectUrl) {
+                Session::remove('redirect_url');
+                return new \Laminas\Diactoros\Response\RedirectResponse($redirectUrl);
+            }
+            $route = 'home';
         } else {
             Session::set('is_admin', false);
             //if user is not an admin send them to the user part of the site
