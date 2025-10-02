@@ -16,8 +16,6 @@ use App\Config\ContainerConfigurator;
 use App\Middleware\Contracts\MiddlewareInterface;
 use App\Middleware\Contracts\MiddlewareStack;
 use App\Middleware\ApplicationHandler;
-use App\Middleware\AuthorizationMiddleware;
-use App\Middleware\AuthenticationMiddleware;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
 use App\Utils\ResponseEmitter;
@@ -63,9 +61,7 @@ class Application
         $this->setupRouter();
         $this->setupMiddlewareStack();
 
-        // Add middlewares here
-        $this->addMiddleware(new AuthenticationMiddleware($this->router, $this->logger));
-        $this->addMiddleware(new AuthorizationMiddleware($this->router, $this->logger));
+        // Add global middlewares here
         $this->addMiddleware(new CsrfMiddleware($this->router, $this->logger));
     }
 
