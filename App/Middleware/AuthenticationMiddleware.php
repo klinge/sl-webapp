@@ -10,12 +10,18 @@ use App\Middleware\Contracts\RequestHandlerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
+use League\Route\Route;
 
 class AuthenticationMiddleware extends BaseMiddleware
 {
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $match = $this->router->match();
+        $routeName = $request->getAttribute('route_name');
+
+        if (!$routeName) {
+            $this->logger->error('No route name found in request attributes. Path: ' . $request->getUri()->getPath());
+            throw new \RuntimeException('Route name not set on request. League Route integration issue.');
+        }
 
         // Handle AJAX requests - user must be logged in
         if ($this->isAjaxRequest($request)) {
@@ -30,17 +36,17 @@ class AuthenticationMiddleware extends BaseMiddleware
                     'message' => 'Du måste vara inloggad för åtkomst till denna tjänst.'
                 ], 401);
             }
-        } elseif ($match && !in_array($match['name'], RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
+        } elseif (!in_array($routeName, RouteConfig::$noLoginRequiredRoutes) && !Session::get('user_id')) {
             $this->logger->info('Request to protected page, user not logged in. URI: ' .
                 $request->getUri()->__toString() .
                 ', Remote IP: ' .
                 $request->getServerParams()['REMOTE_ADDR']);
 
             // Store the current URL for redirect after login
-            Session::set('redirect_url', $match['name']);
+            Session::set('redirect_url', $routeName);
             Session::setFlashMessage('error', 'Du måste vara inloggad för att se denna sida.');
 
-            return new RedirectResponse($this->router->generate('show-login'), 401);
+            return new RedirectResponse('/login', 401);
         }
 
         // Continue to next middleware or handler

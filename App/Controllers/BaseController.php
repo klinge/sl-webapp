@@ -56,7 +56,9 @@ class BaseController
 
     protected function createUrl(string $routeName, array $params = []): string
     {
-        return $this->app->getRouter()->generate($routeName, $params);
+        $router = $this->app->getRouter();
+        $route = $router->getNamedRoute($routeName);
+        return $route->getPath($params);
     }
 
     protected function notFoundResponse(): ResponseInterface

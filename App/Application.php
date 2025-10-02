@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App;
 
 use Dotenv\Dotenv;
-use AltoRouter; //https://dannyvankooten.github.io/AltoRouter/
+use League\Route\Router;
 use Monolog\Logger;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -30,7 +30,7 @@ use Exception;
  * - Loading the environment variables from the .env file
  * - Loading the application configuration
  * - Setting up the error reporting based on the application environment
- * - Setting up the routing using the AltoRouter library
+ * - Setting up the routing using the League Route library
  * - Registering middleware to be executed for each request
  * - Dispatching to the appropriate controller action based on the current route
  * - Starting the session
@@ -39,7 +39,7 @@ class Application
 {
     private array $config = [];
     private $container;
-    private ?AltoRouter $router = null;
+    private ?Router $router = null;
     private MiddlewareStack $middlewareStack;
     private string $rootDir = '';
     private ServerRequestInterface $psrRequest;
@@ -50,7 +50,6 @@ class Application
         $this->rootDir = dirname(__DIR__);
         $this->loadEnvironment();
         $this->loadConfig();
-        $this->setupRouter();
         $this->setErrorReporting($this->getAppEnv());
         $this->setupSession();
         $this->psrRequest = ServerRequestFactory::fromGlobals(
@@ -61,6 +60,7 @@ class Application
         );
         $this->setupContainer();
         $this->logger = $this->container->get(Logger::class);
+        $this->setupRouter();
         $this->setupMiddlewareStack();
 
         // Add middlewares here
@@ -78,16 +78,19 @@ class Application
     /**
      * Sets up the router for the application.
      *
-     * This method initializes the AltoRouter instance and sets the base path for
-     * the router. It then calls the `RouteConfig::createAppRoutes` static method
-     * to define the application routes using the router instance.
+     * This method initializes the League Router instance and calls the
+     * `RouteConfig::createAppRoutes` static method to define the application routes.
      *
      * @return void
      */
     private function setupRouter(): void
     {
-        $this->router = new AltoRouter();
-        $this->router->setBasePath($this->getConfig('APP_DIR'));
+        $this->router = new Router();
+
+        // Set up the application strategy with container for dependency injection
+        $strategy = new \League\Route\Strategy\ApplicationStrategy();
+        $strategy->setContainer($this->container);
+        $this->router->setStrategy($strategy);
 
         // Routes are created from the Config/RouteConfig class
         RouteConfig::createAppRoutes($this->router);
@@ -181,7 +184,7 @@ class Application
     }
 
     /**
-     * Returns the AltoRouter instance used by the application.
+     * Returns the DI container used by the application.
      *
      * @return Container The DI container
      */
@@ -189,17 +192,13 @@ class Application
     {
         return $this->container;
     }
+
     /**
-     * Returns the AltoRouter instance used by the application.
+     * Returns the League Router instance used by the application.
      *
-     * @return AltoRouter The AltoRouter instance
+     * @return Router The Router instance
      */
-    /**
-     * Returns the AltoRouter instance used by the application.
-     *
-     * @return AltoRouter The AltoRouter instance
-     */
-    public function getRouter(): AltoRouter
+    public function getRouter(): Router
     {
         return $this->router;
     }

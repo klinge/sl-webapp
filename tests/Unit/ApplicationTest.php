@@ -137,7 +137,7 @@ class ApplicationTest extends TestCase
         $app = new Application();
 
         $router = $app->getRouter();
-        $this->assertInstanceOf(\AltoRouter::class, $router);
+        $this->assertInstanceOf(\League\Route\Router::class, $router);
     }
 
     public function testGetPsrRequest(): void

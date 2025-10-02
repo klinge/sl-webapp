@@ -81,7 +81,7 @@ class RollControllerTest extends TestCase
             ->with($rollId)
             ->willReturn($expectedMembers);
 
-        $result = $this->controller->membersInRole(['id' => (string) $rollId]);
+        $result = $this->controller->membersInRole($this->request, ['id' => (string) $rollId]);
         $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 
@@ -97,7 +97,7 @@ class RollControllerTest extends TestCase
             ->with(2)
             ->willReturn($expectedMembers);
 
-        $result = $this->controller->membersInRole(['id' => $rollId]);
+        $result = $this->controller->membersInRole($this->request, ['id' => $rollId]);
         $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 
@@ -111,7 +111,7 @@ class RollControllerTest extends TestCase
             ->with($rollId)
             ->willReturn($expectedMembers);
 
-        $result = $this->controller->membersInRole(['id' => (string) $rollId]);
+        $result = $this->controller->membersInRole($this->request, ['id' => (string) $rollId]);
         $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 }

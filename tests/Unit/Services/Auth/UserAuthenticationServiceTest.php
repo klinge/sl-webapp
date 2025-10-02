@@ -7,7 +7,7 @@ use App\Application;
 use App\Services\Auth\UserAuthenticationService;
 use App\Utils\Email;
 use Monolog\Logger;
-use AltoRouter;
+use League\Route\Router;
 use PDO;
 
 class UserAuthenticationServiceTest extends TestCase
@@ -25,13 +25,18 @@ class UserAuthenticationServiceTest extends TestCase
         $this->app = $this->createMock(Application::class);
         $this->conn = $this->createMock(PDO::class);
         $this->logger = $this->createMock(Logger::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->mailer = $this->createMock(Email::class);
 
         // Create mock config array with required values
         $mockConfig = [
             'SITE_ADDRESS' => 'https://some.testsite.com'
         ];
+
+        // Mock router's getNamedRoute method
+        $mockRoute = $this->createMock(\League\Route\Route::class);
+        $mockRoute->method('getPath')->willReturn('/auth/activate');
+        $this->router->method('getNamedRoute')->willReturn($mockRoute);
 
         $this->app->method('getRouter')->willReturn($this->router);
         $this->app->method('getConfig')->willReturn('http://test.com');

@@ -13,14 +13,14 @@ use App\Utils\TokenHandler;
 use App\Models\MedlemRepository;
 use App\Models\Medlem;
 use PDO;
-use AltoRouter;
+use League\Route\Router;
 use Monolog\Logger;
 
 class UserAuthenticationService
 {
     private Logger $logger;
     private PDO $conn;
-    private AltoRouter $router;
+    private Router $router;
     private Email $mailer;
     private array $config;
     private TokenHandler $tokenHandler;
@@ -28,7 +28,7 @@ class UserAuthenticationService
     private PasswordService $passwordSvc;
 
 
-    public function __construct(PDO $conn, Logger $logger, AltoRouter $router, Email $mailer, array $config)
+    public function __construct(PDO $conn, Logger $logger, Router $router, Email $mailer, array $config)
     {
         $this->conn = $conn;
         $this->logger = $logger;
@@ -238,11 +238,11 @@ class UserAuthenticationService
         EmailType $emailType,
         string $routeName
     ): bool {
+        $route = $this->router->getNamedRoute($routeName);
         $data = [
             'token' => $token,
             'fornamn' => $firstName,
-            'url' => $this->config['SITE_ADDRESS'] .
-                $this->router->generate($routeName, ['token' => $token])
+            'url' => $this->config['SITE_ADDRESS'] . $route->getPath(['token' => $token])
         ];
 
         try {

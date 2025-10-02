@@ -14,7 +14,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use PDO;
 use PDOStatement;
-use AltoRouter;
+use League\Route\Router;
 use Monolog\Logger;
 
 class MedlemControllerTest extends TestCase
@@ -35,7 +35,7 @@ class MedlemControllerTest extends TestCase
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->logger = $this->createMock(Logger::class);
-        $this->router = $this->createMock(AltoRouter::class);
+        $this->router = $this->createMock(Router::class);
         $this->conn = $this->createMock(PDO::class);
         $this->view = $this->createMock(View::class);
         $this->betalningRepo = $this->createMock(BetalningRepository::class);
@@ -125,13 +125,11 @@ class MedlemControllerTest extends TestCase
             ->method('getAll')
             ->willReturn($expectedMembers);
 
-        // Mock router to return a test URL
-        $this->router->method('generate')
-            ->with('medlem-new')
-            ->willReturn('/medlem/new');
-
-        $this->app->method('getRouter')
-            ->willReturn($this->router);
+        // Mock router's getNamedRoute method
+        $mockRoute = $this->createMock(\League\Route\Route::class);
+        $mockRoute->method('getPath')->willReturn('/medlem/new');
+        $this->router->method('getNamedRoute')->willReturn($mockRoute);
+        $this->app->method('getRouter')->willReturn($this->router);
 
         // Mock view to return a response
         $mockResponse = $this->createMock(ResponseInterface::class);

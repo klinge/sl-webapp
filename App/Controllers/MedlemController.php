@@ -73,7 +73,7 @@ class MedlemController extends BaseController
         $data = [
             "title" => "Medlemmar",
             "items" => $result,
-            'newAction' => $this->app->getRouter()->generate('medlem-new')
+            'newAction' => $this->createUrl('medlem-new')
         ];
         return $this->view->render('viewMedlem', $data);
     }
@@ -90,9 +90,10 @@ class MedlemController extends BaseController
      * Fetches member data, roles, sailings, and payments for the specified member ID
      * and renders them in an edit view.
      *
+     * @param ServerRequestInterface $request The request object
      * @param array $params The route parameters, must contain 'id'
      */
-    public function edit(array $params): ResponseInterface
+    public function edit(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
 
@@ -113,10 +114,10 @@ class MedlemController extends BaseController
                 'seglingar' => $seglingar,
                 'betalningar' => $betalningar,
                 //Used in the view to set the proper action url for the form
-                'formAction' => $this->app->getRouter()->generate('medlem-update', ['id' => $id]),
-                'createBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
-                'listBetalningAction' => $this->app->getRouter()->generate('betalning-medlem', ['id' => $id]),
-                'deleteAction' => $this->app->getRouter()->generate('medlem-delete')
+                'formAction' => $this->createUrl('medlem-update', ['id' => $id]),
+                'createBetalningAction' => $this->createUrl('betalning-medlem', ['id' => $id]),
+                'listBetalningAction' => $this->createUrl('betalning-medlem', ['id' => $id]),
+                'deleteAction' => $this->createUrl('medlem-delete')
             ];
 
             return $this->view->render('viewMedlemEdit', $data);
@@ -130,9 +131,10 @@ class MedlemController extends BaseController
      *
      * Sanitizes input data, updates the member record, and redirects to the member list.
      *
+     * @param ServerRequestInterface $request The request object
      * @param array $params The route parameters, must contain 'id'
      */
-    public function update(array $params): ResponseInterface
+    public function update(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $medlem = new Medlem($this->conn, $this->logger, $id);
@@ -180,7 +182,7 @@ class MedlemController extends BaseController
             "title" => "Lägg till medlem",
             "roller" => $roller,
             //Used in the view to set the proper action url for the form
-            'formAction' => $this->app->getRouter()->generate('medlem-create')
+            'formAction' => $this->createUrl('medlem-create')
         ];
         return $this->view->render('viewMedlemNew', $data);
     }

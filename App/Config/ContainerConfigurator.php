@@ -6,7 +6,7 @@ namespace App\Config;
 
 use League\Container\Container;
 use Psr\Http\Message\ServerRequestInterface;
-use AltoRouter;
+use League\Route\Router;
 use App\Application;
 use App\ServiceProviders\DatabaseServiceProvider;
 use App\ServiceProviders\LoggerServiceProvider;
@@ -26,7 +26,6 @@ class ContainerConfigurator
         // Core services registration
         $container->add(Application::class, $app);
         $container->add(ServerRequestInterface::class, $app->getPsrRequest());
-        $container->add(AltoRouter::class, $app->getRouter());
         $container->add('config', $app->getConfig(null));
         $container->add(Session::class);
         $container->add(\App\Utils\View::class)

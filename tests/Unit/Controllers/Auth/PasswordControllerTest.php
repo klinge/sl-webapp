@@ -156,7 +156,7 @@ class PasswordControllerTest extends TestCase
             ->method('render')
             ->with('login/viewSetNewPassword', $expectedViewData);
 
-        $this->controller->showResetPassword(['token' => $token]);
+        $this->controller->showResetPassword($this->request, ['token' => $token]);
     }
 
     public function testShowResetPasswordWithInvalidToken(): void
@@ -176,7 +176,7 @@ class PasswordControllerTest extends TestCase
             ->method('redirectWithError')
             ->with('show-request-password', 'Token är ogiltig eller har gått ut');
 
-        $this->controller->showResetPassword(['token' => 'invalid_token']);
+        $this->controller->showResetPassword($this->request, ['token' => 'invalid_token']);
     }
 
     public function testResetAndSavePasswordSuccess(): void

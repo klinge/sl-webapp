@@ -1,13 +1,13 @@
 {
     "require": {
-        "altorouter/altorouter": "^2.0",
         "vlucas/phpdotenv": "*",
         "phpmailer/phpmailer": "^6.10",
         "monolog/monolog": "^3.7",
         "andkab/php-turnstile": "^1.0",
         "laminas/laminas-diactoros": "^3.5",
         "guzzlehttp/guzzle": "^7.0",
-        "league/container": "^5.1"
+        "league/container": "^5.1",
+        "league/route": "^6.2"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^4.0",
@@ -26,9 +26,9 @@
     },
     "scripts": {
         "test": "phpunit",
-        "test-unit": "phpunit --testsuite unit",
-        "test-integration": "phpunit --testsuite integration",
-        "test-coverage": "phpunit --coverage-html tests/coverage",
+        "test-unit": "phpunit --testsuite unit --configuration phpunit.xml",
+        "test-integration": "phpunit --testsuite integration --configuration phpunit.xml",
+        "test-coverage": "phpunit --coverage-html tests/coverage --configuration phpunit.xml",
         "test-all": [
             "@test-unit",
             "@test-integration"

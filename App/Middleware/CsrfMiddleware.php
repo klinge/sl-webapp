@@ -56,7 +56,7 @@ class CsrfMiddleware extends BaseMiddleware
                     return $this->jsonResponse(['status' => 'fail', 'message' => 'Error validating csrf token'], 403);
                 } else {
                     Session::setFlashMessage('error', 'Kunde inte validera CSFR-token..');
-                    return new RedirectResponse($this->router->generate('tech-error'));
+                    return new RedirectResponse('/error');
                 }
             }
         }

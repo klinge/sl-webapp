@@ -60,7 +60,7 @@ class BetalningController extends BaseController
         return $this->view->render('viewBetalning', $data);
     }
 
-    public function getBetalning(array $params): Betalning
+    public function getBetalning(ServerRequestInterface $request, array $params): Betalning
     {
         $id = (int) $params['id'];
         $betalning = new Betalning($this->conn, $this->logger);
@@ -70,7 +70,7 @@ class BetalningController extends BaseController
         return $betalning;
     }
 
-    public function getMedlemBetalning(array $params): ResponseInterface
+    public function getMedlemBetalning(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
         $medlem = $this->medlemRepo->getById($id);
@@ -98,7 +98,7 @@ class BetalningController extends BaseController
         return $this->view->render('viewBetalning', $data);
     }
     //This function is called via a javascript fetch POST in the viewBetalning.php view
-    public function createBetalning(array $params): ResponseInterface
+    public function createBetalning(ServerRequestInterface $request): ResponseInterface
     {
         $betalning = new Betalning($this->conn, $this->logger);
         $parsedBody = $this->request->getParsedBody();
@@ -145,7 +145,7 @@ class BetalningController extends BaseController
         }
     }
 
-    public function deleteBetalning(array $params): ResponseInterface
+    public function deleteBetalning(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = $params['id'];
         $betalning = new Betalning($this->conn, $this->logger);
