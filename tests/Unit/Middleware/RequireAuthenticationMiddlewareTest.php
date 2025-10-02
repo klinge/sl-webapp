@@ -55,4 +55,14 @@ class RequireAuthenticationMiddlewareTest extends TestCase
 
         $this->assertSame($expectedResponse, $response);
     }
+
+    public function testRedirectsToLoginWhenNoRouteNameAttribute(): void
+    {
+        $request = new ServerRequest(); // No route_name attribute
+        $response = $this->middleware->process($request, $this->handler);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals('/login', $response->getHeaderLine('Location'));
+        $this->assertNull(Session::get('redirect_url'));
+    }
 }

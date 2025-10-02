@@ -249,7 +249,7 @@ class MedlemControllerTest extends TestCase
     {
         // Test that controller has the required dependencies injected
         $reflection = new \ReflectionClass($this->controller);
-        
+
         $this->assertTrue($reflection->hasProperty('view'));
         $this->assertTrue($reflection->hasProperty('medlemRepo'));
         $this->assertTrue($reflection->hasProperty('betalningRepo'));
@@ -262,13 +262,13 @@ class MedlemControllerTest extends TestCase
         // Test that validator service can be mocked and injected
         $validator = $this->createMock(\App\Services\MedlemDataValidatorService::class);
         $this->setProtectedProperty($this->controller, 'validator', $validator);
-        
+
         // Verify the validator was injected
         $reflection = new \ReflectionClass($this->controller);
         $property = $reflection->getProperty('validator');
         $property->setAccessible(true);
         $injectedValidator = $property->getValue($this->controller);
-        
+
         $this->assertInstanceOf(\App\Services\MedlemDataValidatorService::class, $injectedValidator);
     }
 

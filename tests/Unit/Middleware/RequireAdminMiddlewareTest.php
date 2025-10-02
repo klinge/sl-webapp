@@ -68,4 +68,16 @@ class RequireAdminMiddlewareTest extends TestCase
 
         $this->assertSame($expectedResponse, $response);
     }
+
+    public function testRedirectsToUserWhenAuthenticatedButAdminIsNull(): void
+    {
+        Session::set('user_id', 123);
+        // is_admin is null (not set)
+
+        $request = new ServerRequest();
+        $response = $this->middleware->process($request, $this->handler);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals('/user', $response->getHeaderLine('Location'));
+    }
 }

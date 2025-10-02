@@ -100,7 +100,7 @@ class RouteConfig
                 ->setName('report-member-emails');
         })->middlewares([new RequireAdminMiddleware()]);
 
-        $router->group('/reports', function (\League\Route\RouteGroup $route) {
+        $router->group('/user', function (\League\Route\RouteGroup $route) {
             $route->map('GET', '/', 'App\\Controllers\\UserController::home')
                 ->setName('user-home');
         })->middlewares([new RequireAuthenticationMiddleware()]);
