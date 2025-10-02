@@ -39,18 +39,18 @@ class RedirectAfterLoginTest extends TestCase
 
         // This should redirect to login and store the redirect URL
         $response = $this->app->getRouter()->dispatch($request);
-        
+
         // Verify we got redirected to login
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertEquals('/login', $response->getHeaderLine('Location'));
-        
+
         // Verify redirect URL was stored (now stores path instead of route name)
         $this->assertEquals('/medlem', Session::get('redirect_url'));
-        
+
         // Step 2: Verify that after login, admin users get redirected to the stored URL
         $redirectUrl = Session::get('redirect_url');
         $this->assertEquals('/medlem', $redirectUrl);
-        
+
         // The LoginController should now redirect directly to this URL path
         $this->assertNotNull($redirectUrl);
     }
