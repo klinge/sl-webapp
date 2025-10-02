@@ -56,6 +56,21 @@ class ContainerConfigurator
         $container->add(\App\Middleware\RequireAuthenticationMiddleware::class)
             ->addArgument(Logger::class);
 
+        // Register repositories
+        $container->add(\App\Models\RollRepository::class)
+            ->addArgument('PDO')
+            ->addArgument(Logger::class);
+
+        // Register services
+        $container->add(\App\Services\MedlemService::class)
+            ->addArgument(\App\Models\MedlemRepository::class)
+            ->addArgument(\App\Models\BetalningRepository::class)
+            ->addArgument(\App\Models\RollRepository::class)
+            ->addArgument(\App\Services\MedlemDataValidatorService::class)
+            ->addArgument(\App\Services\MailAliasService::class)
+            ->addArgument(Application::class)
+            ->addArgument(Logger::class);
+
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);
 

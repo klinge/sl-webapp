@@ -124,6 +124,54 @@ class MedlemRepository extends BaseModel
         }
     }
 
+    /**
+     * Creates a new empty Medlem object for data entry.
+     *
+     * @return Medlem New Medlem object
+     */
+    public function createNew(): Medlem
+    {
+        return new Medlem($this->conn, $this->logger);
+    }
+
+    /**
+     * Saves a member (create or update).
+     *
+     * @param Medlem $medlem The member to save
+     * @return bool Success status
+     */
+    public function save(Medlem $medlem): bool
+    {
+        try {
+            if (isset($medlem->id) && $medlem->id > 0) {
+                $medlem->save();
+            } else {
+                $medlem->create();
+            }
+            return true;
+        } catch (Exception $e) {
+            $this->logger->error('Failed to save medlem: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Deletes a member.
+     *
+     * @param Medlem $medlem The member to delete
+     * @return bool Success status
+     */
+    public function delete(Medlem $medlem): bool
+    {
+        try {
+            $medlem->delete();
+            return true;
+        } catch (Exception $e) {
+            $this->logger->error('Failed to delete medlem: ' . $e->getMessage());
+            return false;
+        }
+    }
+
     protected function createMedlem(int $id): Medlem
     {
         return new Medlem($this->conn, $this->logger, $id);
