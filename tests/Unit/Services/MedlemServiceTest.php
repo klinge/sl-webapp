@@ -94,8 +94,9 @@ class MedlemServiceTest extends TestCase
             ->method('getAll')
             ->willReturn($expectedRoles);
 
-        $mockMedlem->expects($this->once())
-            ->method('getSeglingar')
+        $this->medlemRepo->expects($this->once())
+            ->method('getSeglingarByMemberId')
+            ->with($memberId)
             ->willReturn($expectedSeglingar);
 
         $this->betalningRepo->expects($this->once())

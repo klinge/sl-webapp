@@ -60,7 +60,14 @@ class UserAuthenticationService
             ];
         }
 
-        $medlem = new Medlem($this->conn, $this->logger, $result['id']);
+        $medlem = $this->medlemRepo->getById($result['id']);
+        if (!$medlem) {
+            $this->logger->error("Technical error. Could not get member object for member id: " . $result['id']);
+            return [
+                'success' => false,
+                'message' => 'Tekniskt fel. Försök igen eller kontakta en administratör.'
+            ];
+        }
 
         if ($medlem->password) {
             return [

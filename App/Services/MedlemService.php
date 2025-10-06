@@ -42,7 +42,7 @@ class MedlemService
         return [
             'medlem' => $medlem,
             'roller' => $this->rollRepo->getAll(),
-            'seglingar' => $medlem->getSeglingar(),
+            'seglingar' => $this->medlemRepo->getSeglingarByMemberId($id),
             'betalningar' => $this->betalningRepo->getBetalningForMedlem($id)
         ];
     }

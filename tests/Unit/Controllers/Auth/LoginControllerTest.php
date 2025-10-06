@@ -148,13 +148,19 @@ class LoginControllerTest extends TestCase
             ->method('getMemberByEmail')
             ->willReturn(['id' => 1]);
 
-        // Mock PDO query for Medlem constructor
-        $pdoStatement = $this->createMock(\PDOStatement::class);
-        $pdoStatement->method('fetch')
-            ->willReturn($this->medlemData);
+        // Mock repository getById method
+        $mockMedlem = new Medlem();
+        $mockMedlem->id = 1;
+        $mockMedlem->email = 'admin@example.com';
+        $mockMedlem->fornamn = 'John';
+        $mockMedlem->efternamn = 'Doe';
+        $mockMedlem->isAdmin = true;
+        $mockMedlem->password = 'hashedpassword';
 
-        $this->conn->method('prepare')
-            ->willReturn($pdoStatement);
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(1)
+            ->willReturn($mockMedlem);
 
         $this->passwordService->expects($this->once())
             ->method('verifyPassword')
@@ -179,14 +185,19 @@ class LoginControllerTest extends TestCase
             ->method('getMemberByEmail')
             ->willReturn(['id' => 1]);
 
-        $medlemNotAdminData = $this->medlemData;
-        $medlemNotAdminData['isAdmin'] = 0;
-        $pdoStatement = $this->createMock(\PDOStatement::class);
-        $pdoStatement->method('fetch')
-            ->willReturn($medlemNotAdminData);
+        // Mock repository getById method for regular user
+        $mockMedlem = new Medlem();
+        $mockMedlem->id = 1;
+        $mockMedlem->email = 'user@example.com';
+        $mockMedlem->fornamn = 'John';
+        $mockMedlem->efternamn = 'Doe';
+        $mockMedlem->isAdmin = false;
+        $mockMedlem->password = 'hashedpassword';
 
-        $this->conn->method('prepare')
-            ->willReturn($pdoStatement);
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(1)
+            ->willReturn($mockMedlem);
 
         $this->passwordService->expects($this->once())
             ->method('verifyPassword')
@@ -211,12 +222,19 @@ class LoginControllerTest extends TestCase
             ->method('getMemberByEmail')
             ->willReturn(['id' => 2]);
 
-        $pdoStatement = $this->createMock(\PDOStatement::class);
-        $pdoStatement->method('fetch')
-            ->willReturn($this->medlemData);
+        // Mock repository getById method
+        $mockMedlem = new Medlem();
+        $mockMedlem->id = 2;
+        $mockMedlem->email = 'user@example.com';
+        $mockMedlem->fornamn = 'John';
+        $mockMedlem->efternamn = 'Doe';
+        $mockMedlem->isAdmin = false;
+        $mockMedlem->password = 'hashedpassword';
 
-        $this->conn->method('prepare')
-            ->willReturn($pdoStatement);
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(2)
+            ->willReturn($mockMedlem);
 
         $this->passwordService->expects($this->once())
             ->method('verifyPassword')

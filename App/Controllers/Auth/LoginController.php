@@ -90,10 +90,9 @@ class LoginController extends AuthBaseController
             $this->logger->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
             return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
         }
-        //Catch exception if medlem not found, should not happen since we already checked for it
-        try {
-            $medlem = new Medlem($this->conn, $this->logger, $result['id']);
-        } catch (\Exception $e) {
+        //Get medlem object from repository
+        $medlem = $this->medlemRepo->getById($result['id']);
+        if (!$medlem) {
             $this->logger->error("Technical error. Could not create member object for member id: " . $result['id']);
             return $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
         }
