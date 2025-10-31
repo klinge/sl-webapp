@@ -21,21 +21,19 @@ use Exception;
 class SeglingControllerTest extends TestCase
 {
     private SeglingController $controller;
-    private MockObject $app;
     private MockObject $request;
-    private MockObject $logger;
     private MockObject $seglingService;
     private MockObject $view;
     private MockObject $router;
+    private MockObject $app;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
-        $this->request = $this->createMock(ServerRequest::class);
-        $this->logger = $this->createMock(Logger::class);
         $this->seglingService = $this->createMock(SeglingService::class);
         $this->view = $this->createMock(View::class);
+        $this->request = $this->createMock(ServerRequest::class);
         $this->router = $this->createMock(Router::class);
+        $this->app = $this->createMock(Application::class);
 
         // Mock router's getNamedRoute method
         $mockRoute = $this->createMock(\League\Route\Route::class);
@@ -47,13 +45,12 @@ class SeglingControllerTest extends TestCase
         $this->app->method('getAppDir')->willReturn('/path/to/app');
 
         $this->controller = new SeglingController(
-            $this->app,
-            $this->request,
-            $this->logger,
-            $this->seglingService
+            $this->seglingService,
+            $this->view
         );
 
-        $this->setProtectedProperty($this->controller, 'view', $this->view);
+        $this->setProtectedProperty($this->controller, 'request', $this->request);
+        $this->setProtectedProperty($this->controller, 'app', $this->app);
     }
 
     public function testListDelegatesServiceAndRendersView(): void

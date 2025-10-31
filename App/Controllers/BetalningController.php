@@ -14,18 +14,10 @@ use Monolog\Logger;
 
 class BetalningController extends BaseController
 {
-    private View $view;
-    private BetalningService $betalningService;
-
     public function __construct(
-        Application $app,
-        ServerRequestInterface $request,
-        Logger $logger,
-        BetalningService $betalningService
+        private BetalningService $betalningService,
+        private View $view
     ) {
-        parent::__construct($app, $request, $logger);
-        $this->view = new View($this->app);
-        $this->betalningService = $betalningService;
     }
 
     public function list(): ResponseInterface

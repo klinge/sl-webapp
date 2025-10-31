@@ -17,18 +17,10 @@ use Monolog\Logger;
 
 class SeglingController extends BaseController
 {
-    private View $view;
-    private SeglingService $seglingService;
-
     public function __construct(
-        Application $app,
-        ServerRequestInterface $request,
-        Logger $logger,
-        SeglingService $seglingService
+        private SeglingService $seglingService,
+        private View $view
     ) {
-        parent::__construct($app, $request, $logger);
-        $this->view = new View($this->app);
-        $this->seglingService = $seglingService;
     }
 
     public function list(): ResponseInterface

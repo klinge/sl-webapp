@@ -24,25 +24,12 @@ class MedlemController extends BaseController
 {
     use ResponseFormatter;
 
-    private View $view;
-    private MedlemService $medlemService;
 
-    /**
-     * Constructs a new MedlemController instance.
-     *
-     * @param Application $app The application instance
-     * @param ServerRequestInterface $request The request object
-     */
+
     public function __construct(
-        Application $app,
-        ServerRequestInterface $request,
-        Logger $logger,
-        MedlemService $medlemService,
-        View $view
+        private MedlemService $medlemService,
+        private View $view
     ) {
-        parent::__construct($app, $request, $logger);
-        $this->medlemService = $medlemService;
-        $this->view = $view;
     }
 
     /**

@@ -17,30 +17,22 @@ use Exception;
 class BetalningControllerTest extends TestCase
 {
     private BetalningController $controller;
-    private $app;
-    private $request;
-    private $logger;
     private $betalningService;
     private $view;
+    private $request;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
-        $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->logger = $this->createMock(\Monolog\Logger::class);
-        $this->view = $this->createMock(View::class);
         $this->betalningService = $this->createMock(BetalningService::class);
-
-        $this->app->method('getAppDir')->willReturn('/path/to/app');
+        $this->view = $this->createMock(View::class);
+        $this->request = $this->createMock(ServerRequestInterface::class);
 
         $this->controller = new BetalningController(
-            $this->app,
-            $this->request,
-            $this->logger,
-            $this->betalningService
+            $this->betalningService,
+            $this->view
         );
 
-        $this->setProtectedProperty($this->controller, 'view', $this->view);
+        $this->setProtectedProperty($this->controller, 'request', $this->request);
     }
 
     protected function tearDown(): void
@@ -233,7 +225,6 @@ class BetalningControllerTest extends TestCase
 
     private function setProtectedProperty(object $protectedClass, string $property, object $objectToInject): void
     {
-        // Inject service using reflection
         $reflection = new \ReflectionClass($protectedClass);
         $property = $reflection->getProperty($property);
         $property->setAccessible(true);

@@ -36,12 +36,12 @@ class MedlemControllerTest extends TestCase
         $this->router = $this->createMock(Router::class);
 
         $this->controller = new MedlemController(
-            $this->app,
-            $this->request,
-            $this->logger,
             $this->medlemService,
             $this->view
         );
+
+        $this->setProtectedProperty($this->controller, 'request', $this->request);
+        $this->setProtectedProperty($this->controller, 'app', $this->app);
     }
 
     private function mockCreateUrl(string $route, array $params = []): void
@@ -258,5 +258,13 @@ class MedlemControllerTest extends TestCase
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
         $this->assertEquals(302, $response->getStatusCode());
+    }
+
+    private function setProtectedProperty(object $object, string $property, $value): void
+    {
+        $reflection = new \ReflectionClass($object);
+        $prop = $reflection->getProperty($property);
+        $prop->setAccessible(true);
+        $prop->setValue($object, $value);
     }
 }
