@@ -62,9 +62,10 @@ class MedlemControllerIntegrationTest extends TestCase
         $constructor = $reflection->getConstructor();
         $params = $constructor->getParameters();
 
-        // MedlemController should have 2 parameters: MedlemService and View
-        $this->assertCount(2, $params);
+        // MedlemController should have 3 parameters: MedlemService, View, and Application
+        $this->assertCount(3, $params);
         $this->assertEquals(\App\Services\MedlemService::class, $params[0]->getType()->getName());
         $this->assertEquals(\App\Utils\View::class, $params[1]->getType()->getName());
+        $this->assertEquals(\App\Application::class, $params[2]->getType()->getName());
     }
 }

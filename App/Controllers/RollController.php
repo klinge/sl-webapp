@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Services\RollService;
 use App\Utils\View;
+use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -13,8 +14,10 @@ class RollController extends BaseController
 {
     public function __construct(
         private RollService $rollService,
-        private View $view
+        private View $view,
+        Application $app
     ) {
+        $this->app = $app;
     }
 
     public function list(): ResponseInterface

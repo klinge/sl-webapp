@@ -37,7 +37,8 @@ class MedlemControllerTest extends TestCase
 
         $this->controller = new MedlemController(
             $this->medlemService,
-            $this->view
+            $this->view,
+            $this->app
         );
 
         $this->setProtectedProperty($this->controller, 'request', $this->request);

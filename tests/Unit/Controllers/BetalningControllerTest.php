@@ -20,16 +20,19 @@ class BetalningControllerTest extends TestCase
     private $betalningService;
     private $view;
     private $request;
+    private $app;
 
     protected function setUp(): void
     {
         $this->betalningService = $this->createMock(BetalningService::class);
         $this->view = $this->createMock(View::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
+        $this->app = $this->createMock(Application::class);
 
         $this->controller = new BetalningController(
             $this->betalningService,
-            $this->view
+            $this->view,
+            $this->app
         );
 
         $this->setProtectedProperty($this->controller, 'request', $this->request);

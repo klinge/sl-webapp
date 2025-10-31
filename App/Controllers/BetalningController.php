@@ -16,8 +16,10 @@ class BetalningController extends BaseController
 {
     public function __construct(
         private BetalningService $betalningService,
-        private View $view
+        private View $view,
+        Application $app
     ) {
+        $this->app = $app;
     }
 
     public function list(): ResponseInterface

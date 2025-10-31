@@ -97,19 +97,23 @@ class ContainerConfigurator
         // Manual registration for refactored controllers
         $container->add(\App\Controllers\MedlemController::class)
             ->addArgument(\App\Services\MedlemService::class)
-            ->addArgument(\App\Utils\View::class);
+            ->addArgument(\App\Utils\View::class)
+            ->addArgument(Application::class);
 
         $container->add(\App\Controllers\BetalningController::class)
             ->addArgument(\App\Services\BetalningService::class)
-            ->addArgument(\App\Utils\View::class);
+            ->addArgument(\App\Utils\View::class)
+            ->addArgument(Application::class);
 
         $container->add(\App\Controllers\SeglingController::class)
             ->addArgument(\App\Services\SeglingService::class)
-            ->addArgument(\App\Utils\View::class);
+            ->addArgument(\App\Utils\View::class)
+            ->addArgument(Application::class);
 
         $container->add(\App\Controllers\RollController::class)
             ->addArgument(\App\Services\RollService::class)
-            ->addArgument(\App\Utils\View::class);
+            ->addArgument(\App\Utils\View::class)
+            ->addArgument(Application::class);
 
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);

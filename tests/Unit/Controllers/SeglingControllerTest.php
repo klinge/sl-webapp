@@ -46,7 +46,8 @@ class SeglingControllerTest extends TestCase
 
         $this->controller = new SeglingController(
             $this->seglingService,
-            $this->view
+            $this->view,
+            $this->app
         );
 
         $this->setProtectedProperty($this->controller, 'request', $this->request);

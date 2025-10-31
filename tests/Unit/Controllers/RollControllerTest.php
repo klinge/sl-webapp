@@ -16,15 +16,18 @@ class RollControllerTest extends TestCase
     private RollController $controller;
     private $mockRollService;
     private $mockView;
+    private $mockApp;
 
     protected function setUp(): void
     {
         $this->mockRollService = $this->createMock(RollService::class);
         $this->mockView = $this->createMock(View::class);
+        $this->mockApp = $this->createMock(\App\Application::class);
 
         $this->controller = new RollController(
             $this->mockRollService,
-            $this->mockView
+            $this->mockView,
+            $this->mockApp
         );
     }
 

@@ -32,13 +32,14 @@ class ContainerConfigurationTest extends TestCase
             $controller = $this->container->get($controllerClass);
             $this->assertInstanceOf($controllerClass, $controller);
 
-            // Verify each controller has exactly 2 dependencies (Service + View)
+            // Verify each controller has exactly 3 dependencies (Service + View + Application)
             $reflection = new \ReflectionClass($controller);
             $constructor = $reflection->getConstructor();
             $params = $constructor->getParameters();
 
-            $this->assertCount(2, $params, "Controller $controllerClass should have exactly 2 dependencies");
+            $this->assertCount(3, $params, "Controller $controllerClass should have exactly 3 dependencies");
             $this->assertEquals(\App\Utils\View::class, $params[1]->getType()->getName(), "Second dependency should be View");
+            $this->assertEquals(\App\Application::class, $params[2]->getType()->getName(), "Third dependency should be Application");
         }
     }
 

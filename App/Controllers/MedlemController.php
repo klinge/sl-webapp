@@ -28,8 +28,10 @@ class MedlemController extends BaseController
 
     public function __construct(
         private MedlemService $medlemService,
-        private View $view
+        private View $view,
+        Application $app
     ) {
+        $this->app = $app;
     }
 
     /**
