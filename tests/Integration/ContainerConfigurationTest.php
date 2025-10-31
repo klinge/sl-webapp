@@ -39,7 +39,11 @@ class ContainerConfigurationTest extends TestCase
 
             $this->assertCount(3, $params, "Controller $controllerClass should have exactly 3 dependencies");
             $this->assertEquals(\App\Utils\View::class, $params[1]->getType()->getName(), "Second dependency should be View");
-            $this->assertEquals(\App\Services\UrlGeneratorService::class, $params[2]->getType()->getName(), "Third dependency should be UrlGeneratorService");
+            $this->assertEquals(
+                \App\Services\UrlGeneratorService::class,
+                $params[2]->getType()->getName(),
+                "Third dependency should be UrlGeneratorService"
+            );
         }
     }
 

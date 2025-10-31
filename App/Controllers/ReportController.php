@@ -19,8 +19,14 @@ class ReportController extends BaseController
     private MedlemRepository $medlemRepo;
     private PDO $conn;
 
-    public function __construct(UrlGeneratorService $urlGenerator, ServerRequestInterface $request, Logger $logger, Container $container, PDO $conn, View $view)
-    {
+    public function __construct(
+        UrlGeneratorService $urlGenerator,
+        ServerRequestInterface $request,
+        Logger $logger,
+        Container $container,
+        PDO $conn,
+        View $view
+    ) {
         parent::__construct($urlGenerator, $request, $logger, $container);
         $this->conn = $conn;
         $this->view = $view;
