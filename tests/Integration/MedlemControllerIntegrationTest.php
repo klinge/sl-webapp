@@ -24,14 +24,14 @@ class MedlemControllerIntegrationTest extends TestCase
     public function testContainerCanInstantiateMedlemController(): void
     {
         $controller = $this->container->get(MedlemController::class);
-        
+
         $this->assertInstanceOf(MedlemController::class, $controller);
     }
 
     public function testMedlemServiceCanBeResolved(): void
     {
         $service = $this->container->get(\App\Services\MedlemService::class);
-        
+
         $this->assertInstanceOf(\App\Services\MedlemService::class, $service);
     }
 
@@ -56,12 +56,12 @@ class MedlemControllerIntegrationTest extends TestCase
     {
         // This tests the full dependency chain: Controller -> Service -> Repository -> Model
         $controller = $this->container->get(MedlemController::class);
-        
+
         // Use reflection to verify the controller has the expected dependencies
         $reflection = new \ReflectionClass($controller);
         $constructor = $reflection->getConstructor();
         $params = $constructor->getParameters();
-        
+
         // MedlemController should have 2 parameters: MedlemService and View
         $this->assertCount(2, $params);
         $this->assertEquals(\App\Services\MedlemService::class, $params[0]->getType()->getName());

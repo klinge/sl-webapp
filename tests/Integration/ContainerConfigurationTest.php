@@ -31,12 +31,12 @@ class ContainerConfigurationTest extends TestCase
         foreach ($controllers as $controllerClass) {
             $controller = $this->container->get($controllerClass);
             $this->assertInstanceOf($controllerClass, $controller);
-            
+
             // Verify each controller has exactly 2 dependencies (Service + View)
             $reflection = new \ReflectionClass($controller);
             $constructor = $reflection->getConstructor();
             $params = $constructor->getParameters();
-            
+
             $this->assertCount(2, $params, "Controller $controllerClass should have exactly 2 dependencies");
             $this->assertEquals(\App\Utils\View::class, $params[1]->getType()->getName(), "Second dependency should be View");
         }

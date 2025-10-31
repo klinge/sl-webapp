@@ -98,15 +98,15 @@ class ContainerConfigurator
         $container->add(\App\Controllers\MedlemController::class)
             ->addArgument(\App\Services\MedlemService::class)
             ->addArgument(\App\Utils\View::class);
-            
+
         $container->add(\App\Controllers\BetalningController::class)
             ->addArgument(\App\Services\BetalningService::class)
             ->addArgument(\App\Utils\View::class);
-            
+
         $container->add(\App\Controllers\SeglingController::class)
             ->addArgument(\App\Services\SeglingService::class)
             ->addArgument(\App\Utils\View::class);
-            
+
         $container->add(\App\Controllers\RollController::class)
             ->addArgument(\App\Services\RollService::class)
             ->addArgument(\App\Utils\View::class);
@@ -153,7 +153,7 @@ class ContainerConfigurator
                 'App\\Controllers\\SeglingController',
                 'App\\Controllers\\RollController'
             ];
-            
+
             if (class_exists($className) && !in_array($className, $manuallyRegistered)) {
                 $reflection = new \ReflectionClass($className);
                 if (!$reflection->isAbstract()) {
