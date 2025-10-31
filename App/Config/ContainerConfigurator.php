@@ -89,6 +89,11 @@ class ContainerConfigurator
             ->addArgument(\App\Models\RollRepository::class)
             ->addArgument(\App\Models\MedlemRepository::class);
 
+        $container->add(\App\Services\MedlemDataValidatorService::class);
+        $container->add(\App\Services\MailAliasService::class)
+            ->addArgument(Logger::class)
+            ->addArgument('config');
+
         // Manual registration for refactored controllers
         $container->add(\App\Controllers\RollController::class)
             ->addArgument(\App\Services\RollService::class)
