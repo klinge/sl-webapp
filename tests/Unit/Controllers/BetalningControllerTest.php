@@ -31,7 +31,7 @@ class BetalningControllerTest extends TestCase
         $this->app = $this->createMock(Application::class);
 
         $this->urlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
-        
+
         $this->controller = new BetalningController(
             $this->betalningService,
             $this->view,

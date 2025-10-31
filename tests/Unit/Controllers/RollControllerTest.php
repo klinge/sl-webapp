@@ -26,7 +26,7 @@ class RollControllerTest extends TestCase
         $this->mockApp = $this->createMock(\App\Application::class);
 
         $this->mockUrlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
-        
+
         $this->controller = new RollController(
             $this->mockRollService,
             $this->mockView,

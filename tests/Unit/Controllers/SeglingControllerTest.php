@@ -45,10 +45,10 @@ class SeglingControllerTest extends TestCase
         $this->router->method('getNamedRoute')->willReturn($mockRoute);
         $this->app->method('getRouter')->willReturn($this->router);
         $this->app->method('getAppDir')->willReturn('/path/to/app');
-        
+
         // Mock URL generator
-        $this->urlGenerator->method('createUrl')->willReturnCallback(function($route, $params = []) {
-            return match($route) {
+        $this->urlGenerator->method('createUrl')->willReturnCallback(function ($route, $params = []) {
+            return match ($route) {
                 'segling-show-create' => '/segling/new',
                 'segling-create' => '/segling/new',
                 'segling-save' => '/segling/save/' . ($params['id'] ?? ''),

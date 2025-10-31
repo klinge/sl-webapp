@@ -83,6 +83,9 @@ class Application
     {
         $this->router = new Router();
 
+        // Register router in container now that it's created
+        $this->container->add(Router::class, $this->router);
+
         // Set up the application strategy with container for dependency injection
         $strategy = new \League\Route\Strategy\ApplicationStrategy();
         $strategy->setContainer($this->container);

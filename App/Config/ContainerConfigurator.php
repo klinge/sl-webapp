@@ -96,6 +96,13 @@ class ContainerConfigurator
             ->addArgument(Logger::class)
             ->addArgument('config');
 
+        $container->add(\App\Services\Auth\UserAuthenticationService::class)
+            ->addArgument('PDO')
+            ->addArgument(Logger::class)
+            ->addArgument(Router::class)
+            ->addArgument(\App\Utils\Email::class)
+            ->addArgument('config');
+
         // Manual registration for refactored controllers
         $container->add(\App\Controllers\MedlemController::class)
             ->addArgument(\App\Services\MedlemService::class)
@@ -116,7 +123,7 @@ class ContainerConfigurator
             ->addArgument(\App\Services\RollService::class)
             ->addArgument(\App\Utils\View::class)
             ->addArgument(\App\Services\UrlGeneratorService::class);
-            
+
         // Manual registration for HomeController
         $container->add(\App\Controllers\HomeController::class)
             ->addArgument(\App\Services\UrlGeneratorService::class)
@@ -124,18 +131,18 @@ class ContainerConfigurator
             ->addArgument(Logger::class)
             ->addArgument($container)
             ->addArgument(\App\Utils\View::class);
-            
+
         // Manual registration for Auth controllers
         $container->add(\App\Controllers\Auth\LoginController::class)
             ->addArgument(\App\Services\UrlGeneratorService::class)
             ->addArgument(ServerRequestInterface::class)
             ->addArgument(Logger::class)
             ->addArgument($container)
-            ->addArgument('config.TURNSTILE_SECRET_KEY')
+            ->addArgument($app->getConfig('TURNSTILE_SECRET_KEY'))
             ->addArgument('PDO')
             ->addArgument(\App\Services\Auth\PasswordService::class)
             ->addArgument(\App\Utils\View::class);
-            
+
         // Manual registration for ReportController
         $container->add(\App\Controllers\ReportController::class)
             ->addArgument(\App\Services\UrlGeneratorService::class)
@@ -144,7 +151,7 @@ class ContainerConfigurator
             ->addArgument($container)
             ->addArgument('PDO')
             ->addArgument(\App\Utils\View::class);
-            
+
         // Manual registration for WebhookController
         $container->add(\App\Controllers\WebhookController::class)
             ->addArgument(\App\Services\UrlGeneratorService::class)
@@ -154,17 +161,27 @@ class ContainerConfigurator
             ->addArgument(GitHubService::class)
             ->addArgument(GitRepositoryService::class)
             ->addArgument(DeploymentService::class);
-            
+
         // Manual registration for RegistrationController
         $container->add(\App\Controllers\Auth\RegistrationController::class)
             ->addArgument(\App\Services\UrlGeneratorService::class)
             ->addArgument(ServerRequestInterface::class)
             ->addArgument(Logger::class)
             ->addArgument($container)
-            ->addArgument('config.TURNSTILE_SECRET_KEY')
+            ->addArgument($app->getConfig('TURNSTILE_SECRET_KEY'))
             ->addArgument(\App\Services\Auth\UserAuthenticationService::class)
             ->addArgument(\App\Utils\View::class);
-            
+
+        // Manual registration for PasswordController
+        $container->add(\App\Controllers\Auth\PasswordController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument($app->getConfig('TURNSTILE_SECRET_KEY'))
+            ->addArgument(\App\Services\Auth\UserAuthenticationService::class)
+            ->addArgument(\App\Utils\View::class);
+
         // Manual registration for UserController
         $container->add(\App\Controllers\UserController::class)
             ->addArgument(\App\Services\UrlGeneratorService::class)
@@ -215,7 +232,7 @@ class ContainerConfigurator
                 'App\\Controllers\\SeglingController',
                 'App\\Controllers\\RollController'
             ];
-            
+
             // Controllers that need manual registration
             $manuallyRegisteredControllers = [
                 'App\\Controllers\\HomeController',

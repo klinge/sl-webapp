@@ -37,7 +37,7 @@ class MedlemControllerTest extends TestCase
         $this->router = $this->createMock(Router::class);
 
         $this->urlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
-        
+
         $this->controller = new MedlemController(
             $this->medlemService,
             $this->view,
