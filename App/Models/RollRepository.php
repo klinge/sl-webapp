@@ -14,14 +14,11 @@ class RollRepository extends BaseModel
         parent::__construct($db, $logger);
     }
 
-    /**
-     * Retrieves all roles from the database.
-     *
-     * @return array Array of role data
-     */
     public function getAll(): array
     {
-        $roll = new Roll($this->conn, $this->logger);
-        return $roll->getAll();
+        $query = "SELECT * FROM Roll";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

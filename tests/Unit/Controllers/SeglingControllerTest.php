@@ -5,21 +5,18 @@ declare(strict_types=1);
 namespace Tests\Unit\Controllers;
 
 use App\Controllers\SeglingController;
-use App\Models\BetalningRepository;
-use App\Models\SeglingRepository;
-use App\Models\MedlemRepository;
-use App\Models\Roll;
-use App\Models\Segling;
+use App\Services\SeglingService;
+use App\Services\SeglingServiceResult;
 use App\Utils\View;
 use App\Application;
 use Laminas\Diactoros\Response\RedirectResponse;
-use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequest;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use League\Route\Router;
-use PDOException;
+use Psr\Http\Message\ResponseInterface;
+use Exception;
 
 class SeglingControllerTest extends TestCase
 {
@@ -27,11 +24,8 @@ class SeglingControllerTest extends TestCase
     private MockObject $app;
     private MockObject $request;
     private MockObject $logger;
-    private MockObject $seglingRepo;
-    private MockObject $medlemRepo;
-    private MockObject $betalningRepo;
+    private MockObject $seglingService;
     private MockObject $view;
-    private MockObject $roll;
     private MockObject $router;
 
     protected function setUp(): void
@@ -39,43 +33,38 @@ class SeglingControllerTest extends TestCase
         $this->app = $this->createMock(Application::class);
         $this->request = $this->createMock(ServerRequest::class);
         $this->logger = $this->createMock(Logger::class);
-        $this->seglingRepo = $this->createMock(SeglingRepository::class);
-        $this->medlemRepo = $this->createMock(MedlemRepository::class);
-        $this->betalningRepo = $this->createMock(BetalningRepository::class);
+        $this->seglingService = $this->createMock(SeglingService::class);
         $this->view = $this->createMock(View::class);
-        $this->roll = $this->createMock(Roll::class);
         $this->router = $this->createMock(Router::class);
 
         // Mock router's getNamedRoute method
         $mockRoute = $this->createMock(\League\Route\Route::class);
         $mockRoute->method('getPath')->willReturnCallback(function ($params = []) {
-            // Return appropriate URLs based on the route being requested
             return '/segling/new'; // Default for tests
         });
         $this->router->method('getNamedRoute')->willReturn($mockRoute);
         $this->app->method('getRouter')->willReturn($this->router);
+        $this->app->method('getAppDir')->willReturn('/path/to/app');
 
         $this->controller = new SeglingController(
             $this->app,
             $this->request,
             $this->logger,
-            $this->seglingRepo,
-            $this->medlemRepo,
-            $this->betalningRepo,
-            $this->view,
-            $this->roll
+            $this->seglingService
         );
+
+        $this->setProtectedProperty($this->controller, 'view', $this->view);
     }
 
-    public function testList(): void
+    public function testListDelegatesServiceAndRendersView(): void
     {
         $seglingData = [['id' => 1, 'skeppslag' => 'Test']];
 
-        $this->seglingRepo->expects($this->once())
-            ->method('getAllWithDeltagare')
+        $this->seglingService->expects($this->once())
+            ->method('getAllSeglingar')
             ->willReturn($seglingData);
 
-        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+        $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with('viewSegling', [
@@ -86,129 +75,117 @@ class SeglingControllerTest extends TestCase
             ->willReturn($mockResponse);
 
         $result = $this->controller->list();
-        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
+        $this->assertSame($mockResponse, $result);
     }
 
-    public function testEditWithValidId(): void
+    public function testEditDelegatesServiceAndRendersView(): void
     {
-        $segling = $this->createMock(Segling::class);
-        $segling->start_dat = '2024-01-01';
-        $segling->method('getDeltagare')->willReturn([
-            ['medlem_id' => 1, 'namn' => 'Test']
-        ]);
+        $editData = [
+            'segling' => (object) ['id' => 1, 'skeppslag' => 'Test'],
+            'roles' => [],
+            'allaSkeppare' => [],
+            'allaBatsman' => [],
+            'allaKockar' => []
+        ];
 
-        $this->seglingRepo->expects($this->once())
-            ->method('getById')
+        $this->seglingService->expects($this->once())
+            ->method('getSeglingEditData')
             ->with(1)
-            ->willReturn($segling);
+            ->willReturn($editData);
 
-        $this->betalningRepo->expects($this->once())
-            ->method('memberHasPayed')
-            ->with(1, 2024)
-            ->willReturn(true);
-
-        $this->roll->expects($this->once())
-            ->method('getAll')
-            ->willReturn([]);
-
-        $this->medlemRepo->expects($this->exactly(3))
-            ->method('getMembersByRollName')
-            ->willReturn([]);
-
-        // Router generate method not needed since controller uses createUrl
-
-        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+        $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with('viewSeglingEdit', $this->isType('array'))
             ->willReturn($mockResponse);
 
         $result = $this->controller->edit($this->request, ['id' => '1']);
-        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
+        $this->assertSame($mockResponse, $result);
     }
 
-    public function testEditWithInvalidId(): void
+    public function testEditHandlesServiceException(): void
     {
-        $this->seglingRepo->expects($this->once())
-            ->method('getById')
+        $this->seglingService->expects($this->once())
+            ->method('getSeglingEditData')
             ->with(999)
-            ->willReturn(null);
+            ->willThrowException(new Exception('Segling not found'));
 
         $result = $this->controller->edit($this->request, ['id' => '999']);
-        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
         $this->assertEquals(404, $result->getStatusCode());
     }
 
-    public function testSaveSuccess(): void
+    public function testSaveDelegatesServiceAndRedirects(): void
     {
+        $postData = [
+            'startdat' => '2024-01-01',
+            'slutdat' => '2024-01-02',
+            'skeppslag' => 'Test',
+            'kommentar' => 'Test comment'
+        ];
+        $successResult = new SeglingServiceResult(true, 'Segling uppdaterad!', 'segling-list');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn([
-                'startdat' => '2024-01-01',
-                'slutdat' => '2024-01-02',
-                'skeppslag' => 'Test',
-                'kommentar' => 'Test comment'
-            ]);
+            ->willReturn($postData);
 
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('updateSegling')
-            ->with(1, $this->isType('array'))
-            ->willReturn(true);
+            ->with(1, $postData)
+            ->willReturn($successResult);
 
         $result = $this->controller->save($this->request, ['id' => '1']);
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
-    public function testSaveFailure(): void
+    public function testSaveHandlesServiceFailure(): void
     {
+        $postData = ['invalid' => 'data'];
+        $failureResult = new SeglingServiceResult(false, 'Validation failed');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn([
-                'startdat' => '2024-01-01',
-                'slutdat' => '2024-01-02',
-                'skeppslag' => 'Test',
-                'kommentar' => 'Test comment'
-            ]);
+            ->willReturn($postData);
 
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('updateSegling')
-            ->willReturn(false);
+            ->with(1, $postData)
+            ->willReturn($failureResult);
 
         $result = $this->controller->save($this->request, ['id' => '1']);
-        $this->assertInstanceOf(JsonResponse::class, $result);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
+        $this->assertEquals('application/json', $result->getHeader('Content-Type')[0]);
     }
 
-    public function testDeleteSuccess(): void
+    public function testDeleteDelegatesServiceAndRedirects(): void
     {
-        $this->seglingRepo->expects($this->once())
+        $successResult = new SeglingServiceResult(true, 'Seglingen är nu borttagen!', 'segling-list');
+
+        $this->seglingService->expects($this->once())
             ->method('deleteSegling')
             ->with(1)
-            ->willReturn(true);
-
-        $this->logger->expects($this->once())
-            ->method('info');
+            ->willReturn($successResult);
 
         $result = $this->controller->delete($this->request, ['id' => '1']);
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
-    public function testDeleteFailure(): void
+    public function testDeleteHandlesServiceFailure(): void
     {
-        $this->seglingRepo->expects($this->once())
+        $failureResult = new SeglingServiceResult(false, 'Kunde inte ta bort seglingen', 'segling-list');
+
+        $this->seglingService->expects($this->once())
             ->method('deleteSegling')
             ->with(1)
-            ->willReturn(false);
-
-        $this->logger->expects($this->once())
-            ->method('warning');
+            ->willReturn($failureResult);
 
         $result = $this->controller->delete($this->request, ['id' => '1']);
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
-    public function testShowCreate(): void
+    public function testShowCreateRendersView(): void
     {
-        $mockResponse = $this->createMock(\Psr\Http\Message\ResponseInterface::class);
+        $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
             ->with('viewSeglingNew', [
@@ -218,186 +195,139 @@ class SeglingControllerTest extends TestCase
             ->willReturn($mockResponse);
 
         $result = $this->controller->showCreate();
-        $this->assertInstanceOf(\Psr\Http\Message\ResponseInterface::class, $result);
+        $this->assertSame($mockResponse, $result);
     }
 
-    public function testCreateSuccess(): void
+    public function testCreateDelegatesServiceAndRedirects(): void
     {
+        $postData = [
+            'startdat' => '2024-01-01',
+            'slutdat' => '2024-01-02',
+            'skeppslag' => 'Test',
+            'kommentar' => 'Test comment'
+        ];
+        $successResult = new SeglingServiceResult(true, 'Seglingen är nu skapad!', 'segling-edit', 123);
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn([
-                'startdat' => '2024-01-01',
-                'slutdat' => '2024-01-02',
-                'skeppslag' => 'Test',
-                'kommentar' => 'Test comment'
-            ]);
+            ->willReturn($postData);
 
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('createSegling')
-            ->willReturn(123);
+            ->with($postData)
+            ->willReturn($successResult);
 
         $result = $this->controller->create();
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
-    public function testCreateMissingData(): void
+    public function testCreateHandlesServiceFailure(): void
     {
+        $postData = ['startdat' => '', 'slutdat' => '2024-01-02', 'skeppslag' => 'Test'];
+        $failureResult = new SeglingServiceResult(false, 'Indata saknades', 'segling-show-create');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn([
-                'startdat' => '',
-                'slutdat' => '2024-01-02',
-                'skeppslag' => 'Test'
-            ]);
+            ->willReturn($postData);
 
-        $result = $this->controller->create();
-        $this->assertInstanceOf(RedirectResponse::class, $result);
-    }
-
-    public function testCreateFailure(): void
-    {
-        $this->request->expects($this->once())
-            ->method('getParsedBody')
-            ->willReturn([
-                'startdat' => '2024-01-01',
-                'slutdat' => '2024-01-02',
-                'skeppslag' => 'Test',
-                'kommentar' => 'Test comment'
-            ]);
-
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('createSegling')
-            ->willReturn(null);
+            ->with($postData)
+            ->willReturn($failureResult);
 
         $result = $this->controller->create();
         $this->assertInstanceOf(RedirectResponse::class, $result);
     }
 
-    public function testSaveMedlemSuccess(): void
+
+
+    public function testSaveMedlemDelegatesServiceAndReturnsJson(): void
     {
+        $postData = [
+            'segling_id' => '1',
+            'segling_person' => '2',
+            'segling_roll' => '3'
+        ];
+        $successResult = new SeglingServiceResult(true, 'Medlem tillagd på segling');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn([
-                'segling_id' => '1',
-                'segling_person' => '2',
-                'segling_roll' => '3'
-            ]);
+            ->willReturn($postData);
 
-        $this->seglingRepo->expects($this->once())
-            ->method('isMemberOnSegling')
-            ->with(1, 2)
-            ->willReturn(false);
-
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('addMemberToSegling')
-            ->with(1, 2, 3)
-            ->willReturn(true);
+            ->with($postData)
+            ->willReturn($successResult);
 
         $result = $this->controller->saveMedlem();
-        $this->assertInstanceOf(JsonResponse::class, $result);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
+        $this->assertEquals('application/json', $result->getHeader('Content-Type')[0]);
     }
 
-    public function testSaveMedlemMissingInput(): void
+    public function testSaveMedlemHandlesServiceFailure(): void
     {
+        $postData = ['segling_id' => '1'];
+        $failureResult = new SeglingServiceResult(false, 'Missing input');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn(['segling_id' => '1']);
+            ->willReturn($postData);
 
-        $result = $this->controller->saveMedlem();
-        $this->assertInstanceOf(JsonResponse::class, $result);
-    }
-
-    public function testSaveMedlemAlreadyExists(): void
-    {
-        $this->request->expects($this->once())
-            ->method('getParsedBody')
-            ->willReturn([
-                'segling_id' => '1',
-                'segling_person' => '2'
-            ]);
-
-        $this->seglingRepo->expects($this->once())
-            ->method('isMemberOnSegling')
-            ->with(1, 2)
-            ->willReturn(true);
-
-        $result = $this->controller->saveMedlem();
-        $this->assertInstanceOf(JsonResponse::class, $result);
-    }
-
-    public function testSaveMedlemPDOException(): void
-    {
-        $this->request->expects($this->once())
-            ->method('getParsedBody')
-            ->willReturn([
-                'segling_id' => '1',
-                'segling_person' => '2'
-            ]);
-
-        $this->seglingRepo->expects($this->once())
-            ->method('isMemberOnSegling')
-            ->willReturn(false);
-
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('addMemberToSegling')
-            ->willThrowException(new PDOException('Database error'));
+            ->with($postData)
+            ->willReturn($failureResult);
 
         $result = $this->controller->saveMedlem();
-        $this->assertInstanceOf(JsonResponse::class, $result);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 
-    public function testDeleteMedlemFromSeglingSuccess(): void
+
+
+
+
+    public function testDeleteMedlemFromSeglingDelegatesServiceAndReturnsJson(): void
     {
+        $data = ['segling_id' => '1', 'medlem_id' => '2'];
+        $successResult = new SeglingServiceResult(true, 'Member removed successfully');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn([
-                'segling_id' => '1',
-                'medlem_id' => '2'
-            ]);
+            ->willReturn($data);
 
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('removeMemberFromSegling')
-            ->with(1, 2)
-            ->willReturn(true);
-
-        $this->logger->expects($this->once())
-            ->method('info');
+            ->with($data)
+            ->willReturn($successResult);
 
         $result = $this->controller->deleteMedlemFromSegling();
-        $this->assertInstanceOf(JsonResponse::class, $result);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
+        $this->assertEquals('application/json', $result->getHeader('Content-Type')[0]);
     }
 
-    public function testDeleteMedlemFromSeglingInvalidData(): void
+    public function testDeleteMedlemFromSeglingHandlesServiceFailure(): void
     {
+        $data = ['segling_id' => '1'];
+        $failureResult = new SeglingServiceResult(false, 'Invalid data');
+
         $this->request->expects($this->once())
             ->method('getParsedBody')
-            ->willReturn(['segling_id' => '1']);
+            ->willReturn($data);
 
-        $this->logger->expects($this->once())
-            ->method('warning');
-
-        $result = $this->controller->deleteMedlemFromSegling();
-        $this->assertInstanceOf(JsonResponse::class, $result);
-    }
-
-    public function testDeleteMedlemFromSeglingFailure(): void
-    {
-        $this->request->expects($this->once())
-            ->method('getParsedBody')
-            ->willReturn([
-                'segling_id' => '1',
-                'medlem_id' => '2'
-            ]);
-
-        $this->seglingRepo->expects($this->once())
+        $this->seglingService->expects($this->once())
             ->method('removeMemberFromSegling')
-            ->with(1, 2)
-            ->willReturn(false);
-
-        $this->logger->expects($this->once())
-            ->method('warning');
+            ->with($data)
+            ->willReturn($failureResult);
 
         $result = $this->controller->deleteMedlemFromSegling();
-        $this->assertInstanceOf(JsonResponse::class, $result);
+        $this->assertInstanceOf(ResponseInterface::class, $result);
+    }
+
+    private function setProtectedProperty(object $object, string $property, $value): void
+    {
+        $reflection = new \ReflectionClass($object);
+        $prop = $reflection->getProperty($property);
+        $prop->setAccessible(true);
+        $prop->setValue($object, $value);
     }
 }

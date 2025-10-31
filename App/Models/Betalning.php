@@ -7,11 +7,11 @@ namespace App\Models;
 class Betalning
 {
     // object properties
-    public int $id;
-    public int $medlem_id;
-    public float $belopp;
-    public string $datum;
-    public int $avser_ar;
+    public int $id = 0;
+    public int $medlem_id = 0;
+    public float $belopp = 0.0;
+    public string $datum = '';
+    public int $avser_ar = 0;
     public string $kommentar = '';
     public string $created_at = '';
     public string $updated_at = '';
