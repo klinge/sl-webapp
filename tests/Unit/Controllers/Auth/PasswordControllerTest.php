@@ -3,33 +3,36 @@
 namespace Tests\Unit\Controllers\Auth;
 
 use PHPUnit\Framework\TestCase;
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Controllers\Auth\PasswordController;
 use App\Utils\View;
 use App\Utils\Email;
 use App\Utils\Session;
 use App\Services\Auth\UserAuthenticationService;
 use Psr\Http\Message\ServerRequestInterface;
+use League\Container\Container;
 
 class PasswordControllerTest extends TestCase
 {
     private $controller;
-    private $app;
+    private $urlGenerator;
     private $request;
     private $authService;
     private $view;
     private $email;
     private $conn;
+    private $container;
 
     protected function setUp(): void
     {
         session_start();
-        $this->app = $this->createMock(Application::class);
+        $this->urlGenerator = $this->createMock(UrlGeneratorService::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->view = $this->createMock(View::class);
         $this->authService = $this->createMock(UserAuthenticationService::class);
         $this->email = $this->createMock(Email::class);
         $this->conn = $this->createMock(\PDO::class);
+        $this->container = $this->createMock(Container::class);
 
         // Mock Database singleton
         $database = $this->createMock(\App\Utils\Database::class);
@@ -41,13 +44,7 @@ class PasswordControllerTest extends TestCase
         $instance->setAccessible(true);
         $instance->setValue(null, $database);
 
-        // Mock the config and app directory methods to return test values
-        $this->app->method('getConfig')
-            ->willReturnMap([
-                ['TURNSTILE_SECRET_KEY', 'test-secret-key']
-            ]);
-        $this->app->method('getAppDir')
-            ->willReturn(__DIR__ . '/../../../../App');
+
         // Mock the request's getServerParams
         $this->request->method('getServerParams')
             ->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
@@ -57,7 +54,15 @@ class PasswordControllerTest extends TestCase
 
         // Create partial mock of controller, mocking recaptcha validation
         $this->controller = $this->getMockBuilder(PasswordController::class)
-            ->setConstructorArgs([$this->app, $this->request, $logger, $this->authService])
+            ->setConstructorArgs([
+                $this->urlGenerator,
+                $this->request,
+                $logger,
+                $this->container,
+                'test-secret-key',
+                $this->authService,
+                $this->view
+            ])
             ->onlyMethods(['validateRecaptcha', 'redirectWithError', 'redirectWithSuccess'])
             ->getMock();
 

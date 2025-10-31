@@ -3,7 +3,7 @@
 namespace Tests\Unit\Controllers\Auth;
 
 use PHPUnit\Framework\TestCase;
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Controllers\Auth\LoginController;
 use App\Models\MedlemRepository;
 use App\Models\Medlem;
@@ -11,37 +11,33 @@ use App\Services\Auth\PasswordService;
 use App\Utils\View;
 use App\Utils\Session;
 use Monolog\Logger;
+use League\Container\Container;
 use Psr\Http\Message\ServerRequestInterface;
 
 class LoginControllerTest extends TestCase
 {
     private $controller;
-    private $app;
+    private $urlGenerator;
     private $request;
     private $medlemRepo;
     private $logger;
     private $passwordService;
     private $view;
     private $conn;
+    private $container;
     private $medlemData;
 
     protected function setUp(): void
     {
         // Start session for tests
         Session::start();
-        $this->app = $this->createMock(Application::class);
+        $this->urlGenerator = $this->createMock(UrlGeneratorService::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->medlemRepo = $this->createMock(MedlemRepository::class);
         $this->passwordService = $this->createMock(PasswordService::class);
         $this->conn = $this->createMock(\PDO::class);
         $this->view = $this->createMock(View::class);
-
-        // Create mock router - League Route doesn't have generate method
-        $router = $this->createMock(\League\Route\Router::class);
-
-        // Configure app to return our mock router
-        $this->app->method('getRouter')
-            ->willReturn($router);
+        $this->container = $this->createMock(Container::class);
 
         // Mock Database singleton
         $database = $this->createMock(\App\Utils\Database::class);
@@ -57,13 +53,7 @@ class LoginControllerTest extends TestCase
         // Mock the logger
         $this->logger = $this->createMock(Logger::class);
 
-        // Mock the config and app directory methods to return test values
-        $this->app->method('getConfig')
-            ->willReturnMap([
-                ['TURNSTILE_SECRET_KEY', 'test-secret-key']
-            ]);
-        $this->app->method('getAppDir')
-            ->willReturn(__DIR__ . '/../../../../App');
+
 
         // Mock the request's getServerParams
         $this->request->method('getServerParams')
@@ -72,7 +62,16 @@ class LoginControllerTest extends TestCase
 
         // Create partial mock of controller that also mocks the constructor dependencies
         $this->controller = $this->getMockBuilder(LoginController::class)
-            ->setConstructorArgs([$this->app, $this->request, $this->logger, $this->conn, $this->passwordService])
+            ->setConstructorArgs([
+                $this->urlGenerator,
+                $this->request,
+                $this->logger,
+                $this->container,
+                'test-secret-key',
+                $this->conn,
+                $this->passwordService,
+                $this->view
+            ])
             ->onlyMethods(['validateRecaptcha'])
             ->getMock();
 
@@ -148,13 +147,19 @@ class LoginControllerTest extends TestCase
             ->method('getMemberByEmail')
             ->willReturn(['id' => 1]);
 
-        // Mock PDO query for Medlem constructor
-        $pdoStatement = $this->createMock(\PDOStatement::class);
-        $pdoStatement->method('fetch')
-            ->willReturn($this->medlemData);
+        // Mock repository getById method
+        $mockMedlem = new Medlem();
+        $mockMedlem->id = 1;
+        $mockMedlem->email = 'admin@example.com';
+        $mockMedlem->fornamn = 'John';
+        $mockMedlem->efternamn = 'Doe';
+        $mockMedlem->isAdmin = true;
+        $mockMedlem->password = 'hashedpassword';
 
-        $this->conn->method('prepare')
-            ->willReturn($pdoStatement);
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(1)
+            ->willReturn($mockMedlem);
 
         $this->passwordService->expects($this->once())
             ->method('verifyPassword')
@@ -179,14 +184,19 @@ class LoginControllerTest extends TestCase
             ->method('getMemberByEmail')
             ->willReturn(['id' => 1]);
 
-        $medlemNotAdminData = $this->medlemData;
-        $medlemNotAdminData['isAdmin'] = 0;
-        $pdoStatement = $this->createMock(\PDOStatement::class);
-        $pdoStatement->method('fetch')
-            ->willReturn($medlemNotAdminData);
+        // Mock repository getById method for regular user
+        $mockMedlem = new Medlem();
+        $mockMedlem->id = 1;
+        $mockMedlem->email = 'user@example.com';
+        $mockMedlem->fornamn = 'John';
+        $mockMedlem->efternamn = 'Doe';
+        $mockMedlem->isAdmin = false;
+        $mockMedlem->password = 'hashedpassword';
 
-        $this->conn->method('prepare')
-            ->willReturn($pdoStatement);
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(1)
+            ->willReturn($mockMedlem);
 
         $this->passwordService->expects($this->once())
             ->method('verifyPassword')
@@ -211,12 +221,19 @@ class LoginControllerTest extends TestCase
             ->method('getMemberByEmail')
             ->willReturn(['id' => 2]);
 
-        $pdoStatement = $this->createMock(\PDOStatement::class);
-        $pdoStatement->method('fetch')
-            ->willReturn($this->medlemData);
+        // Mock repository getById method
+        $mockMedlem = new Medlem();
+        $mockMedlem->id = 2;
+        $mockMedlem->email = 'user@example.com';
+        $mockMedlem->fornamn = 'John';
+        $mockMedlem->efternamn = 'Doe';
+        $mockMedlem->isAdmin = false;
+        $mockMedlem->password = 'hashedpassword';
 
-        $this->conn->method('prepare')
-            ->willReturn($pdoStatement);
+        $this->medlemRepo->expects($this->once())
+            ->method('getById')
+            ->with(2)
+            ->willReturn($mockMedlem);
 
         $this->passwordService->expects($this->once())
             ->method('verifyPassword')

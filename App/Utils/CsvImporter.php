@@ -8,6 +8,7 @@ use PDO;
 use PDOException;
 use App\Application;
 use App\Models\Medlem;
+use App\Models\MedlemRepository;
 use App\Utils\DateFormatter;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -25,11 +26,13 @@ class CsvImporter
     public array $dbRowsNotCreated = [];
     public Application $app;
     public LoggerInterface $logger;
+    private MedlemRepository $medlemRepo;
 
     public function __construct(string $dbFilename)
     {
         $this->app = new Application();
         $this->logger = $this->app->getContainer()->get(LoggerInterface::class);
+        $this->medlemRepo = $this->app->getContainer()->get(MedlemRepository::class);
         $this->dbfile = $this->app->getRootDir() . '/db/' . $dbFilename;
         $this->csvfile = $this->app->getRootDir() . '/db/csv-data/medlemmar-cleaned.csv';
 
@@ -72,13 +75,9 @@ class CsvImporter
 
         foreach ($this->data as $row) {
             //First populate a member object with the row data and save it
-            $member = new Medlem($this->conn, $this->logger);
+            $member = new Medlem();
             $birthdate = DateFormatter::formatDateWithHms($row['Födelsedatum']);
             $member->fodelsedatum = $birthdate ?: "";
-            if (!empty($this->fodelsedatum)) {
-                print_r($member->fodelsedatum);
-                exit;
-            }
             $member->fornamn = $row['Förnamn'];
             $member->efternamn = $row['Efternamn'];
             $member->email = isset($row['E-post']) ? $row['E-post'] : "";
@@ -99,24 +98,25 @@ class CsvImporter
             } else {
                 $member->standig_medlem = false;
             }
-            //$member->created_at = $row['created_at'];
-            //$member->updated_at = $row['updated_at'];
             try {
-                $insertedId = $member->create();
-                $member->id = $insertedId;
-                $countUpdated++;
-                //Add betalningar for member
-                $betalningar = array_filter([
-                    '2024' => DateFormatter::formatDateWithHms($row['B24']),
-                    '2023' => DateFormatter::formatDateWithHms($row['B23']),
-                    '2022' => DateFormatter::formatDateWithHms($row['B22'])
-                ]);
-                if (!empty($betalningar)) {
-                    $this->addPaymentsForMember($member->id, $betalningar);
+                $success = $this->medlemRepo->save($member);
+                if ($success) {
+                    $countUpdated++;
+                    //Add betalningar for member
+                    $betalningar = array_filter([
+                        '2024' => DateFormatter::formatDateWithHms($row['B24']),
+                        '2023' => DateFormatter::formatDateWithHms($row['B23']),
+                        '2022' => DateFormatter::formatDateWithHms($row['B22'])
+                    ]);
+                    if (!empty($betalningar)) {
+                        $this->addPaymentsForMember($member->id, $betalningar);
+                    }
+                    //Add roller to Medlem
+                    $this->addRolesForMember($member->id, $row['Besättning'], $row['Underhåll'], $allRoles);
+                } else {
+                    $countNotUpdated++;
+                    $this->dbRowsNotCreated[] = implode(",", $row);
                 }
-                //Add roller to Medlem
-                $this->addRolesForMember($member->id, $row['Besättning'], $row['Underhåll'], $allRoles);
-                //Finish off by returning if it went well or not
             } catch (PDOException $e) {
                 $countNotUpdated++;
                 $this->dbRowsNotCreated[] = implode(",", $row);
@@ -246,28 +246,29 @@ class CsvImporter
         }
     }
 
-    private function insertMedlemRoll($medlemId, $roleId)
+    private function connect(): void
     {
-        $query = "INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (:medlem_id, :roll_id)";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':medlem_id', $medlemId);
-        $stmt->bindParam(':roll_id', $roleId);
-        $stmt->execute();
+        if (!file_exists($this->dbfile)) {
+            throw new InvalidArgumentException("Database file does not exist: " . $this->dbfile);
+        }
+        $this->conn = new PDO('sqlite:' . $this->dbfile);
+        $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    private function addPaymentsForMember(int $memberId, array $betalningar): void
+    private function insertMedlemRoll($medlemId, $roleId): void
+    {
+        $query = 'INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (?, ?)';
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([$medlemId, $roleId]);
+    }
+
+    private function addPaymentsForMember(int $medlemId, array $betalningar): void
     {
         foreach ($betalningar as $year => $date) {
             if (!empty($date)) {
-                $query = "INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar, kommentar)
-                    VALUES (:medlem_id, :belopp, :datum, :avser_ar, :kommentar)";
+                $query = 'INSERT INTO Betalning (medlem_id, belopp, datum, avser_ar) VALUES (?, ?, ?, ?)';
                 $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':medlem_id', $memberId);
-                $stmt->bindValue(':belopp', 300);
-                $stmt->bindParam(':datum', $date);
-                $stmt->bindParam(':avser_ar', $year);
-                $stmt->bindValue(':kommentar', "Automatskapad vid import");
-                $stmt->execute();
+                $stmt->execute([$medlemId, 500, $date, (int) $year]); // Default amount 500
             }
         }
     }
@@ -285,21 +286,5 @@ class CsvImporter
         $stmt->bindParam(':id', $result[0]['id']);
         $stmt->execute();
         echo "---Johan Klinge har nu admin-rättigheter" . PHP_EOL;
-    }
-
-
-    private function connect()
-    {
-        if (!is_file($this->dbfile)) {
-            throw new InvalidArgumentException("Invalid path to db file");
-        }
-        try {
-            $this->conn = new PDO("sqlite:" . $this->dbfile);
-            $this->conn->exec("PRAGMA foreign_keys = ON;");
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-        } catch (PDOException $exception) {
-            throw new PDOException($exception->getMessage(), (int) $exception->getCode());
-        }
     }
 }

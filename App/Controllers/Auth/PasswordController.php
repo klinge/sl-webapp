@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Auth;
 
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\View;
@@ -12,6 +12,7 @@ use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
+use League\Container\Container;
 
 class PasswordController extends AuthBaseController
 {
@@ -23,14 +24,17 @@ class PasswordController extends AuthBaseController
     private View $view;
 
     public function __construct(
-        Application $app,
+        UrlGeneratorService $urlGenerator,
         ServerRequestInterface $request,
         Logger $logger,
-        UserAuthenticationService $userAuthSvc
+        Container $container,
+        string $turnstileSecret,
+        UserAuthenticationService $userAuthSvc,
+        View $view
     ) {
-        parent::__construct($app, $request, $logger);
+        parent::__construct($urlGenerator, $request, $logger, $container, $turnstileSecret);
         $this->authService = $userAuthSvc;
-        $this->view = new View($this->app);
+        $this->view = $view;
     }
 
     public function showRequestPwd(): ResponseInterface

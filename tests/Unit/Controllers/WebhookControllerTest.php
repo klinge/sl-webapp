@@ -6,7 +6,7 @@ namespace Tests\Unit\Controllers;
 
 use PHPUnit\Framework\TestCase;
 use App\Controllers\WebhookController;
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Services\Github\GitHubService;
 use App\Services\Github\GitRepositoryService;
 use App\Services\Github\DeploymentService;
@@ -14,25 +14,28 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Monolog\Logger;
+use League\Container\Container;
 
 class WebhookControllerTest extends TestCase
 {
-    private $app;
+    private $urlGenerator;
     private $request;
     private $logger;
     private $githubService;
     private $gitRepositoryService;
     private $deploymentService;
     private $controller;
+    private $container;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
+        $this->urlGenerator = $this->createMock(UrlGeneratorService::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->logger = $this->createMock(Logger::class);
         $this->githubService = $this->createMock(GitHubService::class);
         $this->gitRepositoryService = $this->createMock(GitRepositoryService::class);
         $this->deploymentService = $this->createMock(DeploymentService::class);
+        $this->container = $this->createMock(Container::class);
 
         // Mock server params for remote IP
         $this->request->method('getServerParams')
@@ -45,9 +48,10 @@ class WebhookControllerTest extends TestCase
     {
         $controller = $this->getMockBuilder(WebhookController::class)
             ->setConstructorArgs([
-                $this->app,
+                $this->urlGenerator,
                 $this->request,
                 $this->logger,
+                $this->container,
                 $this->githubService,
                 $this->gitRepositoryService,
                 $this->deploymentService

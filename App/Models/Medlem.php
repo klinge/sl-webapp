@@ -4,18 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use PDO;
-use PDOException;
-use Exception;
-use Psr\Log\LoggerInterface;
-use App\Utils\Session;
-use InvalidArgumentException;
-
-class Medlem extends BaseModel
+class Medlem
 {
-    // database connection and table name
-    private string $table_name = "Medlem";
-
     // Class properties
     public int $id;
     public ?string $fodelsedatum;
@@ -36,335 +26,43 @@ class Medlem extends BaseModel
     public bool $skickat_valkomstbrev = false;
     public bool $isAdmin = false;
     // User login
-    public ?string $password;
+    public ?string $password = null;
     //Fetched from Roller table
-    public ?array $roller = [];
+    public array $roller = [];
     // Timestamps
-    public string $created_at;
-    public string $updated_at;
+    public string $created_at = '';
+    public string $updated_at = '';
 
-    public function __construct(PDO $db, LoggerInterface $logger, int $id = null)
+    public function __construct()
     {
-        parent::__construct($db, $logger);
-
-        if (isset($id)) {
-            $result = $this->getDataFromDb($id);
-            if ($result) {
-                $this->roller = $this->getRoles();
-            } else {
-                throw new Exception("Medlem med id: " . $id . "hittades inte");
-            }
-        }
+        // Pure data object - no dependencies
     }
 
     public function getNamn(): string
     {
-        $namn = $this->fornamn . " " . $this->efternamn;
-        return $namn;
+        return $this->fornamn . " " . $this->efternamn;
     }
 
-    public function save(): int
-    {
-        return $this->saveOrCreate('UPDATE');
-    }
-
-    public function create(): int
-    {
-        return $this->saveOrCreate('INSERT');
-    }
-
-    private function saveOrCreate(string $operation): int
-    {
-        $successVerb = ($operation === 'INSERT') ? 'skapad' : 'uppdaterad';
-        $errorVerb = ($operation === 'INSERT') ? 'skapande' : 'uppdatering';
-        $successMessage = "Medlem: " . $this->fornamn . " " . $this->efternamn . " " .
-            $successVerb . " av användare: " . Session::get('user_id');
-        $errorMessage = "Fel vid " . $errorVerb . " av medlem: " . $this->fornamn . " " . $this->efternamn .
-            ". Användare: " . Session::get('user_id') . ". Felmeddelande: ";
-
-        try {
-            $this->persistToDatabase($operation);
-            $this->logger->info($successMessage);
-            return (int) $this->id;
-        } catch (PDOException $e) {
-            $this->logger->error($errorMessage . $e->getMessage());
-            return 0;
-        } catch (InvalidArgumentException $e) {
-            $this->logger->error($errorMessage . $e->getMessage());
-            return 0;
-        }
-    }
-
-    public function delete(): void
-    {
-        $this->logger->info("Medlem: " . $this->fornamn . " " . $this->efternamn . "borttagen av användare: " . Session::get('user_id'));
-
-        $query = 'DELETE FROM Medlem WHERE id = ?; ';
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $this->id);
-        $stmt->execute();
-        //Also remove all roles
-        $this->roller = [];
-        $this->saveRoles();
-    }
-
-    public function saveUserProvidedPassword(): void
-    {
-        $password = password_hash($this->password, PASSWORD_DEFAULT);
-
-        $query = 'UPDATE $this->table_name SET password = ? WHERE id = ?; ';
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $password);
-        $stmt->bindParam(2, $this->id);
-        $stmt->execute();
-    }
-
-    //find Seglingar a Medlem has participated in..
-    public function getSeglingar(): array
-    {
-        $query = 'SELECT smr.medlem_id, s.id as segling_id, r.roll_namn, s.skeppslag, s.startdatum
-            FROM Segling_Medlem_Roll smr
-            INNER JOIN Segling s ON s.id = smr.segling_id
-            LEFT JOIN Roll r ON r.id = smr.roll_id
-            WHERE smr.medlem_id = :id
-            ORDER BY s.startdatum DESC
-            LIMIT 10;';
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $this->id);
-        $stmt->execute();
-
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $results;
-    }
-
-    //
-    // FUNCTIONS RELATED TO ROLES
-    //
-    public function getRoles(): array
-    {
-        $query = "SELECT mr.roll_id, r.roll_namn 
-                    FROM Medlem_Roll mr
-                    INNER JOIN Roll r ON mr.roll_id = r.id
-                    WHERE mr.medlem_id = :id";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $this->id);
-        $stmt->execute();
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        return $results;
-    }
-
-    /*
-    * Function that saves the member objects roles to the db
-    */
-    public function saveRoles(): void
-    {
-        try {
-            $this->conn->beginTransaction();
-
-            // Get current roles from the database
-            $stmt = $this->conn->prepare("SELECT roll_id FROM Medlem_Roll WHERE medlem_id = :medlem_id");
-            $stmt->execute(['medlem_id' => $this->id]);
-            $currentRoles = $stmt->fetchAll(PDO::FETCH_COLUMN);
-
-            $newRoles = array_values(array_map(function ($role) {
-                return (int) $role['roll_id'];
-            }, $this->roller));
-            //$this->logger->debug("Current roles: " . json_encode($currentRoles));
-            //$this->logger->debug("New roles: " . json_encode($newRoles));
-
-            // Determine roles to add and remove
-            $rolesToAdd = array_values(array_diff($newRoles, $currentRoles));
-            $rolesToRemove = array_values(array_diff($currentRoles, $newRoles));
-
-            //$this->logger->debug("Roles to add: " . json_encode($rolesToAdd));
-            //$this->logger->info("Roles to remove: " . json_encode($rolesToRemove));
-
-            // Add new roles
-            if (!empty($rolesToAdd)) {
-                $stmt = $this->conn->prepare("INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (:medlem_id, :roll_id)");
-                foreach ($rolesToAdd as $rollId) {
-                    $stmt->bindValue(':medlem_id', $this->id, PDO::PARAM_INT);
-                    $stmt->bindValue(':roll_id', $rollId, PDO::PARAM_INT);
-                    $stmt->execute();
-                }
-                $this->logger->info("Roles added for member: " . $this->fornamn . " " . $this->efternamn . ". Rollid: " . json_encode($rolesToAdd));
-            }
-
-            // Remove old roles
-            if (!empty($rolesToRemove)) {
-                $stmt = $this->conn->prepare("DELETE FROM Medlem_Roll WHERE medlem_id = :medlem_id AND roll_id = :roll_id");
-                foreach ($rolesToRemove as $rollId) {
-                    $stmt->bindValue(':medlem_id', $this->id, PDO::PARAM_INT);
-                    $stmt->bindValue(':roll_id', $rollId, PDO::PARAM_INT);
-                    $stmt->execute();
-                }
-                $this->logger->info("Roles removed for member: " . $this->fornamn . " " .
-                    $this->efternamn . ". Rollid: " . json_encode($rolesToRemove));
-            }
-            $this->conn->commit();
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            $this->logger->error("Error updating roles for medlem: " . $this->fornamn . " " . $this->efternamn . ". Error: " . $e->getMessage());
-            throw $e;
-        }
-    }
-
-    /*
-    * Function that updates roles on the member object
-    */
     public function updateMedlemRoles(array $newRoleIds): void
     {
-        $this->logger->debug("In updateMedlemRoles. New roles: " . json_encode($newRoleIds));
-
-        //first remove roles from that no longer exist
+        // Remove roles that no longer exist
         $rolesToRemove = array_diff(array_column($this->roller, 'roll_id'), $newRoleIds);
         foreach ($rolesToRemove as $roleId) {
             $key = array_search($roleId, array_column($this->roller, 'roll_id'));
             unset($this->roller[$key]);
         }
 
-        //then add new roles
+        // Add new roles
         foreach ($newRoleIds as $roleId) {
             if (!in_array($roleId, array_column($this->roller, 'roll_id'))) {
-                $newRole = ['roll_id' => $roleId];
-                $this->roller[] = $newRole;
+                $this->roller[] = ['roll_id' => $roleId];
             }
         }
     }
 
-    //Method to check if a member has a given role
     public function hasRole(string $searchRole): bool
     {
-        $extractRollId = function ($role) {
-            return $role['roll_id'] ?? null;
-        };
-
-        return in_array($searchRole, array_map($extractRollId, $this->roller));
-    }
-
-    protected function persistToDatabase(string $operation): bool
-    {
-        $params = [
-            "fodelsedatum",
-            "fornamn",
-            "efternamn",
-            "email",
-            "gatuadress",
-            "postnummer",
-            "postort",
-            "mobil",
-            "telefon",
-            "kommentar",
-            "godkant_gdpr",
-            "pref_kommunikation",
-            "isAdmin",
-            'foretag',
-            'standig_medlem',
-            'skickat_valkomstbrev'
-        ];
-
-        if ($operation === 'INSERT') {
-            $sql = "INSERT INTO Medlem (" . implode(', ', $params) . ") VALUES (";
-            $sql .= implode(', ', array_map(function ($param) {
-                return ':' . $param;
-            }, $params));
-            $sql .= ")";
-        } elseif ($operation === 'UPDATE') {
-            $sql = "UPDATE $this->table_name SET ";
-            foreach ($params as $param) {
-                $sql .= "$param = :$param, ";
-            }
-            $sql = rtrim($sql, ', ');
-            $sql .= " WHERE id = :id;";
-        } else {
-            throw new InvalidArgumentException("Invalid operation: " . $operation);
-        }
-
-        //$this->logger->debug("In persistToDatabase: SQL Query: $sql");
-
-        try {
-            $stmt = $this->conn->prepare($sql);
-
-            $stmt->bindParam(':fodelsedatum', $this->fodelsedatum, PDO::PARAM_STR);
-            $stmt->bindParam(':fornamn', $this->fornamn, PDO::PARAM_STR);
-            $stmt->bindParam(':efternamn', $this->efternamn, PDO::PARAM_STR);
-            //If email is empty make sure to save it as null, to avoid UNIQUE issues
-            $email = $this->email ?: null;
-            $stmt->bindParam(':email', $email, PDO::PARAM_STR);
-            $stmt->bindParam(':gatuadress', $this->adress, PDO::PARAM_STR);
-            $stmt->bindParam(':postnummer', $this->postnummer, PDO::PARAM_STR);
-            $stmt->bindParam(':postort', $this->postort, PDO::PARAM_STR);
-            $stmt->bindParam(':mobil', $this->mobil, PDO::PARAM_STR);
-            $stmt->bindParam(':telefon', $this->telefon, PDO::PARAM_STR);
-            $stmt->bindParam(':kommentar', $this->kommentar, PDO::PARAM_STR);
-            $stmt->bindParam(':godkant_gdpr', $this->godkant_gdpr, PDO::PARAM_BOOL);
-            $stmt->bindParam(':pref_kommunikation', $this->pref_kommunikation, PDO::PARAM_BOOL);
-            $stmt->bindParam(':isAdmin', $this->isAdmin, PDO::PARAM_BOOL);
-            $stmt->bindParam(':foretag', $this->foretag, PDO::PARAM_BOOL);
-            $stmt->bindParam(':standig_medlem', $this->standig_medlem, PDO::PARAM_BOOL);
-            $stmt->bindParam(':skickat_valkomstbrev', $this->skickat_valkomstbrev, PDO::PARAM_BOOL);
-            if ($operation === 'UPDATE') {
-                $stmt->bindParam(':id', $this->id, PDO::PARAM_INT);
-            }
-            $stmt->execute();
-        } catch (PDOException $e) {
-            $this->logger->warning("PDOException in Medlem::persistToDatabase. Error: " . $e->getMessage());
-            if ($e->getCode() == '23000') {
-                //For troubleshooting csv import and handling trouble with null vs empty strings in email field
-                $this->logger->debug("UNIQUE constraint violation for email: " . $this->email);
-            }
-            throw $e; // Re-throw the exception if you want to handle it further up the call stack
-        }
-
-        if ($operation === 'INSERT') {
-            $this->id = (int) $this->conn->lastInsertId();
-            $this->getDataFromDb($this->id);
-        }
-        $this->saveRoles();
-        return true;
-    }
-
-    protected function getDataFromDb($id): bool
-    {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id = :id limit 0,1";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        //If we got a result from db then set values for the object
-        if ($row !== false) {
-            $this->id = (int) $id;
-            $this->fodelsedatum = isset($row['fodelsedatum']) ? $row['fodelsedatum'] : "";
-            $this->fornamn = $row['fornamn'];
-            $this->efternamn = $row['efternamn'];
-            $this->email = $row['email'];
-            $this->mobil = isset($row['mobil']) ? $row['mobil'] : "";
-            $this->telefon = isset($row['telefon']) ? $row['telefon'] : "";
-            $this->adress = isset($row['gatuadress']) ? $row['gatuadress'] : "";
-            $this->postnummer = isset($row['postnummer']) ? $row['postnummer'] : "";
-            $this->postort = isset($row['postort']) ? $row['postort'] : "";
-            $this->kommentar = isset($row['kommentar']) ? $row['kommentar'] : "";
-            //Sqlite stores bool as 0/1 so convert to proper bools
-            $this->godkant_gdpr = $row['godkant_gdpr'] === 0 ? false : true;
-            $this->pref_kommunikation = $row['pref_kommunikation'] === 0 ? false : true;
-            $this->foretag = $row['foretag'] === 0 ? false : true;
-            $this->standig_medlem = $row['standig_medlem'] === 0 ? false : true;
-            $this->skickat_valkomstbrev = $row['skickat_valkomstbrev'] === 0 ? false : true;
-            $this->isAdmin = $row['isAdmin'] === 0 ? false : true;
-            //End bools
-            $this->password = isset($row['password']) ? $row['password'] : "";
-            $this->created_at = $row['created_at'];
-            $this->updated_at = $row['updated_at'];
-            return true;
-        } else {
-            return false;
-        }
+        $roleIds = array_column($this->roller, 'roll_id');
+        return in_array($searchRole, $roleIds);
     }
 }

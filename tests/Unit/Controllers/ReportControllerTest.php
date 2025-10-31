@@ -6,30 +6,32 @@ namespace Tests\Unit\Controllers;
 
 use PHPUnit\Framework\TestCase;
 use App\Controllers\ReportController;
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Utils\View;
 use App\Models\MedlemRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use Monolog\Logger;
+use League\Container\Container;
 use PDOStatement;
 
 class ReportControllerTest extends TestCase
 {
-    private $app;
+    private $urlGenerator;
     private $request;
     private $controller;
     private $conn;
     private $logger;
+    private $container;
+    private $view;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
+        $this->urlGenerator = $this->createMock(UrlGeneratorService::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->conn = $this->createMock(\PDO::class);
         $this->logger = $this->createMock(Logger::class);
-
-        //Mock the getAppDir method to return a string path
-        $this->app->method('getAppDir')->willReturn('/path/to/app');
+        $this->container = $this->createMock(Container::class);
+        $this->view = $this->createMock(View::class);
 
         // Mock Database singleton
         $database = $this->createMock(\App\Utils\Database::class);
@@ -42,7 +44,14 @@ class ReportControllerTest extends TestCase
         $instance->setAccessible(true);
         $instance->setValue(null, $database);
 
-        $this->controller = new ReportController($this->app, $this->request, $this->logger, $this->conn);
+        $this->controller = new ReportController(
+            $this->urlGenerator,
+            $this->request,
+            $this->logger,
+            $this->container,
+            $this->conn,
+            $this->view
+        );
     }
 
     protected function tearDown(): void
@@ -56,22 +65,13 @@ class ReportControllerTest extends TestCase
 
     public function testShow(): void
     {
-        // Create mock for View
-        $viewMock = $this->createMock(View::class);
-
         // Set expectations
-        $viewMock->expects($this->once())
+        $this->view->expects($this->once())
             ->method('render')
             ->with(
                 'reports/viewRapporter',
                 ['title' => 'Rapporter']
             );
-
-        // Inject mock using reflection
-        $reflection = new \ReflectionClass($this->controller);
-        $property = $reflection->getProperty('view');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $viewMock);
 
         $this->controller->show();
     }
@@ -93,9 +93,8 @@ class ReportControllerTest extends TestCase
         $this->conn->method('prepare')
             ->willReturn($pdoStatement);
 
-        // Create mock for View
-        $viewMock = $this->createMock(View::class);
-        $viewMock->expects($this->once())
+        // Set expectations
+        $this->view->expects($this->once())
             ->method('render')
             ->with(
                 'reports/viewReportResults',
@@ -104,12 +103,6 @@ class ReportControllerTest extends TestCase
                     'items' => [['id' => 1, 'name' => 'Test Member']]
                 ]
             );
-
-        // Inject mock using reflection
-        $reflection = new \ReflectionClass($this->controller);
-        $property = $reflection->getProperty('view');
-        $property->setAccessible(true);
-        $property->setValue($this->controller, $viewMock);
 
         $this->controller->showPaymentReport();
     }
@@ -135,9 +128,8 @@ class ReportControllerTest extends TestCase
                 ['email' => 'test2@example.com']
             ]);
 
-        // Create mock for View
-        $viewMock = $this->createMock(View::class);
-        $viewMock->expects($this->once())
+        // Set expectations
+        $this->view->expects($this->once())
             ->method('render')
             ->with(
                 'reports/viewReportResults',
@@ -150,12 +142,8 @@ class ReportControllerTest extends TestCase
                 ]
             );
 
-        // Inject mocks using reflection
+        // Inject mock using reflection
         $reflection = new \ReflectionClass($this->controller);
-
-        $viewProperty = $reflection->getProperty('view');
-        $viewProperty->setAccessible(true);
-        $viewProperty->setValue($this->controller, $viewMock);
 
         $medlemRepoProperty = $reflection->getProperty('medlemRepo');
         $medlemRepoProperty->setAccessible(true);

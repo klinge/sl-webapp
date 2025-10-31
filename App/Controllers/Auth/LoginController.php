@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Auth;
 
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Models\MedlemRepository;
 use App\Models\Medlem;
 use App\Services\Auth\PasswordService;
@@ -15,6 +15,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use PDO;
 use Monolog\Logger;
+use League\Container\Container;
 
 class LoginController extends AuthBaseController
 {
@@ -31,20 +32,19 @@ class LoginController extends AuthBaseController
     //View links
     private const LOGIN_VIEW = 'login/viewLogin';
 
-    /**
-     * @param Application $app The application instance.
-     * @param ServerRequestInterface $request The request data.
-     */
     public function __construct(
-        Application $app,
+        UrlGeneratorService $urlGenerator,
         ServerRequestInterface $request,
         Logger $logger,
+        Container $container,
+        string $turnstileSecret,
         PDO $conn,
-        PasswordService $pwdService
+        PasswordService $pwdService,
+        View $view
     ) {
-        parent::__construct($app, $request, $logger);
+        parent::__construct($urlGenerator, $request, $logger, $container, $turnstileSecret);
         $this->conn = $conn;
-        $this->view = new View($this->app);
+        $this->view = $view;
         $this->passwordService = $pwdService;
         $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
     }
@@ -90,10 +90,9 @@ class LoginController extends AuthBaseController
             $this->logger->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
             return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
         }
-        //Catch exception if medlem not found, should not happen since we already checked for it
-        try {
-            $medlem = new Medlem($this->conn, $this->logger, $result['id']);
-        } catch (\Exception $e) {
+        //Get medlem object from repository
+        $medlem = $this->medlemRepo->getById($result['id']);
+        if (!$medlem) {
             $this->logger->error("Technical error. Could not create member object for member id: " . $result['id']);
             return $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
         }

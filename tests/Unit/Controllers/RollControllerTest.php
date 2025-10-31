@@ -6,57 +6,48 @@ namespace Tests\Unit\Controllers;
 
 use PHPUnit\Framework\TestCase;
 use App\Controllers\RollController;
-use App\Application;
-use App\Models\Roll;
-use App\Models\MedlemRepository;
+use App\Services\RollService;
 use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Monolog\Logger;
 
 class RollControllerTest extends TestCase
 {
-    private $app;
-    private $request;
-    private $logger;
-    private $view;
-    private $roll;
-    private $medlemRepo;
-    private $controller;
+    private RollController $controller;
+    private $mockRollService;
+    private $mockView;
+    private $mockApp;
+    private $mockUrlGenerator;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
-        $this->request = $this->createMock(ServerRequestInterface::class);
-        $this->logger = $this->createMock(Logger::class);
-        $this->view = $this->createMock(View::class);
-        $this->roll = $this->createMock(Roll::class);
-        $this->medlemRepo = $this->createMock(MedlemRepository::class);
+        $this->mockRollService = $this->createMock(RollService::class);
+        $this->mockView = $this->createMock(View::class);
+        $this->mockApp = $this->createMock(\App\Application::class);
+
+        $this->mockUrlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
 
         $this->controller = new RollController(
-            $this->app,
-            $this->request,
-            $this->logger,
-            $this->view,
-            $this->roll,
-            $this->medlemRepo
+            $this->mockRollService,
+            $this->mockView,
+            $this->mockUrlGenerator
         );
     }
 
-    public function testListRendersViewWithRoles(): void
+    public function testListDelegatesServiceAndRendersView(): void
     {
         $expectedRoles = [
-            ['id' => 1, 'namn' => 'Skeppare'],
-            ['id' => 2, 'namn' => 'Båtsman'],
-            ['id' => 3, 'namn' => 'Kock']
+            ['id' => 1, 'roll_namn' => 'Skeppare'],
+            ['id' => 2, 'roll_namn' => 'Båtsman']
         ];
 
-        $this->roll->expects($this->once())
-            ->method('getAll')
+        $mockResponse = $this->createMock(ResponseInterface::class);
+
+        $this->mockRollService->expects($this->once())
+            ->method('getAllRoles')
             ->willReturn($expectedRoles);
 
-        $mockResponse = $this->createMock(ResponseInterface::class);
-        $this->view->expects($this->once())
+        $this->mockView->expects($this->once())
             ->method('render')
             ->with('viewRoller', [
                 'title' => 'Visa roller',
@@ -65,53 +56,26 @@ class RollControllerTest extends TestCase
             ->willReturn($mockResponse);
 
         $result = $this->controller->list();
-        $this->assertInstanceOf(ResponseInterface::class, $result);
+
+        $this->assertSame($mockResponse, $result);
     }
 
-    public function testMembersInRoleReturnsJsonResponse(): void
+    public function testMembersInRoleDelegatesServiceAndReturnsJson(): void
     {
-        $rollId = 1;
         $expectedMembers = [
-            ['id' => 1, 'fornamn' => 'John', 'efternamn' => 'Doe'],
-            ['id' => 2, 'fornamn' => 'Jane', 'efternamn' => 'Smith']
+            ['id' => 1, 'fornamn' => 'John', 'efternamn' => 'Doe']
         ];
 
-        $this->medlemRepo->expects($this->once())
-            ->method('getMembersByRollId')
-            ->with($rollId)
+        $mockRequest = $this->createMock(ServerRequestInterface::class);
+        $params = ['id' => '1'];
+
+        $this->mockRollService->expects($this->once())
+            ->method('getMembersInRole')
+            ->with(1)
             ->willReturn($expectedMembers);
 
-        $result = $this->controller->membersInRole($this->request, ['id' => (string) $rollId]);
-        $this->assertInstanceOf(ResponseInterface::class, $result);
-    }
+        $result = $this->controller->membersInRole($mockRequest, $params);
 
-    public function testMembersInRoleWithStringId(): void
-    {
-        $rollId = '2';
-        $expectedMembers = [
-            ['id' => 3, 'fornamn' => 'Bob', 'efternamn' => 'Wilson']
-        ];
-
-        $this->medlemRepo->expects($this->once())
-            ->method('getMembersByRollId')
-            ->with(2)
-            ->willReturn($expectedMembers);
-
-        $result = $this->controller->membersInRole($this->request, ['id' => $rollId]);
-        $this->assertInstanceOf(ResponseInterface::class, $result);
-    }
-
-    public function testMembersInRoleWithEmptyResult(): void
-    {
-        $rollId = 999;
-        $expectedMembers = [];
-
-        $this->medlemRepo->expects($this->once())
-            ->method('getMembersByRollId')
-            ->with($rollId)
-            ->willReturn($expectedMembers);
-
-        $result = $this->controller->membersInRole($this->request, ['id' => (string) $rollId]);
         $this->assertInstanceOf(ResponseInterface::class, $result);
     }
 }

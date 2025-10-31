@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers\Auth;
 
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Services\Auth\UserAuthenticationService;
 use App\Traits\ResponseFormatter;
 use App\Utils\Session;
@@ -12,6 +12,7 @@ use App\Utils\View;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
+use League\Container\Container;
 
 class RegistrationController extends AuthBaseController
 {
@@ -22,11 +23,18 @@ class RegistrationController extends AuthBaseController
     private UserAuthenticationService $userAuthService;
     private View $view;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, UserAuthenticationService $userAuthSvc)
-    {
-        parent::__construct($app, $request, $logger);
+    public function __construct(
+        UrlGeneratorService $urlGenerator,
+        ServerRequestInterface $request,
+        Logger $logger,
+        Container $container,
+        string $turnstileSecret,
+        UserAuthenticationService $userAuthSvc,
+        View $view
+    ) {
+        parent::__construct($urlGenerator, $request, $logger, $container, $turnstileSecret);
         $this->userAuthService = $userAuthSvc;
-        $this->view = new View($this->app);
+        $this->view = $view;
     }
 
     public function showRegister(): ResponseInterface

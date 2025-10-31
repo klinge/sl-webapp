@@ -5,61 +5,111 @@ declare(strict_types=1);
 namespace App\Models;
 
 use PDO;
-use Exception;
 use Psr\Log\LoggerInterface;
 
 class SeglingRepository extends BaseModel
 {
-    // object attributes
-    public $seglingar;
-
     public function __construct(PDO $db, LoggerInterface $logger)
     {
         parent::__construct($db, $logger);
     }
 
-    /**
-     * Fetches all seglingar by querying Segling table in DB
-     * The function takes no parameters and returns an array of all Segling objects
-     *
-     * @return array Segling Array of all seglingar
-     */
     public function getAll(): array
     {
-        $withdeltagare = false;
-        return $this->fetchAllSeglingar($withdeltagare);
-    }
-
-    /**
-     * Fetches all seglingar by querying Segling table in DB
-     * The function takes no parameters and returns an array of all Segling objects including deltagare
-     *
-     * @return array Segling Array of all seglingar with deltagare details added
-     */
-    public function getAllWithDeltagare(): array
-    {
-        $withdeltagare = true;
-        return $this->fetchAllSeglingar($withdeltagare);
-    }
-    //Private function that fetches seglingar with or without deltagare
-    private function fetchAllSeglingar(bool $withdeltagare): array
-    {
-        $seglingar = [];
-        $withdeltagare = $withdeltagare ? 'withdeltagare' : null;
-
-        $query = "SELECT id from Segling ORDER BY startdatum DESC";
+        $query = "SELECT * FROM Segling ORDER BY startdatum DESC";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        $result =  $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        foreach ($result as $sailevent) {
-            try {
-                $seglingar[] = new Segling($this->conn, $this->logger, $sailevent['id'], $withdeltagare);
-            } catch (Exception $e) {
-                //Do nothing right now..
-            }
+        $seglingar = [];
+        foreach ($results as $row) {
+            $seglingar[] = $this->mapRowToSegling($row);
         }
         return $seglingar;
+    }
+
+    public function getAllWithDeltagare(): array
+    {
+        $seglingar = $this->getAll();
+        foreach ($seglingar as $segling) {
+            $segling->deltagare = $this->getDeltagare($segling->id);
+        }
+        return $seglingar;
+    }
+
+    public function getById(int $id): ?Segling
+    {
+        $query = "SELECT * FROM Segling WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $row ? $this->mapRowToSegling($row) : null;
+    }
+
+    public function getByIdWithDeltagare(int $id): ?Segling
+    {
+        $segling = $this->getById($id);
+        if ($segling) {
+            $segling->deltagare = $this->getDeltagare($id);
+        }
+        return $segling;
+    }
+
+    public function create(array $data): ?int
+    {
+        $query = 'INSERT INTO Segling (startdatum, slutdatum, skeppslag, kommentar) VALUES (:startdat, :slutdat, :skeppslag, :kommentar)';
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':startdat', $data['startdat'], PDO::PARAM_STR);
+        $stmt->bindParam(':slutdat', $data['slutdat'], PDO::PARAM_STR);
+        $stmt->bindParam(':skeppslag', $data['skeppslag'], PDO::PARAM_STR);
+        $stmt->bindValue(':kommentar', $data['kommentar'] ?? null, PDO::PARAM_STR);
+
+        if ($stmt->execute() && $stmt->rowCount() === 1) {
+            return (int) $this->conn->lastInsertId();
+        }
+        return null;
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $query = "UPDATE Segling SET 
+            startdatum = :startdatum, 
+            slutdatum = :slutdatum, 
+            skeppslag = :skeppslag, 
+            kommentar = :kommentar
+            WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':startdatum', $data['startdat'], PDO::PARAM_STR);
+        $stmt->bindParam(':slutdatum', $data['slutdat'], PDO::PARAM_STR);
+        $stmt->bindParam(':skeppslag', $data['skeppslag'], PDO::PARAM_STR);
+        $stmt->bindValue(':kommentar', $data['kommentar'] ?? null, PDO::PARAM_STR);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+        return $stmt->execute() && $stmt->rowCount() === 1;
+    }
+
+    public function delete(int $id): bool
+    {
+        $query = "DELETE FROM Segling WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(1, $id, PDO::PARAM_INT);
+        return $stmt->execute() && $stmt->rowCount() === 1;
+    }
+
+    public function getDeltagare(int $seglingId): array
+    {
+        $query = "SELECT smr.medlem_id, m.fornamn, m.efternamn, smr.roll_id, r.roll_namn
+                    FROM Segling_Medlem_Roll smr
+                    JOIN Medlem m ON smr.medlem_id = m.id
+                    LEFT JOIN Roll r ON smr.roll_id = r.id
+                    WHERE smr.segling_id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $seglingId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function isMemberOnSegling(int $seglingId, int $memberId): bool
@@ -99,46 +149,33 @@ class SeglingRepository extends BaseModel
         return $stmt->execute();
     }
 
-    public function getById(int $id): ?Segling
+    private function mapRowToSegling(array $row): Segling
     {
-        try {
-            return new Segling($this->conn, $this->logger, $id);
-        } catch (Exception $e) {
-            return null;
-        }
+        return new Segling(
+            id: (int) $row['id'],
+            start_dat: $row['startdatum'],
+            slut_dat: $row['slutdatum'],
+            skeppslag: $row['skeppslag'],
+            kommentar: $row['kommentar'],
+            deltagare: [],
+            created_at: $row['created_at'],
+            updated_at: $row['updated_at']
+        );
     }
 
+    // Legacy methods for backward compatibility
     public function createSegling(array $data): ?int
     {
-        $segling = new Segling($this->conn, $this->logger);
-        $segling->start_dat = $data['startdat'];
-        $segling->slut_dat = $data['slutdat'];
-        $segling->skeppslag = $data['skeppslag'];
-        $segling->kommentar = $data['kommentar'] ?? null;
-        return $segling->create();
+        return $this->create($data);
     }
 
     public function updateSegling(int $id, array $data): bool
     {
-        try {
-            $segling = new Segling($this->conn, $this->logger, $id);
-            $segling->start_dat = $data['startdat'];
-            $segling->slut_dat = $data['slutdat'];
-            $segling->skeppslag = $data['skeppslag'];
-            $segling->kommentar = $data['kommentar'] ?? null;
-            return $segling->save();
-        } catch (Exception $e) {
-            return false;
-        }
+        return $this->update($id, $data);
     }
 
     public function deleteSegling(int $id): bool
     {
-        try {
-            $segling = new Segling($this->conn, $this->logger, $id);
-            return $segling->delete();
-        } catch (Exception $e) {
-            return false;
-        }
+        return $this->delete($id);
     }
 }
