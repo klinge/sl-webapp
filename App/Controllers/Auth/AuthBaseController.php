@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\Controllers\Auth;
 
 use App\Controllers\BaseController;
-use App\Application;
+use App\Services\UrlGeneratorService;
 use andkab\Turnstile\Turnstile;
 use Psr\Http\Message\ServerRequestInterface;
 use Monolog\Logger;
+use League\Container\Container;
 
 abstract class AuthBaseController extends BaseController
 {
@@ -20,11 +21,11 @@ abstract class AuthBaseController extends BaseController
     //Messages
     protected const RECAPTCHA_ERROR_MESSAGE = 'Kunde inte validera recaptcha. Försök igen.';
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
+    public function __construct(UrlGeneratorService $urlGenerator, ServerRequestInterface $request, Logger $logger, Container $container, string $turnstileSecret)
     {
-        parent::__construct($app, $request, $logger);
+        parent::__construct($urlGenerator, $request, $logger, $container);
         $this->logger = $logger;
-        $this->turnstileSecret = $this->app->getConfig('TURNSTILE_SECRET_KEY');
+        $this->turnstileSecret = $turnstileSecret;
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
         $this->turnstile = new Turnstile($this->turnstileSecret);
     }

@@ -6,8 +6,8 @@ namespace App\Controllers;
 
 use Exception;
 use App\Services\MedlemService;
+use App\Services\UrlGeneratorService;
 use App\Utils\View;
-use App\Application;
 use App\Traits\ResponseFormatter;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -29,9 +29,9 @@ class MedlemController extends BaseController
     public function __construct(
         private MedlemService $medlemService,
         private View $view,
-        Application $app
+        UrlGeneratorService $urlGenerator
     ) {
-        $this->app = $app;
+        $this->urlGenerator = $urlGenerator;
     }
 
     /**

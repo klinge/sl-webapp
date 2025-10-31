@@ -6,9 +6,9 @@ namespace App\Controllers;
 
 use Exception;
 use App\Services\SeglingService;
+use App\Services\UrlGeneratorService;
 use App\Utils\View;
 use App\Utils\Session;
-use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\Response\RedirectResponse;
@@ -20,9 +20,9 @@ class SeglingController extends BaseController
     public function __construct(
         private SeglingService $seglingService,
         private View $view,
-        Application $app
+        UrlGeneratorService $urlGenerator
     ) {
-        $this->app = $app;
+        $this->urlGenerator = $urlGenerator;
     }
 
     public function list(): ResponseInterface

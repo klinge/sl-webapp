@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Services\RollService;
+use App\Services\UrlGeneratorService;
 use App\Utils\View;
-use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -15,9 +15,9 @@ class RollController extends BaseController
     public function __construct(
         private RollService $rollService,
         private View $view,
-        Application $app
+        UrlGeneratorService $urlGenerator
     ) {
-        $this->app = $app;
+        $this->urlGenerator = $urlGenerator;
     }
 
     public function list(): ResponseInterface

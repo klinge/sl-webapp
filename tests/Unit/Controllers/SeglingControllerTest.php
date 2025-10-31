@@ -26,6 +26,7 @@ class SeglingControllerTest extends TestCase
     private MockObject $view;
     private MockObject $router;
     private MockObject $app;
+    private MockObject $urlGenerator;
 
     protected function setUp(): void
     {
@@ -34,6 +35,7 @@ class SeglingControllerTest extends TestCase
         $this->request = $this->createMock(ServerRequest::class);
         $this->router = $this->createMock(Router::class);
         $this->app = $this->createMock(Application::class);
+        $this->urlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
 
         // Mock router's getNamedRoute method
         $mockRoute = $this->createMock(\League\Route\Route::class);
@@ -43,15 +45,24 @@ class SeglingControllerTest extends TestCase
         $this->router->method('getNamedRoute')->willReturn($mockRoute);
         $this->app->method('getRouter')->willReturn($this->router);
         $this->app->method('getAppDir')->willReturn('/path/to/app');
+        
+        // Mock URL generator
+        $this->urlGenerator->method('createUrl')->willReturnCallback(function($route, $params = []) {
+            return match($route) {
+                'segling-show-create' => '/segling/new',
+                'segling-create' => '/segling/new',
+                'segling-save' => '/segling/save/' . ($params['id'] ?? ''),
+                default => '/segling'
+            };
+        });
 
         $this->controller = new SeglingController(
             $this->seglingService,
             $this->view,
-            $this->app
+            $this->urlGenerator
         );
 
         $this->setProtectedProperty($this->controller, 'request', $this->request);
-        $this->setProtectedProperty($this->controller, 'app', $this->app);
     }
 
     public function testListDelegatesServiceAndRendersView(): void

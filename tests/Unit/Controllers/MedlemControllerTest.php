@@ -25,6 +25,7 @@ class MedlemControllerTest extends TestCase
     private $medlemService;
     private $view;
     private $router;
+    private $urlGenerator;
 
     protected function setUp(): void
     {
@@ -35,23 +36,21 @@ class MedlemControllerTest extends TestCase
         $this->view = $this->createMock(View::class);
         $this->router = $this->createMock(Router::class);
 
+        $this->urlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
+        
         $this->controller = new MedlemController(
             $this->medlemService,
             $this->view,
-            $this->app
+            $this->urlGenerator
         );
 
         $this->setProtectedProperty($this->controller, 'request', $this->request);
-        $this->setProtectedProperty($this->controller, 'app', $this->app);
     }
 
     private function mockCreateUrl(string $route, array $params = []): void
     {
-        $mockRoute = $this->createMock(\League\Route\Route::class);
         $expectedPath = $route === 'medlem-new' ? '/medlem/new' : '/medlem';
-        $mockRoute->method('getPath')->willReturn($expectedPath);
-        $this->router->method('getNamedRoute')->willReturn($mockRoute);
-        $this->app->method('getRouter')->willReturn($this->router);
+        $this->urlGenerator->method('createUrl')->willReturn($expectedPath);
     }
 
     public function testListAllDelegatesServiceAndRendersView(): void

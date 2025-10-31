@@ -21,6 +21,7 @@ class BetalningControllerTest extends TestCase
     private $view;
     private $request;
     private $app;
+    private $urlGenerator;
 
     protected function setUp(): void
     {
@@ -29,10 +30,12 @@ class BetalningControllerTest extends TestCase
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->app = $this->createMock(Application::class);
 
+        $this->urlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
+        
         $this->controller = new BetalningController(
             $this->betalningService,
             $this->view,
-            $this->app
+            $this->urlGenerator
         );
 
         $this->setProtectedProperty($this->controller, 'request', $this->request);

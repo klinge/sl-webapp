@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Utils\View;
 use App\Models\MedlemRepository;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use PDO;
 use Monolog\Logger;
+use League\Container\Container;
 
 class ReportController extends BaseController
 {
@@ -18,11 +19,11 @@ class ReportController extends BaseController
     private MedlemRepository $medlemRepo;
     private PDO $conn;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger, PDO $conn)
+    public function __construct(UrlGeneratorService $urlGenerator, ServerRequestInterface $request, Logger $logger, Container $container, PDO $conn, View $view)
     {
-        parent::__construct($app, $request, $logger);
+        parent::__construct($urlGenerator, $request, $logger, $container);
         $this->conn = $conn;
-        $this->view = new View($this->app);
+        $this->view = $view;
         $this->medlemRepo = new MedlemRepository($this->conn, $this->logger);
     }
 

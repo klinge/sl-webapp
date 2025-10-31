@@ -3,26 +3,29 @@
 namespace Tests\Unit\Controllers\Auth;
 
 use PHPUnit\Framework\TestCase;
-use App\Application;
+use App\Services\UrlGeneratorService;
 use Psr\Http\Message\ServerRequestInterface;
 use andkab\Turnstile\Turnstile;
 use andkab\Turnstile\Response;
 use Monolog\Logger;
+use League\Container\Container;
 
 class AuthBaseControllerTest extends TestCase
 {
-    private $app;
+    private $urlGenerator;
     private $request;
     private $controller;
     private $conn;
     private $logger;
+    private $container;
 
     protected function setUp(): void
     {
-        $this->app = $this->createMock(Application::class);
+        $this->urlGenerator = $this->createMock(UrlGeneratorService::class);
         $this->request = $this->createMock(ServerRequestInterface::class);
         $this->conn = $this->createMock(\PDO::class);
         $this->logger = $this->createMock(Logger::class);
+        $this->container = $this->createMock(Container::class);
 
         // Mock Database singleton
         $database = $this->createMock(\App\Utils\Database::class);
@@ -35,17 +38,19 @@ class AuthBaseControllerTest extends TestCase
         $instance->setAccessible(true);
         $instance->setValue(null, $database);
 
-        // Mock the config
-        $this->app->method('getConfig')
-            ->willReturnMap([
-                ['TURNSTILE_SECRET_KEY', 'test-secret-key']
-            ]);
+
 
         // Mock server params
         $this->request->method('getServerParams')
             ->willReturn(['REMOTE_ADDR' => '127.0.0.1']);
 
-        $this->controller = new FakeBaseAuthController($this->app, $this->request, $this->logger);
+        $this->controller = new FakeBaseAuthController(
+            $this->urlGenerator,
+            $this->request,
+            $this->logger,
+            $this->container,
+            'test-secret-key'
+        );
     }
 
     protected function tearDown(): void

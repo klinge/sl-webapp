@@ -6,8 +6,8 @@ namespace App\Controllers;
 
 use Exception;
 use App\Services\BetalningService;
+use App\Services\UrlGeneratorService;
 use App\Utils\View;
-use App\Application;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
@@ -17,9 +17,9 @@ class BetalningController extends BaseController
     public function __construct(
         private BetalningService $betalningService,
         private View $view,
-        Application $app
+        UrlGeneratorService $urlGenerator
     ) {
-        $this->app = $app;
+        $this->urlGenerator = $urlGenerator;
     }
 
     public function list(): ResponseInterface

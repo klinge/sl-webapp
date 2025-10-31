@@ -33,6 +33,8 @@ class ContainerConfigurator
         $container->add(\App\Utils\Email::class)
             ->addArgument(Application::class)
             ->addArgument(Logger::class);
+        $container->add(\App\Services\UrlGeneratorService::class)
+            ->addArgument(Application::class);
 
         // Webhook services
         $container->add(GitHubService::class)
@@ -98,22 +100,78 @@ class ContainerConfigurator
         $container->add(\App\Controllers\MedlemController::class)
             ->addArgument(\App\Services\MedlemService::class)
             ->addArgument(\App\Utils\View::class)
-            ->addArgument(Application::class);
+            ->addArgument(\App\Services\UrlGeneratorService::class);
 
         $container->add(\App\Controllers\BetalningController::class)
             ->addArgument(\App\Services\BetalningService::class)
             ->addArgument(\App\Utils\View::class)
-            ->addArgument(Application::class);
+            ->addArgument(\App\Services\UrlGeneratorService::class);
 
         $container->add(\App\Controllers\SeglingController::class)
             ->addArgument(\App\Services\SeglingService::class)
             ->addArgument(\App\Utils\View::class)
-            ->addArgument(Application::class);
+            ->addArgument(\App\Services\UrlGeneratorService::class);
 
         $container->add(\App\Controllers\RollController::class)
             ->addArgument(\App\Services\RollService::class)
             ->addArgument(\App\Utils\View::class)
-            ->addArgument(Application::class);
+            ->addArgument(\App\Services\UrlGeneratorService::class);
+            
+        // Manual registration for HomeController
+        $container->add(\App\Controllers\HomeController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument(\App\Utils\View::class);
+            
+        // Manual registration for Auth controllers
+        $container->add(\App\Controllers\Auth\LoginController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument('config.TURNSTILE_SECRET_KEY')
+            ->addArgument('PDO')
+            ->addArgument(\App\Services\Auth\PasswordService::class)
+            ->addArgument(\App\Utils\View::class);
+            
+        // Manual registration for ReportController
+        $container->add(\App\Controllers\ReportController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument('PDO')
+            ->addArgument(\App\Utils\View::class);
+            
+        // Manual registration for WebhookController
+        $container->add(\App\Controllers\WebhookController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument(GitHubService::class)
+            ->addArgument(GitRepositoryService::class)
+            ->addArgument(DeploymentService::class);
+            
+        // Manual registration for RegistrationController
+        $container->add(\App\Controllers\Auth\RegistrationController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument('config.TURNSTILE_SECRET_KEY')
+            ->addArgument(\App\Services\Auth\UserAuthenticationService::class)
+            ->addArgument(\App\Utils\View::class);
+            
+        // Manual registration for UserController
+        $container->add(\App\Controllers\UserController::class)
+            ->addArgument(\App\Services\UrlGeneratorService::class)
+            ->addArgument(ServerRequestInterface::class)
+            ->addArgument(Logger::class)
+            ->addArgument($container)
+            ->addArgument(\App\Utils\View::class);
 
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);
@@ -157,16 +215,29 @@ class ContainerConfigurator
                 'App\\Controllers\\SeglingController',
                 'App\\Controllers\\RollController'
             ];
+            
+            // Controllers that need manual registration
+            $manuallyRegisteredControllers = [
+                'App\\Controllers\\HomeController',
+                'App\\Controllers\\ReportController',
+                'App\\Controllers\\WebhookController',
+                'App\\Controllers\\UserController',
+                'App\\Controllers\\Auth\\LoginController',
+                'App\\Controllers\\Auth\\PasswordController',
+                'App\\Controllers\\Auth\\RegistrationController',
+                'App\\Controllers\\Auth\\AuthBaseController'
+            ];
 
-            if (class_exists($className) && !in_array($className, $manuallyRegistered)) {
+            if (class_exists($className) && !in_array($className, $manuallyRegistered) && !in_array($className, $manuallyRegisteredControllers)) {
                 $reflection = new \ReflectionClass($className);
                 if (!$reflection->isAbstract()) {
                     $definition = $container->add($className);
 
-                    // Base dependencies
-                    $definition->addArgument(Application::class)
+                    // Base dependencies for new pattern controllers
+                    $definition->addArgument(\App\Services\UrlGeneratorService::class)
                         ->addArgument(ServerRequestInterface::class)
-                        ->addArgument(Logger::class);
+                        ->addArgument(Logger::class)
+                        ->addArgument(Container::class);
 
                     // Additional dependencies
                     $constructor = $reflection->getConstructor();

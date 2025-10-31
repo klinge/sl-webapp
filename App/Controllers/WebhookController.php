@@ -4,27 +4,29 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Services\Github\GitHubService;
 use App\Services\Github\GitRepositoryService;
 use App\Services\Github\DeploymentService;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
+use League\Container\Container;
 
 class WebhookController extends BaseController
 {
     private string $remoteIp;
 
     public function __construct(
-        Application $app,
+        UrlGeneratorService $urlGenerator,
         ServerRequestInterface $request,
         Logger $logger,
+        Container $container,
         private GitHubService $githubService,
         private GitRepositoryService $gitRepositoryService,
         private DeploymentService $deploymentService
     ) {
-        parent::__construct($app, $request, $logger);
+        parent::__construct($urlGenerator, $request, $logger, $container);
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
     }
 

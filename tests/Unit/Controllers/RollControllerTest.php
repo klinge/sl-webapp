@@ -17,6 +17,7 @@ class RollControllerTest extends TestCase
     private $mockRollService;
     private $mockView;
     private $mockApp;
+    private $mockUrlGenerator;
 
     protected function setUp(): void
     {
@@ -24,10 +25,12 @@ class RollControllerTest extends TestCase
         $this->mockView = $this->createMock(View::class);
         $this->mockApp = $this->createMock(\App\Application::class);
 
+        $this->mockUrlGenerator = $this->createMock(\App\Services\UrlGeneratorService::class);
+        
         $this->controller = new RollController(
             $this->mockRollService,
             $this->mockView,
-            $this->mockApp
+            $this->mockUrlGenerator
         );
     }
 

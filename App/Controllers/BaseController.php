@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
-use App\Application;
+use App\Services\UrlGeneratorService;
 use App\Traits\JsonResponder;
 use App\Utils\Session;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,16 +20,16 @@ class BaseController
 
     protected ServerRequestInterface $request;
     protected array $sessionData;
-    protected Application $app;
+    protected UrlGeneratorService $urlGenerator;
     protected Logger $logger;
     protected Container $container;
 
-    public function __construct(Application $app, ServerRequestInterface $request, Logger $logger)
+    public function __construct(UrlGeneratorService $urlGenerator, ServerRequestInterface $request, Logger $logger, Container $container)
     {
-        $this->app = $app;
+        $this->urlGenerator = $urlGenerator;
         $this->request = $request;
         $this->logger = $logger;
-        $this->container = $app->getContainer();
+        $this->container = $container;
         $this->initializeSessionData();
     }
 
@@ -56,9 +56,7 @@ class BaseController
 
     protected function createUrl(string $routeName, array $params = []): string
     {
-        $router = $this->app->getRouter();
-        $route = $router->getNamedRoute($routeName);
-        return $route->getPath($params);
+        return $this->urlGenerator->createUrl($routeName, $params);
     }
 
     protected function notFoundResponse(): ResponseInterface
