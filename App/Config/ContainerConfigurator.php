@@ -71,6 +71,13 @@ class ContainerConfigurator
             ->addArgument(Application::class)
             ->addArgument(Logger::class);
 
+        $container->add(\App\Services\BetalningService::class)
+            ->addArgument(\App\Models\BetalningRepository::class)
+            ->addArgument(\App\Models\MedlemRepository::class)
+            ->addArgument(\App\Utils\Email::class)
+            ->addArgument(Application::class)
+            ->addArgument(Logger::class);
+
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);
 
