@@ -23,7 +23,7 @@ class SeglingRepositoryTest extends TestCase
         $this->mockPdo = $this->createMock(PDO::class);
         $this->mockLogger = $this->createMock(LoggerInterface::class);
         $this->mockStmt = $this->createMock(PDOStatement::class);
-        
+
         $this->repository = new SeglingRepository($this->mockPdo, $this->mockLogger);
     }
 

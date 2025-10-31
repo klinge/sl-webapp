@@ -17,7 +17,7 @@ class BetalningTest extends TestCase
     public function testConstructorCreatesEmptyObject(): void
     {
         $betalning = new Betalning();
-        
+
         $this->assertEquals('', $betalning->kommentar);
         $this->assertEquals('', $betalning->created_at);
         $this->assertEquals('', $betalning->updated_at);
@@ -47,7 +47,7 @@ class BetalningTest extends TestCase
     public function testDefaultValues(): void
     {
         $betalning = new Betalning();
-        
+
         $this->assertEquals('', $betalning->kommentar);
         $this->assertEquals('', $betalning->created_at);
         $this->assertEquals('', $betalning->updated_at);

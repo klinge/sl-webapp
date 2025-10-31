@@ -65,7 +65,7 @@ class SeglingRepository extends BaseModel
         $stmt->bindParam(':slutdat', $data['slutdat'], PDO::PARAM_STR);
         $stmt->bindParam(':skeppslag', $data['skeppslag'], PDO::PARAM_STR);
         $stmt->bindValue(':kommentar', $data['kommentar'] ?? null, PDO::PARAM_STR);
-        
+
         if ($stmt->execute() && $stmt->rowCount() === 1) {
             return (int) $this->conn->lastInsertId();
         }
@@ -87,7 +87,7 @@ class SeglingRepository extends BaseModel
         $stmt->bindParam(':skeppslag', $data['skeppslag'], PDO::PARAM_STR);
         $stmt->bindValue(':kommentar', $data['kommentar'] ?? null, PDO::PARAM_STR);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        
+
         return $stmt->execute() && $stmt->rowCount() === 1;
     }
 

@@ -24,7 +24,7 @@ class MedlemRepositoryTest extends TestCase
         $this->mockPdo = $this->createMock(PDO::class);
         $this->mockLogger = $this->createMock(LoggerInterface::class);
         $this->mockStmt = $this->createMock(PDOStatement::class);
-        
+
         $this->repository = new MedlemRepository($this->mockPdo, $this->mockLogger);
     }
 

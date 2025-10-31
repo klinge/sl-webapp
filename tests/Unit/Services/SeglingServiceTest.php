@@ -372,6 +372,4 @@ class SeglingServiceTest extends TestCase
         $this->assertFalse($result->success);
         $this->assertEquals('Deletion failed', $result->message);
     }
-
-
 }

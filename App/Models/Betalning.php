@@ -20,6 +20,4 @@ class Betalning
     {
         // Pure data object - no dependencies
     }
-
-
 }

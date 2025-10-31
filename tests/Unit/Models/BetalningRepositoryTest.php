@@ -23,7 +23,7 @@ class BetalningRepositoryTest extends TestCase
         $this->mockPdo = $this->createMock(PDO::class);
         $this->mockLogger = $this->createMock(LoggerInterface::class);
         $this->mockStmt = $this->createMock(PDOStatement::class);
-        
+
         $this->repository = new BetalningRepository($this->mockPdo, $this->mockLogger);
     }
 

@@ -85,6 +85,15 @@ class ContainerConfigurator
             ->addArgument(\App\Models\Roll::class)
             ->addArgument(Logger::class);
 
+        $container->add(\App\Services\RollService::class)
+            ->addArgument(\App\Models\RollRepository::class)
+            ->addArgument(\App\Models\MedlemRepository::class);
+
+        // Manual registration for refactored controllers
+        $container->add(\App\Controllers\RollController::class)
+            ->addArgument(\App\Services\RollService::class)
+            ->addArgument(\App\Utils\View::class);
+
         // Autoregister all controllers in the container
         self::registerControllers($container, $app);
 

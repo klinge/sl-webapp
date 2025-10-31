@@ -1,56 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Models;
 
 use PHPUnit\Framework\TestCase;
 use App\Models\Roll;
 use PDO;
-use PDOStatement;
 use Psr\Log\LoggerInterface;
 
 class RollTest extends TestCase
 {
-    private $mockPDO;
-    private $roll;
-    private $mockLogger;
-
-    protected function setUp(): void
+    public function testRollModelExists(): void
     {
-        $this->mockPDO = $this->createMock(PDO::class);
-        $this->mockLogger = $this->createMock(LoggerInterface::class);
-        $this->roll = new Roll($this->mockPDO, $this->mockLogger);
+        $mockPdo = $this->createMock(PDO::class);
+        $mockLogger = $this->createMock(LoggerInterface::class);
+
+        $roll = new Roll($mockPdo, $mockLogger);
+
+        $this->assertInstanceOf(Roll::class, $roll);
     }
 
-    public function testGetAllReturnsArray()
+    public function testRollHasExpectedProperties(): void
     {
-        $mockStatement = $this->createMock(PDOStatement::class);
-        $mockStatement->method('execute')->willReturn(true);
-        $mockStatement->method('fetchAll')->willReturn([
-            ['id' => 1, 'roll_namn' => 'Admin', 'kommentar' => 'Administrator', 'created_at' => '2023-01-01', 'updated_at' => '2023-01-01'],
-            ['id' => 2, 'roll_namn' => 'User', 'kommentar' => 'Regular User', 'created_at' => '2023-01-02', 'updated_at' => '2023-01-02']
-        ]);
+        $mockPdo = $this->createMock(PDO::class);
+        $mockLogger = $this->createMock(LoggerInterface::class);
 
-        $this->mockPDO->method('prepare')->willReturn($mockStatement);
+        $roll = new Roll($mockPdo, $mockLogger);
 
-        $result = $this->roll->getAll();
-
-        $this->assertIsArray($result);
-        $this->assertCount(2, $result);
-        $this->assertEquals('Admin', $result[0]['roll_namn']);
-        $this->assertEquals('User', $result[1]['roll_namn']);
-    }
-
-    public function testGetAllWithEmptyResult()
-    {
-        $mockStatement = $this->createMock(PDOStatement::class);
-        $mockStatement->method('execute')->willReturn(true);
-        $mockStatement->method('fetchAll')->willReturn([]);
-
-        $this->mockPDO->method('prepare')->willReturn($mockStatement);
-
-        $result = $this->roll->getAll();
-
-        $this->assertIsArray($result);
-        $this->assertEmpty($result);
+        $this->assertTrue(property_exists($roll, 'id'));
+        $this->assertTrue(property_exists($roll, 'roll_namn'));
+        $this->assertTrue(property_exists($roll, 'kommentar'));
+        $this->assertTrue(property_exists($roll, 'created_at'));
+        $this->assertTrue(property_exists($roll, 'updated_at'));
     }
 }

@@ -50,7 +50,7 @@ class SeglingController extends BaseController
 
         try {
             $editData = $this->seglingService->getSeglingEditData($id);
-            
+
             $data = [
                 "title" => "Visa segling",
                 "items" => $editData['segling'],
@@ -107,13 +107,13 @@ class SeglingController extends BaseController
         $result = $this->seglingService->createSegling($postData);
 
         Session::setFlashMessage($result->success ? 'success' : 'error', $result->message);
-        
+
         if ($result->success && $result->seglingId) {
             $redirectUrl = $this->createUrl($result->redirectRoute, ['id' => $result->seglingId]);
         } else {
             $redirectUrl = $this->createUrl($result->redirectRoute);
         }
-        
+
         return new RedirectResponse($redirectUrl);
     }
 
@@ -121,7 +121,7 @@ class SeglingController extends BaseController
     {
         $postData = $this->request->getParsedBody();
         $result = $this->seglingService->addMemberToSegling($postData);
-        
+
         return $this->jsonResponse([
             'success' => $result->success,
             'message' => $result->message
@@ -144,7 +144,7 @@ class SeglingController extends BaseController
         }
 
         $result = $this->seglingService->removeMemberFromSegling($data);
-        
+
         return $this->jsonResponse([
             'status' => $result->success ? 'ok' : 'fail',
             'error' => $result->success ? null : $result->message
