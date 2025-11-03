@@ -41,7 +41,7 @@ class Email
         $this->mailer->ContentType = 'text/html; charset=UTF-8';
     }
 
-    public function send(EmailType $type, string $to, string $subject = null, array $data = []): bool
+    public function send(EmailType $type, string $to, ?string $subject = null, array $data = []): bool
     {
         //Load correct email template
         switch ($type) {
