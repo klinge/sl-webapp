@@ -54,7 +54,7 @@ class RegistrationControllerTest extends TestCase
     public function testShowRegisterRendersRegistrationView(): void
     {
         $mockResponse = $this->createMock(ResponseInterface::class);
-        
+
         $this->view->expects($this->once())
             ->method('render')
             ->with('login/viewRegisterAccount')
@@ -71,7 +71,7 @@ class RegistrationControllerTest extends TestCase
         $this->request->method('getParsedBody')->willReturn([]);
 
         $mockResponse = $this->createMock(ResponseInterface::class);
-        
+
         $this->view->expects($this->once())
             ->method('render')
             ->with('login/viewRegisterAccount', [])

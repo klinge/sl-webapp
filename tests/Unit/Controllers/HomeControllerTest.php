@@ -43,7 +43,7 @@ class HomeControllerTest extends TestCase
     public function testIndexRendersLoginWhenNotLoggedIn(): void
     {
         Session::destroy();
-        
+
         $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
@@ -60,7 +60,7 @@ class HomeControllerTest extends TestCase
         Session::start();
         $_SESSION['user_id'] = 1;
         $_SESSION['is_admin'] = true;
-        
+
         $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
@@ -77,7 +77,7 @@ class HomeControllerTest extends TestCase
         Session::start();
         $_SESSION['user_id'] = 1;
         $_SESSION['is_admin'] = false;
-        
+
         $mockResponse = $this->createMock(ResponseInterface::class);
         $this->view->expects($this->once())
             ->method('render')
