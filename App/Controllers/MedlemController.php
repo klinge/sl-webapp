@@ -64,7 +64,8 @@ class MedlemController extends BaseController
      * and renders them in an edit view.
      *
      * @param ServerRequestInterface $request The request object
-     * @param array $params The route parameters, must contain 'id'
+     * @param array<string, mixed> $params The route parameters, must contain 'id'
+     * @return ResponseInterface View response with member edit form or error redirect
      */
     public function edit(ServerRequestInterface $request, array $params): ResponseInterface
     {
@@ -97,7 +98,8 @@ class MedlemController extends BaseController
      * Sanitizes input data, updates the member record, and redirects to the member list.
      *
      * @param ServerRequestInterface $request The request object
-     * @param array $params The route parameters, must contain 'id'
+     * @param array<string, mixed> $params The route parameters, must contain 'id'
+     * @return ResponseInterface Redirect response with success or error message
      */
     public function update(ServerRequestInterface $request, array $params): ResponseInterface
     {

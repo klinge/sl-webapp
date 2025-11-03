@@ -35,8 +35,9 @@ use Exception;
  */
 class Application
 {
+    /** @var array<string, mixed> */
     private array $config = [];
-    private $container;
+    private Container $container;
     private ?Router $router = null;
     private MiddlewareStack $middlewareStack;
     private string $rootDir = '';
@@ -172,7 +173,7 @@ class Application
      *
      * @param ?string $key The environment variable to retrieve
      *
-     * @return array|string|bool|null The entire config array, the value of the environment variable or null if the key is not found
+     * @return array<string, mixed>|string|bool|null The entire config array, the value of the environment variable or null if the key is not found
      */
     public function getConfig(?string $key): array|string|bool|null
     {

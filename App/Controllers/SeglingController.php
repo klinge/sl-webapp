@@ -25,6 +25,11 @@ class SeglingController extends BaseController
         $this->urlGenerator = $urlGenerator;
     }
 
+    /**
+     * Lists all seglingar (sailing trips).
+     *
+     * @return ResponseInterface View response with list of all seglingar
+     */
     public function list(): ResponseInterface
     {
         $seglingar = $this->seglingService->getAllSeglingar();
@@ -37,6 +42,13 @@ class SeglingController extends BaseController
         return $this->view->render('viewSegling', $data);
     }
 
+    /**
+     * Displays the edit form for a specific segling (sailing trip).
+     *
+     * @param ServerRequestInterface $request The HTTP request
+     * @param array<string, mixed> $params Route parameters containing segling 'id'
+     * @return ResponseInterface View response with segling edit form or 404 if not found
+     */
     public function edit(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
@@ -60,6 +72,13 @@ class SeglingController extends BaseController
         }
     }
 
+    /**
+     * Saves changes to an existing segling.
+     *
+     * @param ServerRequestInterface $request The HTTP request containing form data
+     * @param array<string, mixed> $params Route parameters containing segling 'id'
+     * @return ResponseInterface Redirect response on success or JSON error response
+     */
     public function save(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
@@ -75,6 +94,13 @@ class SeglingController extends BaseController
         }
     }
 
+    /**
+     * Deletes a segling by ID.
+     *
+     * @param ServerRequestInterface $request The HTTP request
+     * @param array<string, mixed> $params Route parameters containing segling 'id'
+     * @return ResponseInterface Redirect response with success or error message
+     */
     public function delete(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
@@ -85,6 +111,11 @@ class SeglingController extends BaseController
         return new RedirectResponse($redirectUrl);
     }
 
+    /**
+     * Displays the form for creating a new segling.
+     *
+     * @return ResponseInterface View response with new segling creation form
+     */
     public function showCreate(): ResponseInterface
     {
         $formAction = $this->createUrl('segling-create');
@@ -95,6 +126,11 @@ class SeglingController extends BaseController
         return $this->view->render('viewSeglingNew', $data);
     }
 
+    /**
+     * Creates a new segling from form data.
+     *
+     * @return ResponseInterface Redirect response to edit page on success or back to list on error
+     */
     public function create(): ResponseInterface
     {
         $postData = $this->request->getParsedBody();
@@ -111,6 +147,11 @@ class SeglingController extends BaseController
         return new RedirectResponse($redirectUrl);
     }
 
+    /**
+     * Adds a member to a segling.
+     *
+     * @return ResponseInterface JSON response with success status and message
+     */
     public function saveMedlem(): ResponseInterface
     {
         $postData = $this->request->getParsedBody();
@@ -122,6 +163,13 @@ class SeglingController extends BaseController
         ]);
     }
 
+    /**
+     * Removes a member from a segling.
+     *
+     * Handles both JSON and form-encoded request bodies.
+     *
+     * @return ResponseInterface JSON response with status and error information
+     */
     public function deleteMedlemFromSegling(): ResponseInterface
     {
         // Handle JSON request body

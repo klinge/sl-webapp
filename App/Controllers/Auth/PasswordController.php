@@ -62,6 +62,9 @@ class PasswordController extends AuthBaseController
         return $this->view->render(self::NEWPASSWORD_VIEW);
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     public function showResetPassword(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $result = $this->authService->validateResetToken($params['token']);

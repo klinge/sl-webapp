@@ -19,6 +19,7 @@ class BaseController
     use JsonResponder;
 
     protected ServerRequestInterface $request;
+    /** @var array<string, mixed> */
     protected array $sessionData;
     protected UrlGeneratorService $urlGenerator;
     protected Logger $logger;
@@ -54,6 +55,13 @@ class BaseController
         return Session::get('csrf_token') && hash_equals(Session::get('csrf_token'), $token);
     }
 
+    /**
+     * Creates a URL for the given route name with optional parameters.
+     *
+     * @param string $routeName The name of the route
+     * @param array<string, mixed> $params Optional route parameters (e.g., ['id' => 123])
+     * @return string The generated URL path
+     */
     protected function createUrl(string $routeName, array $params = []): string
     {
         return $this->urlGenerator->createUrl($routeName, $params);

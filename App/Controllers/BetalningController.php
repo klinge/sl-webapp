@@ -33,6 +33,13 @@ class BetalningController extends BaseController
         return $this->view->render('viewBetalning', $data);
     }
 
+    /**
+     * Gets a specific payment by ID.
+     *
+     * @param ServerRequestInterface $request The HTTP request
+     * @param array<string, mixed> $params Route parameters containing 'id'
+     * @return ResponseInterface JSON response with payment data or error
+     */
     public function getBetalning(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
@@ -40,6 +47,13 @@ class BetalningController extends BaseController
         return $this->jsonResponse(['message' => 'Payment editing not yet implemented']);
     }
 
+    /**
+     * Gets all payments for a specific member.
+     *
+     * @param ServerRequestInterface $request The HTTP request
+     * @param array<string, mixed> $params Route parameters containing member 'id'
+     * @return ResponseInterface View response with member payments or error message
+     */
     public function getMedlemBetalning(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];
@@ -81,6 +95,13 @@ class BetalningController extends BaseController
         ]);
     }
 
+    /**
+     * Deletes a payment by ID.
+     *
+     * @param ServerRequestInterface $request The HTTP request
+     * @param array<string, mixed> $params Route parameters containing payment 'id'
+     * @return ResponseInterface JSON response with success status and message
+     */
     public function deleteBetalning(ServerRequestInterface $request, array $params): ResponseInterface
     {
         $id = (int) $params['id'];

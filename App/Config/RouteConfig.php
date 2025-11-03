@@ -3,13 +3,14 @@
 namespace App\Config;
 
 use League\Route\Router;
+use League\Container\Container;
 use App\Middleware\RequireAdminMiddleware;
 use App\Middleware\RequireAuthenticationMiddleware;
 
 class RouteConfig
 {
     // Central place to put all the applications routes
-    public static function createAppRoutes(Router $router, $container = null)
+    public static function createAppRoutes(Router $router, ?Container $container = null): void
     {
         $router->get('/', 'App\\Controllers\\HomeController::index')->setName('home');
 

@@ -131,7 +131,7 @@ class WebhookController extends BaseController
      * If it's a 'ping' event, it responds with a 'pong'.
      * For 'push' events, it processes the payload for further action.
      *
-     * @return array The validated payload for 'push' events, or an empty array for other cases
+     * @return array<string, mixed> The validated GitHub webhook payload for 'push' events, or an empty array for other cases
      */
     public function verifyRequest(): array
     {
