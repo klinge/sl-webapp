@@ -49,7 +49,7 @@ class RollServiceTest extends TestCase
         ];
 
         $this->mockMedlemRepo->expects($this->once())
-            ->method('getMembersByRollId')
+            ->method('findMembersByRollId')
             ->with(1)
             ->willReturn($expectedMembers);
 

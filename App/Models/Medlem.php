@@ -28,6 +28,9 @@ class Medlem
     // User login
     public ?string $password = null;
     //Fetched from Roller table
+    /**
+     * @var array<int, array<string, mixed>>
+     */
     public array $roller = [];
     // Timestamps
     public string $created_at = '';
@@ -43,6 +46,12 @@ class Medlem
         return $this->fornamn . " " . $this->efternamn;
     }
 
+    /**
+     * Updates member roles with new role IDs.
+     *
+     * @param array<int, int> $newRoleIds Array of role IDs
+     * @return void
+     */
     public function updateMedlemRoles(array $newRoleIds): void
     {
         // Remove roles that no longer exist

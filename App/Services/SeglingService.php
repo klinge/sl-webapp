@@ -52,9 +52,9 @@ class SeglingService
         return [
             'segling' => $segling,
             'roles' => $this->roll->getAll(),
-            'allaSkeppare' => $this->medlemRepo->getMembersByRollName('Skeppare'),
-            'allaBatsman' => $this->medlemRepo->getMembersByRollName('Båtsman'),
-            'allaKockar' => $this->medlemRepo->getMembersByRollName('Kock')
+            'allaSkeppare' => $this->medlemRepo->findMembersByRollName('Skeppare'),
+            'allaBatsman' => $this->medlemRepo->findMembersByRollName('Båtsman'),
+            'allaKockar' => $this->medlemRepo->findMembersByRollName('Kock')
         ];
     }
 

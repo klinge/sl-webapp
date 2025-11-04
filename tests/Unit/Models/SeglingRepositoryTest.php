@@ -275,7 +275,7 @@ class SeglingRepositoryTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedData);
 
-        $result = $this->repository->getDeltagare(1);
+        $result = $this->repository->findDeltagare(1);
 
         $this->assertEquals($expectedData, $result);
     }

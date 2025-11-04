@@ -8,10 +8,18 @@ use PDO;
 use Exception;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Repository for managing Medlem (member) entities.
+ *
+ * Handles CRUD operations, role management, and member queries.
+ * Uses repository pattern with pure Medlem data objects.
+ *
+ * NOTE: methods named getXXX return Medlem objects, methods named findXXX return raw data arrays.
+ *
+ * @package App\Models
+ */
 class MedlemRepository extends BaseModel
 {
-    public $medlemmar;
-
     public function __construct(PDO $db, LoggerInterface $logger)
     {
         parent::__construct($db, $logger);
@@ -24,7 +32,7 @@ class MedlemRepository extends BaseModel
      * Fetches member and creates Medlem objects for each,
      * and returns them in an array sorted by last name.
      *
-     * @return array Medlem[] An array of Medlem objects
+     * @return array<int, Medlem> An array of Medlem objects
      */
     public function getAll(): array
     {
@@ -37,7 +45,7 @@ class MedlemRepository extends BaseModel
 
         foreach ($members as $member) {
             try {
-                $medlem = $this->createMedlem($member['id']);
+                $medlem = $this->getById($member['id']);
                 $medlemmar[] = $medlem;
             } catch (Exception $e) {
                 //Do nothing right now..
@@ -46,87 +54,9 @@ class MedlemRepository extends BaseModel
         return $medlemmar;
     }
 
-    // Find all Medlemmar in a role by querying Medlem, Roll, and Medlem_Roll tables
-    // to find members with a specified roll_namn
-    public function getMembersByRollName(string $rollName): array
-    {
-        $query = "SELECT m.id,m.fornamn, m.efternamn, r.roll_namn
-            FROM  Medlem m
-            INNER JOIN Medlem_Roll mr ON mr.medlem_id = m.id
-            INNER JOIN Roll r ON r.id = mr.roll_id
-            WHERE r.roll_namn = :rollnamn
-            ORDER BY m.efternamn ASC;";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':rollnamn', $rollName);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Query Medlem, Roll, and Medlem_Roll tables
-    // to find members with a specified roll_namn
-    public function getMembersByRollId(int $rollId): array
-    {
-        $query = "SELECT m.id,m.fornamn, m.efternamn, r.id AS roll_id, r.roll_namn
-            FROM  Medlem m
-            INNER JOIN Medlem_Roll mr ON mr.medlem_id = m.id
-            INNER JOIN Roll r ON r.id = mr.roll_id
-            WHERE r.id = :id
-            ORDER BY m.fornamn ASC;";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $rollId);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Retrieves member data by email.
-     *
-     * @param string $email The email address of the member
-     * @return array|bool Member data array or false if not found
-     */
-    public function getMemberByEmail(string $email): array|bool
-    {
-        $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $result ?: false;
-    }
-
-    /**
-     * Retrieves member email addresses.
-     *
-     * @return array An array of member email addresses
-     */
-    public function getEmailForActiveMembers(): array
-    {
-        $query = "SELECT email FROM medlem WHERE pref_kommunikation = 1";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        //Remove rows with empty emails
-        return array_filter($result, fn($item) => !empty($item['email']));
-    }
-
-    /**
-     * Finds member data by ID.
-     *
-     * @param int $id The member ID
-     * @return array|null Member data array or null if not found
-     */
-    public function findById(int $id): ?array
-    {
-        $query = "SELECT * FROM Medlem WHERE id = :id LIMIT 1";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $row ?: null;
-    }
-
     /**
      * Retrieves a member by ID.
+     * Returns a Medlem object or null if not found.
      *
      * @param int $id The member ID
      * @return Medlem|null The Medlem object or null if not found
@@ -145,6 +75,119 @@ class MedlemRepository extends BaseModel
     }
 
     /**
+     * Finds member data by ID.
+     * Returns raw data array or null if not found.
+     *
+     * @param int $id The member ID
+     * @return array<string, mixed>|null Member data array or null if not found
+     */
+    private function findById(int $id): ?array
+    {
+        $query = "SELECT * FROM Medlem WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row ?: null;
+    }
+
+    /**
+     * Find all Medlemmar in a role by querying Medlem, Roll, and Medlem_Roll tables
+     * to find members with a specified roll_namn
+     *
+     * @param string $rollName The role name to search for
+     * @return array<int, array<string, mixed>> Array of member data with role info
+     */
+    public function findMembersByRollName(string $rollName): array
+    {
+        $query = "SELECT m.id,m.fornamn, m.efternamn, r.roll_namn
+            FROM  Medlem m
+            INNER JOIN Medlem_Roll mr ON mr.medlem_id = m.id
+            INNER JOIN Roll r ON r.id = mr.roll_id
+            WHERE r.roll_namn = :rollnamn
+            ORDER BY m.efternamn ASC;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':rollnamn', $rollName);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Query Medlem, Roll, and Medlem_Roll tables
+     * to find members with a specified roll_id
+     *
+     * @param int $rollId The role ID to search for
+     * @return array<int, array<string, mixed>> Array of member data with role info
+     */
+    public function findMembersByRollId(int $rollId): array
+    {
+        $query = "SELECT m.id,m.fornamn, m.efternamn, r.id AS roll_id, r.roll_namn
+            FROM  Medlem m
+            INNER JOIN Medlem_Roll mr ON mr.medlem_id = m.id
+            INNER JOIN Roll r ON r.id = mr.roll_id
+            WHERE r.id = :id
+            ORDER BY m.fornamn ASC;";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $rollId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Finds member data by email.
+     *
+     * @param string $email The email address of the member
+     * @return array<string, mixed>|false Member data array or false if not found
+     */
+    public function findMemberByEmail(string $email): array|false
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM medlem WHERE email = :email");
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: false;
+    }
+
+    /**
+     * Retrieves member data by email.
+     *
+     * @deprecated Use findMemberByEmail() instead
+     * @param string $email The email address of the member
+     * @return array<string, mixed>|false Member data array or false if not found
+     */
+    public function getMemberByEmail(string $email): array|false
+    {
+        return $this->findMemberByEmail($email);
+    }
+
+    /**
+     * Finds email addresses for active members.
+     *
+     * @return array<int, array<string, mixed>> An array of member email data
+     */
+    public function findEmailsForActiveMembers(): array
+    {
+        $query = "SELECT email FROM medlem WHERE pref_kommunikation = 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //Remove rows with empty emails
+        return array_filter($result, fn($item) => !empty($item['email']));
+    }
+
+    /**
+     * Retrieves member email addresses.
+     *
+     * @deprecated Use findEmailsForActiveMembers() instead
+     * @return array<int, array<string, mixed>> An array of member email data
+     */
+    public function getEmailForActiveMembers(): array
+    {
+        return $this->findEmailsForActiveMembers();
+    }
+
+    /**
      * Creates a new empty Medlem object for data entry.
      *
      * @return Medlem New Medlem object
@@ -157,7 +200,7 @@ class MedlemRepository extends BaseModel
     /**
      * Inserts a new member.
      *
-     * @param array $data Member data
+     * @param array<string, mixed> $data Member data
      * @return int The new member ID
      */
     public function insert(array $data): int
@@ -183,7 +226,7 @@ class MedlemRepository extends BaseModel
      * Updates an existing member.
      *
      * @param int $id Member ID
-     * @param array $data Member data
+     * @param array<string, mixed> $data Member data
      * @return bool Success status
      */
     public function update(int $id, array $data): bool
@@ -274,7 +317,7 @@ class MedlemRepository extends BaseModel
      * Gets roles for a member.
      *
      * @param int $memberId Member ID
-     * @return array Array of roles
+     * @return array<int, array<string, mixed>> Array of role data
      */
     public function getRolesByMemberId(int $memberId): array
     {
@@ -293,7 +336,7 @@ class MedlemRepository extends BaseModel
      * Saves roles for a member.
      *
      * @param int $memberId Member ID
-     * @param array $roles Array of roles
+     * @param array<int, array<string, mixed>> $roles Array of role data
      * @return void
      */
     public function saveRolesForMember(int $memberId, array $roles): void
@@ -338,7 +381,7 @@ class MedlemRepository extends BaseModel
      * Gets seglingar for a member.
      *
      * @param int $memberId Member ID
-     * @return array Array of seglingar
+     * @return array<int, array<string, mixed>> Array of segling data
      */
     public function getSeglingarByMemberId(int $memberId): array
     {
@@ -356,6 +399,13 @@ class MedlemRepository extends BaseModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Binds member parameters to prepared statement.
+     *
+     * @param \PDOStatement $stmt The prepared statement
+     * @param array<string, mixed> $data Member data
+     * @return void
+     */
     private function bindMemberParams($stmt, array $data): void
     {
         $stmt->bindParam(':fodelsedatum', $data['fodelsedatum'], PDO::PARAM_STR);
@@ -377,6 +427,13 @@ class MedlemRepository extends BaseModel
         $stmt->bindParam(':skickat_valkomstbrev', $data['skickat_valkomstbrev'], PDO::PARAM_BOOL);
     }
 
+    /**
+     * Populates a Medlem object with data from database row.
+     *
+     * @param Medlem $medlem The member object to populate
+     * @param array<string, mixed> $data Database row data
+     * @return void
+     */
     private function populateMedlem(Medlem $medlem, array $data): void
     {
         $medlem->id = (int) $data['id'];
@@ -401,6 +458,12 @@ class MedlemRepository extends BaseModel
         $medlem->updated_at = $data['updated_at'];
     }
 
+    /**
+     * Converts a Medlem object to array for database operations.
+     *
+     * @param Medlem $medlem The member object
+     * @return array<string, mixed> Member data as array
+     */
     private function medlemToArray(Medlem $medlem): array
     {
         return [
@@ -421,10 +484,5 @@ class MedlemRepository extends BaseModel
             'standig_medlem' => $medlem->standig_medlem,
             'skickat_valkomstbrev' => $medlem->skickat_valkomstbrev
         ];
-    }
-
-    protected function createMedlem(int $id): Medlem
-    {
-        return $this->getById($id);
     }
 }

@@ -47,7 +47,7 @@ class MedlemRepositoryTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedMembers);
 
-        $result = $this->repository->getMembersByRollName('Skeppare');
+        $result = $this->repository->findMembersByRollName('Skeppare');
 
         $this->assertCount(2, $result);
         $this->assertEquals($expectedMembers, $result);
@@ -71,12 +71,12 @@ class MedlemRepositoryTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedMembers);
 
-        $result = $this->repository->getMembersByRollId(1);
+        $result = $this->repository->findMembersByRollId(1);
 
         $this->assertEquals($expectedMembers, $result);
     }
 
-    public function testGetMemberByEmail(): void
+    public function testFindMemberByEmail(): void
     {
         $expectedData = ['id' => 1, 'fornamn' => 'John', 'efternamn' => 'Doe', 'email' => 'john@example.com'];
 
@@ -90,12 +90,12 @@ class MedlemRepositoryTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedData);
 
-        $result = $this->repository->getMemberByEmail('john@example.com');
+        $result = $this->repository->findMemberByEmail('john@example.com');
 
         $this->assertEquals($expectedData, $result);
     }
 
-    public function testGetMemberByEmailNotFound(): void
+    public function testFindMemberByEmailNotFound(): void
     {
         $this->mockPdo->expects($this->once())
             ->method('prepare')
@@ -105,12 +105,12 @@ class MedlemRepositoryTest extends TestCase
             ->method('fetch')
             ->willReturn(false);
 
-        $result = $this->repository->getMemberByEmail('notfound@example.com');
+        $result = $this->repository->findMemberByEmail('notfound@example.com');
 
         $this->assertFalse($result);
     }
 
-    public function testGetEmailForActiveMembers(): void
+    public function testFindEmailsForActiveMembers(): void
     {
         $expectedData = [
             ['email' => 'john@example.com'],
@@ -128,45 +128,13 @@ class MedlemRepositoryTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedData);
 
-        $result = $this->repository->getEmailForActiveMembers();
+        $result = $this->repository->findEmailsForActiveMembers();
 
         $this->assertCount(2, $result);
         $this->assertEquals('john@example.com', $result[0]['email']);
     }
 
-    public function testFindById(): void
-    {
-        $expectedData = ['id' => 1, 'fornamn' => 'John', 'efternamn' => 'Doe'];
 
-        $this->mockPdo->expects($this->once())
-            ->method('prepare')
-            ->with('SELECT * FROM Medlem WHERE id = :id LIMIT 1')
-            ->willReturn($this->mockStmt);
-
-        $this->mockStmt->expects($this->once())
-            ->method('fetch')
-            ->with(PDO::FETCH_ASSOC)
-            ->willReturn($expectedData);
-
-        $result = $this->repository->findById(1);
-
-        $this->assertEquals($expectedData, $result);
-    }
-
-    public function testFindByIdNotFound(): void
-    {
-        $this->mockPdo->expects($this->once())
-            ->method('prepare')
-            ->willReturn($this->mockStmt);
-
-        $this->mockStmt->expects($this->once())
-            ->method('fetch')
-            ->willReturn(false);
-
-        $result = $this->repository->findById(999);
-
-        $this->assertNull($result);
-    }
 
     public function testInsert(): void
     {

@@ -9,11 +9,16 @@ use Psr\Log\LoggerInterface;
 
 class BetalningRepository extends BaseModel
 {
-    public function __construct($db, LoggerInterface $logger)
+    public function __construct(PDO $db, LoggerInterface $logger)
     {
         parent::__construct($db, $logger);
     }
 
+    /**
+     * Retrieves all payments as Betalning objects.
+     *
+     * @return array<int, Betalning> Array of Betalning objects
+     */
     public function getAll(): array
     {
         $betalningar = [];
@@ -30,10 +35,13 @@ class BetalningRepository extends BaseModel
         return $betalningar;
     }
 
-    public function getAllWithName(): array
+    /**
+     * Finds all payments with member names as raw data.
+     *
+     * @return array<int, array<string, mixed>> Array of payment data with member names
+     */
+    public function findAllWithMemberNames(): array
     {
-        $betalningar = [];
-
         $query = "SELECT b.*, m.fornamn, m.efternamn 
              FROM Betalning b 
              LEFT JOIN Medlem m ON b.medlem_id = m.id 
@@ -41,11 +49,26 @@ class BetalningRepository extends BaseModel
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        $betalningar =  $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        return $betalningar;
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Retrieves all payments with member names as raw data.
+     *
+     * @deprecated Use findAllWithMemberNames() instead
+     * @return array<int, array<string, mixed>> Array of payment data with member names
+     */
+    public function getAllWithName(): array
+    {
+        return $this->findAllWithMemberNames();
+    }
+
+    /**
+     * Retrieves all payments for a member as Betalning objects.
+     *
+     * @param int $medlemId Member ID
+     * @return array<int, Betalning> Array of Betalning objects
+     */
     public function getBetalningForMedlem(int $medlemId): array
     {
         $betalningar = [];
@@ -63,6 +86,13 @@ class BetalningRepository extends BaseModel
         return $betalningar;
     }
 
+    /**
+     * Checks if a member has paid for a specific year.
+     *
+     * @param int $medlemId Member ID
+     * @param int $year Year to check
+     * @return bool True if member has paid
+     */
     public function memberHasPayed(int $medlemId, int $year): bool
     {
         $query = "SELECT * from Betalning WHERE medlem_id = :id AND avser_ar = :ar";
@@ -140,6 +170,12 @@ class BetalningRepository extends BaseModel
         return new Betalning();
     }
 
+    /**
+     * Creates a Betalning object from database row data.
+     *
+     * @param array<string, mixed> $data Database row data
+     * @return Betalning Populated Betalning object
+     */
     private function createBetalningFromData(array $data): Betalning
     {
         $betalning = new Betalning();

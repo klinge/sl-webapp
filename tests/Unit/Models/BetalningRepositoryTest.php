@@ -63,7 +63,7 @@ class BetalningRepositoryTest extends TestCase
         $this->assertEquals(500.00, $result[0]->belopp);
     }
 
-    public function testGetAllWithName(): void
+    public function testFindAllWithMemberNames(): void
     {
         $expectedData = [
             [
@@ -92,7 +92,7 @@ class BetalningRepositoryTest extends TestCase
             ->with(PDO::FETCH_ASSOC)
             ->willReturn($expectedData);
 
-        $result = $this->repository->getAllWithName();
+        $result = $this->repository->findAllWithMemberNames();
 
         $this->assertEquals($expectedData, $result);
     }

@@ -64,7 +64,7 @@ class BetalningServiceTest extends TestCase
         ];
 
         $this->betalningRepo->expects($this->once())
-            ->method('getAllWithName')
+            ->method('findAllWithMemberNames')
             ->willReturn($expectedPayments);
 
         $result = $this->service->getAllPayments();

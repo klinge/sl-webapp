@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 
 class MiddlewareStack implements RequestHandlerInterface
 {
+    /** @var array<int, MiddlewareInterface> */
     private array $middlewares = [];
     private RequestHandlerInterface $fallbackHandler;
 

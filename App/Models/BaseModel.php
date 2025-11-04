@@ -10,8 +10,8 @@ use Psr\Log\LoggerInterface;
 abstract class BaseModel
 {
     // database connection and table name
-    protected $conn;
-    protected $logger;
+    protected PDO $conn;
+    protected LoggerInterface $logger;
 
     public function __construct(PDO $db, LoggerInterface $logger)
     {

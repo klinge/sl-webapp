@@ -95,7 +95,7 @@ class SeglingServiceTest extends TestCase
             ->willReturn([['id' => 1, 'name' => 'Captain']]);
 
         $this->medlemRepo->expects($this->exactly(3))
-            ->method('getMembersByRollName')
+            ->method('findMembersByRollName')
             ->willReturn([]);
 
         $result = $this->service->getSeglingEditData($seglingId);

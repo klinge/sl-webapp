@@ -22,6 +22,6 @@ class RollService
 
     public function getMembersInRole(int $rollId): array
     {
-        return $this->medlemRepo->getMembersByRollId($rollId);
+        return $this->medlemRepo->findMembersByRollId($rollId);
     }
 }

@@ -17,6 +17,8 @@ class CsrfMiddleware extends BaseMiddleware
 {
     /**
      * An array of paths that should be excluded from CSRF protection.
+     *
+     * @var array<int, string>
      */
     private array $excludedPaths = ['/webhooks', '/home'];
 

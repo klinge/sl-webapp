@@ -29,7 +29,7 @@ class BetalningService
 
     public function getAllPayments(): array
     {
-        return $this->betalningRepo->getAllWithName();
+        return $this->betalningRepo->findAllWithMemberNames();
     }
 
     public function getPaymentsForMember(int $memberId): array
