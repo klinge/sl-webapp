@@ -11,7 +11,7 @@ class PasswordService
      *
      * @param string $password The password to validate
      * @param string $email The user's email address
-     * @return array An array of error messages, or an empty array if valid
+     * @return array<int, string> An array of error messages, or an empty array if valid
      */
     public function validatePassword(string $password, string $email): array
     {
@@ -59,7 +59,7 @@ class PasswordService
     /**
      * Formats password errors for View
      *
-     * @param array $errors The errors found in the password
+     * @param array<int, string> $errors The errors found in the password
      * @return string A html formatted string
      */
     public function formatPasswordErrors(array $errors): string

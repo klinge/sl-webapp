@@ -22,12 +22,21 @@ class UserAuthenticationService
     private PDO $conn;
     private Router $router;
     private Email $mailer;
+    /**
+     * @var array<string, mixed>
+     */
     private array $config;
     private TokenHandler $tokenHandler;
     private MedlemRepository $medlemRepo;
     private PasswordService $passwordSvc;
 
-
+    /**
+     * @param PDO $conn Database connection
+     * @param Logger $logger Logger instance
+     * @param Router $router Router instance
+     * @param Email $mailer Email service
+     * @param array<string, mixed> $config Application configuration
+     */
     public function __construct(PDO $conn, Logger $logger, Router $router, Email $mailer, array $config)
     {
         $this->conn = $conn;
@@ -40,6 +49,12 @@ class UserAuthenticationService
         $this->passwordSvc = new PasswordService();
     }
 
+    /**
+     * Registers a new user account.
+     *
+     * @param array<string, mixed> $formData Form data containing email, password, etc.
+     * @return array<string, mixed> Result array with success status and message
+     */
     public function registerUser(array $formData): array
     {
         $s = new Sanitizer();
@@ -110,6 +125,14 @@ class UserAuthenticationService
         return ['success' => true];
     }
 
+    /**
+     * Sends activation email to user.
+     *
+     * @param Medlem $medlem Member object
+     * @param string $email Email address
+     * @param string $token Activation token
+     * @return bool Success status
+     */
     private function sendActivationEmail(Medlem $medlem, string $email, string $token): bool
     {
         return $this->sendAuthenticationEmail(
@@ -121,6 +144,12 @@ class UserAuthenticationService
         );
     }
 
+    /**
+     * Activates a user account using activation token.
+     *
+     * @param string $token Activation token
+     * @return array<string, mixed> Result array with success status
+     */
     public function activateAccount(string $token): array
     {
         $tokenResult = $this->tokenHandler->isValidToken($token, TokenType::ACTIVATION);
@@ -144,6 +173,12 @@ class UserAuthenticationService
         ];
     }
 
+    /**
+     * Requests a password reset for the given email.
+     *
+     * @param string $email Email address
+     * @return array<string, mixed> Result array with success status
+     */
     public function requestPasswordReset(string $email): array
     {
         $member = $this->medlemRepo->getMemberByEmail($email);
@@ -168,6 +203,14 @@ class UserAuthenticationService
         return ['success' => true];
     }
 
+    /**
+     * Sends password reset email to user.
+     *
+     * @param array<string, mixed> $member Member data array
+     * @param string $email Email address
+     * @param string $token Reset token
+     * @return bool Success status
+     */
     private function sendPasswordResetEmail(array $member, string $email, string $token): bool
     {
         return $this->sendAuthenticationEmail(
@@ -179,11 +222,23 @@ class UserAuthenticationService
         );
     }
 
+    /**
+     * Validates a password reset token.
+     *
+     * @param string $token Reset token
+     * @return array<string, mixed> Validation result
+     */
     public function validateResetToken(string $token): array
     {
         return $this->tokenHandler->isValidToken($token, TokenType::RESET);
     }
 
+    /**
+     * Resets user password using form data.
+     *
+     * @param array<string, mixed> $formData Form data containing email, token, passwords
+     * @return array<string, mixed> Result array with success status and message
+     */
     public function resetPassword(array $formData): array
     {
         $email = $formData['email'];
@@ -221,6 +276,13 @@ class UserAuthenticationService
         return ['success' => true];
     }
 
+    /**
+     * Saves hashed password for member.
+     *
+     * @param string $hashedPassword Hashed password
+     * @param string $email Member email
+     * @return bool Success status
+     */
     private function saveMembersPassword(string $hashedPassword, string $email): bool
     {
         $stmt = $this->conn->prepare("UPDATE medlem SET password = :password WHERE email = :email");
@@ -238,6 +300,16 @@ class UserAuthenticationService
         }
     }
 
+    /**
+     * Sends authentication email (activation or password reset).
+     *
+     * @param string $email Email address
+     * @param string $token Authentication token
+     * @param string $firstName Member first name
+     * @param EmailType $emailType Type of email to send
+     * @param string $routeName Route name for generating URL
+     * @return bool Success status
+     */
     private function sendAuthenticationEmail(
         string $email,
         string $token,
@@ -246,6 +318,7 @@ class UserAuthenticationService
         string $routeName
     ): bool {
         $route = $this->router->getNamedRoute($routeName);
+        /** @var array<string, mixed> $data */
         $data = [
             'token' => $token,
             'fornamn' => $firstName,
@@ -263,6 +336,11 @@ class UserAuthenticationService
         }
     }
 
+    /**
+     * Creates and configures token handler.
+     *
+     * @return TokenHandler Configured token handler instance
+     */
     protected function createTokenHandler(): TokenHandler
     {
         return new TokenHandler($this->conn, $this->logger);

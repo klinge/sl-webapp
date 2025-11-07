@@ -8,6 +8,7 @@ use Exception;
 use App\Models\SeglingRepository;
 use App\Models\BetalningRepository;
 use App\Models\MedlemRepository;
+use App\Models\Segling;
 use App\Models\Roll;
 use App\Utils\Sanitizer;
 use App\Utils\Session;
@@ -25,11 +26,23 @@ class SeglingService
     ) {
     }
 
+    /**
+     * Retrieves all seglingar with participants.
+     *
+     * @return array<int, Segling> Array of all segling objects with participants
+     */
     public function getAllSeglingar(): array
     {
         return $this->seglingRepo->getAllWithDeltagare();
     }
 
+    /**
+     * Gets all data needed for segling edit form.
+     *
+     * @param int $id Segling ID
+     * @return array<string, mixed> Array containing segling, roles, and member lists
+     * @throws Exception If segling not found
+     */
     public function getSeglingEditData(int $id): array
     {
         $segling = $this->seglingRepo->getByIdWithDeltagare($id);
@@ -39,6 +52,7 @@ class SeglingService
 
         // Get deltagare with payment status
         $year = (int) substr($segling->start_dat, 0, 4);
+        /** @var array<int, array<string, mixed>> $deltagareWithBetalning */
         $deltagareWithBetalning = [];
 
         foreach ($segling->deltagare as $deltagare) {
@@ -58,6 +72,13 @@ class SeglingService
         ];
     }
 
+    /**
+     * Updates an existing segling with form data.
+     *
+     * @param int $id Segling ID to update
+     * @param array<string, mixed> $postData Form data from POST request
+     * @return SeglingServiceResult Result object with success status and redirect info
+     */
     public function updateSegling(int $id, array $postData): SeglingServiceResult
     {
         $sanitizer = new Sanitizer();
@@ -76,6 +97,12 @@ class SeglingService
         }
     }
 
+    /**
+     * Deletes a segling by ID.
+     *
+     * @param int $id Segling ID to delete
+     * @return SeglingServiceResult Result object with success status and redirect info
+     */
     public function deleteSegling(int $id): SeglingServiceResult
     {
         if ($this->seglingRepo->delete($id)) {
@@ -87,6 +114,12 @@ class SeglingService
         }
     }
 
+    /**
+     * Creates a new segling with form data.
+     *
+     * @param array<string, mixed> $postData Form data from POST request
+     * @return SeglingServiceResult Result object with success status and redirect info
+     */
     public function createSegling(array $postData): SeglingServiceResult
     {
         $sanitizer = new Sanitizer();
@@ -112,6 +145,12 @@ class SeglingService
         }
     }
 
+    /**
+     * Adds a member to a segling with optional role.
+     *
+     * @param array<string, mixed> $postData Form data containing segling_id, segling_person, and optional segling_roll
+     * @return SeglingServiceResult Result object with success status and message
+     */
     public function addMemberToSegling(array $postData): SeglingServiceResult
     {
         if (!isset($postData['segling_id']) || !isset($postData['segling_person'])) {
@@ -137,6 +176,12 @@ class SeglingService
         }
     }
 
+    /**
+     * Removes a member from a segling.
+     *
+     * @param array<string, mixed> $data Data containing segling_id and medlem_id
+     * @return SeglingServiceResult Result object with success status and message
+     */
     public function removeMemberFromSegling(array $data): SeglingServiceResult
     {
         $seglingId = $data['segling_id'] ?? null;

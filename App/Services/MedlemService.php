@@ -8,6 +8,7 @@ use Exception;
 use App\Models\MedlemRepository;
 use App\Models\RollRepository;
 use App\Models\BetalningRepository;
+use App\Models\Medlem;
 use App\Services\MailAliasService;
 use App\Services\MedlemDataValidatorService;
 use App\Utils\Session;
@@ -27,11 +28,23 @@ class MedlemService
     ) {
     }
 
+    /**
+     * Retrieves all members.
+     *
+     * @return array<int, Medlem> Array of all member objects
+     */
     public function getAllMembers(): array
     {
         return $this->medlemRepo->getAll();
     }
 
+    /**
+     * Gets all data needed for member edit form.
+     *
+     * @param int $id Member ID
+     * @return array<string, mixed> Array containing member, roles, seglingar, and betalningar
+     * @throws Exception If member not found
+     */
     public function getMemberEditData(int $id): array
     {
         $medlem = $this->medlemRepo->getById($id);
@@ -47,11 +60,23 @@ class MedlemService
         ];
     }
 
+    /**
+     * Retrieves all available roles.
+     *
+     * @return array<int, array<string, mixed>> Array of all role data
+     */
     public function getAllRoles(): array
     {
         return $this->rollRepo->getAll();
     }
 
+    /**
+     * Updates an existing member with form data.
+     *
+     * @param int $id Member ID to update
+     * @param array<string, mixed> $postData Form data from POST request
+     * @return MedlemServiceResult Result object with success status and redirect info
+     */
     public function updateMember(int $id, array $postData): MedlemServiceResult
     {
         $medlem = $this->medlemRepo->getById($id);
@@ -90,6 +115,12 @@ class MedlemService
         );
     }
 
+    /**
+     * Creates a new member with form data.
+     *
+     * @param array<string, mixed> $postData Form data from POST request
+     * @return MedlemServiceResult Result object with success status and redirect info
+     */
     public function createMember(array $postData): MedlemServiceResult
     {
         $medlem = $this->medlemRepo->createNew();
@@ -119,6 +150,12 @@ class MedlemService
         );
     }
 
+    /**
+     * Deletes a member by ID.
+     *
+     * @param int $id Member ID to delete
+     * @return MedlemServiceResult Result object with success status and redirect info
+     */
     public function deleteMember(int $id): MedlemServiceResult
     {
         $medlem = $this->medlemRepo->getById($id);
@@ -148,10 +185,16 @@ class MedlemService
         );
     }
 
+    /**
+     * Updates email aliases if SmarterEmail integration is enabled.
+     *
+     * @return void
+     */
     private function updateEmailAliases(): void
     {
         if ($this->app->getConfig('SMARTEREMAIL_ENABLED')) {
             $mailAlias = $this->app->getConfig('SMARTEREMAIL_ALIASNAME');
+            /** @var array<int, string> $allEmails */
             $allEmails = array_column($this->medlemRepo->getEmailForActiveMembers(), 'email');
             $this->mailAliasService->updateAlias($mailAlias, $allEmails);
         }
