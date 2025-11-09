@@ -31,15 +31,15 @@ class RollRepositoryTest extends TestCase
     {
         $expectedData = [
             [
-                'id' => 1, 
-                'roll_namn' => 'Skeppare', 
+                'id' => 1,
+                'roll_namn' => 'Skeppare',
                 'kommentar' => 'Captain role',
                 'created_at' => '2024-01-01 00:00:00',
                 'updated_at' => '2024-01-01 00:00:00'
             ],
             [
-                'id' => 2, 
-                'roll_namn' => 'Båtsman', 
+                'id' => 2,
+                'roll_namn' => 'Båtsman',
                 'kommentar' => 'Crew role',
                 'created_at' => '2024-01-01 00:00:00',
                 'updated_at' => '2024-01-01 00:00:00'
