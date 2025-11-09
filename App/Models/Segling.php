@@ -11,10 +11,23 @@ class Segling
     public string $slut_dat;
     public string $skeppslag;
     public ?string $kommentar;
+    /** @var array<int, array<string, mixed>> */
     public array $deltagare = [];
     public string $created_at;
     public string $updated_at;
 
+    /**
+     * Constructor for Segling class
+     *
+     * @param int $id
+     * @param string $start_dat
+     * @param string $slut_dat
+     * @param string $skeppslag
+     * @param string|null $kommentar
+     * @param array<int, array<string, mixed>> $deltagare
+     * @param string $created_at
+     * @param string $updated_at
+     */
     public function __construct(
         int $id = 0,
         string $start_dat = '',
@@ -35,6 +48,12 @@ class Segling
         $this->updated_at = $updated_at;
     }
 
+    /**
+     * Fetches deltagare on a segling that has a specific role
+     *
+     * @param string $targetRole The role to search for
+     * @return array<int, mixed> Array of deltagare with the specified role
+     */
     public function getDeltagareByRoleName(string $targetRole): array
     {
         $results = [];

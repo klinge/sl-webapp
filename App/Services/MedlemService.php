@@ -63,7 +63,7 @@ class MedlemService
     /**
      * Retrieves all available roles.
      *
-     * @return array<int, array<string, mixed>> Array of all role data
+     * @return array<int, Roll> Array of all role objects
      */
     public function getAllRoles(): array
     {

@@ -8,8 +8,7 @@ use Exception;
 use App\Models\SeglingRepository;
 use App\Models\BetalningRepository;
 use App\Models\MedlemRepository;
-use App\Models\Segling;
-use App\Models\Roll;
+use App\Models\RollRepository;
 use App\Utils\Sanitizer;
 use App\Utils\Session;
 use Monolog\Logger;
@@ -21,7 +20,7 @@ class SeglingService
         private SeglingRepository $seglingRepo,
         private BetalningRepository $betalningRepo,
         private MedlemRepository $medlemRepo,
-        private Roll $roll,
+        private RollRepository $rollRepo,
         private Logger $logger
     ) {
     }
@@ -65,7 +64,7 @@ class SeglingService
 
         return [
             'segling' => $segling,
-            'roles' => $this->roll->getAll(),
+            'roles' => $this->rollRepo->getAll(),
             'allaSkeppare' => $this->medlemRepo->findMembersByRollName('Skeppare'),
             'allaBatsman' => $this->medlemRepo->findMembersByRollName('Båtsman'),
             'allaKockar' => $this->medlemRepo->findMembersByRollName('Kock')

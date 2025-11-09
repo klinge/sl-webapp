@@ -9,7 +9,6 @@ use Psr\Log\LoggerInterface;
 
 class Roll extends BaseModel
 {
-    private $table_name = "Roll";
     // object properties
     public int $id;
     public string $roll_namn;
@@ -17,17 +16,13 @@ class Roll extends BaseModel
     public string $created_at;
     public string $updated_at;
 
-    public function __construct(PDO $db, LoggerInterface $logger)
+    public function __construct()
     {
-        parent::__construct($db, $logger);
+        // Pure data object - no dependencies
     }
 
-    public function getAll(): array
+    public function getRollNamn(): string
     {
-        $query = "SELECT * FROM " . $this->table_name;
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->roll_namn;
     }
 }

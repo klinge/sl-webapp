@@ -10,7 +10,7 @@ use App\Services\SeglingServiceResult;
 use App\Models\SeglingRepository;
 use App\Models\BetalningRepository;
 use App\Models\MedlemRepository;
-use App\Models\Roll;
+use App\Models\RollRepository;
 use App\Models\Segling;
 use App\Utils\Session;
 use Monolog\Logger;
@@ -23,7 +23,7 @@ class SeglingServiceTest extends TestCase
     private $seglingRepo;
     private $betalningRepo;
     private $medlemRepo;
-    private $roll;
+    private $rollRepo;
     private $logger;
 
     protected function setUp(): void
@@ -31,14 +31,14 @@ class SeglingServiceTest extends TestCase
         $this->seglingRepo = $this->createMock(SeglingRepository::class);
         $this->betalningRepo = $this->createMock(BetalningRepository::class);
         $this->medlemRepo = $this->createMock(MedlemRepository::class);
-        $this->roll = $this->createMock(Roll::class);
+        $this->rollRepo = $this->createMock(RollRepository::class);
         $this->logger = $this->createMock(Logger::class);
 
         $this->service = new SeglingService(
             $this->seglingRepo,
             $this->betalningRepo,
             $this->medlemRepo,
-            $this->roll,
+            $this->rollRepo,
             $this->logger
         );
 
@@ -90,7 +90,7 @@ class SeglingServiceTest extends TestCase
             ->with(1, 2024)
             ->willReturn(true);
 
-        $this->roll->expects($this->once())
+        $this->rollRepo->expects($this->once())
             ->method('getAll')
             ->willReturn([['id' => 1, 'name' => 'Captain']]);
 
