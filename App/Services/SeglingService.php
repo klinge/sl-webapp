@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use Exception;
+use App\Models\Segling;
 use App\Models\SeglingRepository;
 use App\Models\BetalningRepository;
 use App\Models\MedlemRepository;

@@ -9,6 +9,7 @@ use App\Models\MedlemRepository;
 use App\Models\RollRepository;
 use App\Models\BetalningRepository;
 use App\Models\Medlem;
+use App\Models\Roll;
 use App\Services\MailAliasService;
 use App\Services\MedlemDataValidatorService;
 use App\Utils\Session;
