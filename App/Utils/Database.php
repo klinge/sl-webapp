@@ -10,10 +10,10 @@ use Monolog\Logger;
 
 class Database
 {
-    private static $instance = null;
-    private $conn;
-    private $dbfile;
-    private $logger;
+    private static ?Database $instance = null;
+    private PDO $conn;
+    private string $dbfile;
+    private Logger $logger;
 
 
     private function __construct(string $dbPath, Logger $logger)

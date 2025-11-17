@@ -15,12 +15,19 @@ class MailAliasService
 {
     private Client $client;
     private LoggerInterface $logger;
+    /** @var array<string, string> */
     private array $config;
     private string $baseUrl;
     private string $username;
     private string $password;
     private ?string $accessToken = null;
 
+    /**
+     * Initialize MailAliasService with logger and configuration.
+     *
+     * @param Logger $logger Logger instance for service operations
+     * @param array<string, string> $config Configuration array with SmarterMail settings
+     */
     public function __construct(Logger $logger, array $config)
     {
         $this->client = new Client();
@@ -32,6 +39,11 @@ class MailAliasService
         $this->password = $this->config['SMARTEREMAIL_PASSWORD'];
     }
 
+    /**
+     * Authenticate with SmarterMail API and store access token.
+     *
+     * @throws RequestException If authentication fails
+     */
     private function authenticate(): void
     {
         try {
@@ -50,6 +62,12 @@ class MailAliasService
         }
     }
 
+    /**
+     * Update mail alias with new target email addresses.
+     *
+     * @param string $aliasName The name of the alias to update
+     * @param array<int, string> $targetEmails Array of target email addresses
+     */
     public function updateAlias(string $aliasName, array $targetEmails): void
     {
         if (!$this->accessToken) {

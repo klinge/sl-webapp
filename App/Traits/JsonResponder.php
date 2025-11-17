@@ -27,12 +27,12 @@ trait JsonResponder
     /**
      * Create a JSON response without emitting it.
      *
-     * @param array $data The data to encode as JSON
+     * @param mixed $data The data to encode as JSON
      * @param int $statusCode HTTP status code (default: 200)
-     * @param array $headers Additional HTTP headers
+     * @param array<string, string> $headers Additional HTTP headers
      * @return ResponseInterface The JSON response
      */
-    protected function jsonResponse(array $data, int $statusCode = 200, array $headers = []): ResponseInterface
+    protected function jsonResponse(mixed $data, int $statusCode = 200, array $headers = []): ResponseInterface
     {
         return new \Laminas\Diactoros\Response\JsonResponse($data, $statusCode, $headers);
     }

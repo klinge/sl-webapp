@@ -57,7 +57,8 @@ trait ResponseFormatter
      *
      * @param string $view The view template to render
      * @param string $message Error message to display on the current page
-     * @param array $data Additional data to pass to the view
+     * @param array<string, mixed> $data The data to pass to the view
+     * @return ResponseInterface The rendered view response
      */
     protected function renderWithError(string $view, string $message, array $data = []): ResponseInterface
     {

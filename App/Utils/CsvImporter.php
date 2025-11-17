@@ -18,11 +18,14 @@ use Psr\Log\LoggerInterface;
  */
 class CsvImporter
 {
+    /** @var array<int, array<string, string>> */
     public array $data = [];
     private PDO $conn;
     private string $dbfile;
     private string $csvfile;
+    /** @var array<int, string> */
     public array $csvRowsNotImported = [];
+    /** @var array<int, string> */
     public array $dbRowsNotCreated = [];
     public Application $app;
     public LoggerInterface $logger;
@@ -49,10 +52,13 @@ class CsvImporter
         }
     }
 
+    /**
+     * @return array<int, array<string, string>>
+     */
     public function findMembersInCsv(string $key, string $searchValue): array
     {
         // Print some things to see if import went well
-        $foundMembers = array_filter($this->data, function ($member) use ($key, $searchValue) {
+        $foundMembers = array_filter($this->data, function (array $member) use ($key, $searchValue): bool {
             if ($searchValue === "*" || $searchValue === "") {
                 return isset($member[$key]);
             } else {
@@ -103,6 +109,7 @@ class CsvImporter
                 if ($success) {
                     $countUpdated++;
                     //Add betalningar for member
+                    /** @var array<string, string> */
                     $betalningar = array_filter([
                         '2024' => DateFormatter::formatDateWithHms($row['B24']),
                         '2023' => DateFormatter::formatDateWithHms($row['B23']),
@@ -143,8 +150,12 @@ class CsvImporter
         $stmt->execute();
     }
 
+    /**
+     * @return array<int, array<string, string>>
+     */
     private function readCsv(): array
     {
+        /** @var array<int, array<string, string>> */
         $data = [];
         $file = fopen($this->csvfile, 'r');
         $validRows = 0;
@@ -153,11 +164,18 @@ class CsvImporter
         if ($file !== false) {
             // Read the header row to get column names
             $headers = fgetcsv($file, 0, ',');
+            if ($headers === false) {
+                fclose($file);
+                return $data;
+            }
             // Read the rest of the rows
             while (($row = fgetcsv($file, 0, ',')) !== false) {
                 // Combine the headers and row data into an associative array
+                // array_combine can return false if the number of elements do not match or if either array is empty
                 $combinedRow = array_combine($headers, $row);
-                if ($this->isValidCsvRow($combinedRow)) {
+                // verify that $combinedRow is not false and that the row is valid
+                // @phpstan-ignore-next-line
+                if ($combinedRow !== false && $this->isValidCsvRow($combinedRow)) {
                     $data[] = $combinedRow;
                     $validRows++;
                 } else {
@@ -180,14 +198,19 @@ class CsvImporter
             unlink($errorFile);
         }
         $file = fopen($errorFile, 'w');
-        foreach ($this->csvRowsNotImported as $row) {
-            fputcsv($file, [$row]);
+        if ($file !== false) {
+            foreach ($this->csvRowsNotImported as $row) {
+                fputcsv($file, [$row]);
+            }
+            fclose($file);
         }
-        fclose($file);
 
         return $data;
     }
 
+    /**
+     * @param array<string, string> $row
+     */
     public function isValidCsvRow(array $row): bool
     {
         // Define the expected number of columns based on your CSV header
@@ -215,6 +238,9 @@ class CsvImporter
         return true;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function fetchRoller(): array
     {
         $query = 'SELECT * FROM Roll;';
@@ -227,7 +253,10 @@ class CsvImporter
         return $result;
     }
 
-    private function addRolesForMember(int $medlemId, string $besattningRoll, string $underhallRoll, array $allRoles)
+    /**
+     * @param array<int, array<string, mixed>> $allRoles
+     */
+    private function addRolesForMember(int $medlemId, string $besattningRoll, string $underhallRoll, array $allRoles): void
     {
         $roles = array_merge(
             explode(',', $besattningRoll),
@@ -255,13 +284,16 @@ class CsvImporter
         $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
-    private function insertMedlemRoll($medlemId, $roleId): void
+    private function insertMedlemRoll(int $medlemId, int $roleId): void
     {
         $query = 'INSERT INTO Medlem_Roll (medlem_id, roll_id) VALUES (?, ?)';
         $stmt = $this->conn->prepare($query);
         $stmt->execute([$medlemId, $roleId]);
     }
 
+    /**
+     * @param array<string, string> $betalningar
+     */
     private function addPaymentsForMember(int $medlemId, array $betalningar): void
     {
         foreach ($betalningar as $year => $date) {

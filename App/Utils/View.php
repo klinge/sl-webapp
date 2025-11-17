@@ -23,8 +23,8 @@ class View
     /** @var string Full path to the application directory */
     private string $rootPath;
 
-    /** @var array Data to be passed to the view */
-    private $data = [];
+    /** @var array<string, mixed> Data to be passed to the view */
+    private array $data = [];
 
 
 
@@ -44,7 +44,7 @@ class View
      * Render a view template
      *
      * @param string $template The name of the template file (without .php extension)
-     * @param array $data Additional data to be passed to the view
+     * @param array<string, mixed> $data Additional data to be passed to the view
      * @return ResponseInterface The rendered HTML response
      * @throws \Exception If the view file is not found
      */

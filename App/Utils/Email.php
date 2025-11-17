@@ -12,10 +12,16 @@ use Monolog\Logger;
 
 class Email
 {
-    private $mailer;
-    private $app;
+    private PHPMailer $mailer;
+    private Application $app;
     private Logger $logger;
 
+    /**
+     * Initialize Email service with application and logger dependencies.
+     *
+     * @param Application $app Application instance for configuration access
+     * @param Logger $logger Logger instance for email sending logs
+     */
     public function __construct(Application $app, Logger $logger)
     {
         $this->app = $app;
@@ -24,7 +30,10 @@ class Email
         $this->configure();
     }
 
-    private function configure()
+    /**
+     * Configure PHPMailer with SMTP settings and content options.
+     */
+    private function configure(): void
     {
         //SMTP settings
         $this->mailer->isSMTP();
@@ -32,7 +41,7 @@ class Email
         $this->mailer->SMTPAuth = true;
         $this->mailer->Username = $this->app->getConfig("SMTP_USERNAME");
         $this->mailer->Password = $this->app->getConfig("SMTP_PASSWORD");
-        $this->mailer->Port = $this->app->getConfig("SMTP_PORT");
+        $this->mailer->Port = (int) $this->app->getConfig("SMTP_PORT");
         $this->mailer->Timeout = 20;
         $this->mailer->SMTPDebug = SMTP::DEBUG_OFF;
         //General content settings
@@ -41,6 +50,17 @@ class Email
         $this->mailer->ContentType = 'text/html; charset=UTF-8';
     }
 
+    /**
+     * Send an email of specified type to recipient.
+     *
+     * @param EmailType $type The type of email to send
+     * @param string $to Recipient email address
+     * @param string|null $subject Optional custom subject line
+     * @param array<string, string> $data Template variables for email content
+     * @return bool True if email was sent successfully
+     * @throws Exception If email sending fails
+     * @throws \InvalidArgumentException If unsupported email type provided
+     */
     public function send(EmailType $type, string $to, ?string $subject = null, array $data = []): bool
     {
         //Load correct email template
@@ -95,7 +115,15 @@ class Email
         }
     }
 
-    private function loadTemplate(EmailType $type, array $data = [])
+    /**
+     * Load and process email template with provided data.
+     *
+     * @param EmailType $type The email type to load template for
+     * @param array<string, string> $data Template variables to replace in content
+     * @return string Processed template content
+     * @throws \RuntimeException If template file not found or cannot be read
+     */
+    private function loadTemplate(EmailType $type, array $data = []): string
     {
         $templatePath = $this->app->getRootDir() . "/public/views/emails/{$type->value}.tpl";
         if (!file_exists($templatePath)) {

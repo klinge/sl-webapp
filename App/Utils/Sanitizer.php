@@ -8,10 +8,10 @@ namespace App\Utils;
 * This class is responsible for sanitizing and validating user input
 * It provides methods to sanitize and validate user input based on specified rules.
 */
-
 class Sanitizer
 {
     //Tells the function what rule to use for sanitizing
+    /** @var array<string, string|int> */
     private array $sanitizing_rules = [
         'string' => 'sanitizeString', //FILTER_SANITIZE_STRING us deprecated so use htmlspecialchars() instead
         'email' => FILTER_SANITIZE_EMAIL,
@@ -22,13 +22,13 @@ class Sanitizer
         'date' => 'sanitizeDate',
     ];
 
-    /*
-    * Sanitize user inputs based on specified rules.
-    * @param array $input The input data to be sanitized.
-    * @param array $fieldRules An array specifying the rules for each field.
-    * @return array The sanitized input data.
-    * @throws \InvalidArgumentException If an invalid sanitization rule is specified.
-    */
+    /**
+     * Sanitize user inputs based on specified rules.
+     * @param array<string, mixed> $input The input data to be sanitized.
+     * @param array<string, string|array<int, string>> $fieldRules An array specifying the rules for each field.
+     * @return array<string, mixed> The sanitized input data.
+     * @throws \InvalidArgumentException If an invalid sanitization rule is specified.
+     */
     public function sanitize(array $input, array $fieldRules): array
     {
         $sanitizedInput = [];
@@ -47,13 +47,12 @@ class Sanitizer
      * Applies a sanitization rule to the given value.
      *
      * @param mixed $value The value to be sanitized
-     * @param string|array $rule The sanitization rule to apply
+     * @param string|array<int, string> $rule The sanitization rule to apply (string or [ruleName, parameter])
      *
      * @return mixed The sanitized value
      *
      * @throws \InvalidArgumentException If the sanitization rule is invalid or doesn't exist
      */
-
     private function applySanitizationRule(mixed $value, string|array $rule): mixed
     {
         $value = trim($value);
@@ -74,12 +73,12 @@ class Sanitizer
         }
     }
 
-    private function sanitizeString(string $value)
+    private function sanitizeString(string $value): string
     {
         return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
     }
 
-    private function sanitizeDate($value, $format = 'Y-m-d')
+    private function sanitizeDate(mixed $value, ?string $format = 'Y-m-d'): ?string
     {
         $date = \DateTime::createFromFormat($format, $value);
         return ($date && $date->format($format) === $value) ? $value : null;

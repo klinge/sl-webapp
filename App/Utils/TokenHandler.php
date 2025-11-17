@@ -14,12 +14,23 @@ class TokenHandler
     private PDO $conn;
     private Logger $logger;
 
+    /**
+     * Initialize TokenHandler with database connection and logger.
+     *
+     * @param PDO $conn Database connection for token operations
+     * @param Logger $logger Logger instance for error and info logging
+     */
     public function __construct(PDO $conn, Logger $logger)
     {
         $this->conn = $conn;
         $this->logger = $logger;
     }
 
+    /**
+     * Generate a secure, URL-safe token.
+     *
+     * @return string A random alphanumeric token suitable for URLs
+     */
     public function generateToken(): string
     {
         //$token = bin2hex(random_bytes(16));
@@ -28,6 +39,15 @@ class TokenHandler
         return $token;
     }
 
+    /**
+     * Save a token to the database with associated metadata.
+     *
+     * @param string $token The token string to save
+     * @param TokenType $tokenType The type of token (ACTIVATION or RESET)
+     * @param string $email Email address associated with the token
+     * @param string|null $hashedPassword Optional hashed password for activation tokens
+     * @return bool True if token saved successfully, false otherwise
+     */
     public function saveToken(string $token, TokenType $tokenType, string $email, ?string $hashedPassword = null): bool
     {
         //Activation has a password, reset does not..
@@ -55,6 +75,13 @@ class TokenHandler
         }
     }
 
+    /**
+     * Validate a token and check if it's not expired.
+     *
+     * @param string $token The token to validate
+     * @param TokenType $tokenType The expected token type
+     * @return array<string, mixed> Validation result with success status, message, email, and password hash
+     */
     public function isValidToken(string $token, TokenType $tokenType): array
     {
         // Token validation logic
@@ -78,6 +105,12 @@ class TokenHandler
         return ['success' => true, 'email' => $result['email'], 'hashedPassword' => $hashedPassword];
     }
 
+    /**
+     * Delete a specific token from the database.
+     *
+     * @param string $token The token to delete
+     * @return bool True if token deleted successfully, false otherwise
+     */
     public function deleteToken(string $token): bool
     {
         try {
@@ -91,6 +124,11 @@ class TokenHandler
         }
     }
 
+    /**
+     * Clean up expired tokens from the database.
+     *
+     * @return int Number of expired tokens deleted
+     */
     public function deleteExpiredTokens(): int
     {
         $stmt = $this->conn->prepare("DELETE FROM AuthToken WHERE created_at < datetime('now', '-1 hour')");

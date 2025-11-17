@@ -18,6 +18,15 @@ use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
 class BetalningService
 {
+    /**
+     * Initialize BetalningService with required dependencies.
+     *
+     * @param BetalningRepository $betalningRepo Repository for payment operations
+     * @param MedlemRepository $medlemRepo Repository for member operations
+     * @param Email $email Email service for notifications
+     * @param Application $app Application instance for configuration
+     * @param Logger $logger Logger instance for service operations
+     */
     public function __construct(
         private BetalningRepository $betalningRepo,
         private MedlemRepository $medlemRepo,
@@ -27,11 +36,23 @@ class BetalningService
     ) {
     }
 
+    /**
+     * Retrieve all payments with associated member names.
+     *
+     * @return array<int, mixed> Array of payment records with member information
+     */
     public function getAllPayments(): array
     {
         return $this->betalningRepo->findAllWithMemberNames();
     }
 
+    /**
+     * Get payment information for a specific member.
+     *
+     * @param int $memberId The member ID to get payments for
+     * @return array<string, mixed> Array containing member and payments data
+     * @throws Exception If member not found
+     */
     public function getPaymentsForMember(int $memberId): array
     {
         $medlem = $this->medlemRepo->getById($memberId);
@@ -45,6 +66,12 @@ class BetalningService
         ];
     }
 
+    /**
+     * Create a new payment record.
+     *
+     * @param array<string, mixed> $postData Payment data from form submission
+     * @return BetalningServiceResult Result object with success status and message
+     */
     public function createPayment(array $postData): BetalningServiceResult
     {
         // Validate required fields
@@ -97,6 +124,12 @@ class BetalningService
         }
     }
 
+    /**
+     * Delete a payment record by ID.
+     *
+     * @param int $id The payment ID to delete
+     * @return BetalningServiceResult Result object with success status and message
+     */
     public function deletePayment(int $id): BetalningServiceResult
     {
         try {
@@ -111,6 +144,12 @@ class BetalningService
         }
     }
 
+    /**
+     * Send welcome email to member on their first payment if not already sent.
+     *
+     * @param int $memberId The member ID to send welcome email to
+     * @return bool True if email was sent successfully, false otherwise
+     */
     private function sendWelcomeEmailOnFirstPayment(int $memberId): bool
     {
         if ($this->app->getConfig('WELCOME_MAIL_ENABLED') !== "1") {
