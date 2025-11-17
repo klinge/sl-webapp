@@ -83,7 +83,7 @@ class EmailTest extends TestCase
     {
         $this->app->expects($this->once())
             ->method('getRootDir')
-            ->willReturn(__DIR__ . '/../../fixtures');
+            ->willReturn('/nonexistent/path');
 
         $loadTemplate = $this->unprotectLoadTemplate();
 
@@ -92,6 +92,90 @@ class EmailTest extends TestCase
 
         $loadTemplate->invoke($this->email, EmailType::WELCOME, []);
     }
+
+    public function testSendEmailWithMockedMailer()
+    {
+        // Mock the mailer to prevent actual email sending
+        $mockMailer = $this->createMock(\PHPMailer\PHPMailer\PHPMailer::class);
+        $mockMailer->expects($this->once())->method('setFrom');
+        $mockMailer->expects($this->once())->method('addAddress');
+        $mockMailer->expects($this->once())->method('send')->willReturn(true);
+        $mockMailer->Subject = '';
+        $mockMailer->Body = '';
+
+        // Use reflection to replace the mailer
+        $reflection = new ReflectionClass($this->email);
+        $mailerProperty = $reflection->getProperty('mailer');
+        $mailerProperty->setAccessible(true);
+        $mailerProperty->setValue($this->email, $mockMailer);
+
+        // Mock getRootDir for template loading
+        $this->app->expects($this->once())
+            ->method('getRootDir')
+            ->willReturn(__DIR__ . '/../../fixtures');
+
+        $result = $this->email->send(EmailType::TEST, 'test@example.com', 'Test Subject', ['name' => 'John']);
+
+        $this->assertTrue($result);
+    }
+
+    public function testSendEmailHandlesMailerException()
+    {
+        // Mock the mailer to throw an exception
+        $mockMailer = $this->createMock(\PHPMailer\PHPMailer\PHPMailer::class);
+        $mockMailer->expects($this->once())->method('setFrom');
+        $mockMailer->expects($this->once())->method('addAddress');
+        $mockMailer->expects($this->once())->method('send')
+            ->willThrowException(new \PHPMailer\PHPMailer\Exception('SMTP Error'));
+        $mockMailer->ErrorInfo = 'Mock SMTP Error';
+        $mockMailer->Subject = '';
+        $mockMailer->Body = '';
+
+        // Use reflection to replace the mailer
+        $reflection = new ReflectionClass($this->email);
+        $mailerProperty = $reflection->getProperty('mailer');
+        $mailerProperty->setAccessible(true);
+        $mailerProperty->setValue($this->email, $mockMailer);
+
+        // Mock getRootDir for template loading
+        $this->app->expects($this->once())
+            ->method('getRootDir')
+            ->willReturn(__DIR__ . '/../../fixtures');
+
+        $this->expectException(\PHPMailer\PHPMailer\Exception::class);
+        $this->expectExceptionMessage('Email could not be sent. Mailer Error: Mock SMTP Error');
+
+        $this->email->send(EmailType::TEST, 'test@example.com');
+    }
+
+    public function testSendEmailWithReplyTo()
+    {
+        // Test the reply-to functionality
+        $mockMailer = $this->createMock(\PHPMailer\PHPMailer\PHPMailer::class);
+        $mockMailer->expects($this->once())->method('setFrom');
+        $mockMailer->expects($this->once())->method('addAddress');
+        $mockMailer->expects($this->once())->method('addReplyTo')->with('reply@example.com');
+        $mockMailer->expects($this->once())->method('send')->willReturn(true);
+        $mockMailer->Subject = '';
+        $mockMailer->Body = '';
+
+        // Use reflection to replace the mailer
+        $reflection = new ReflectionClass($this->email);
+        $mailerProperty = $reflection->getProperty('mailer');
+        $mailerProperty->setAccessible(true);
+        $mailerProperty->setValue($this->email, $mockMailer);
+
+        // Mock getRootDir for template loading
+        $this->app->expects($this->once())
+            ->method('getRootDir')
+            ->willReturn(__DIR__ . '/../../fixtures');
+
+        $result = $this->email->send(EmailType::TEST, 'test@example.com');
+
+        $this->assertTrue($result);
+    }
+
+
 
     protected function unprotectLoadTemplate()
     {

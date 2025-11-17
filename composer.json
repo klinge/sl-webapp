@@ -28,7 +28,7 @@
         "test": "phpunit",
         "test-unit": "phpunit --testsuite unit --configuration phpunit.xml",
         "test-integration": "phpunit --testsuite integration --configuration phpunit.xml",
-        "test-coverage": "phpunit --coverage-html tests/coverage --configuration phpunit.xml",
+        "test-coverage": "XDEBUG_MODE=coverage phpunit --coverage-html tests/coverage --configuration phpunit.xml",
         "test-all": [
             "@test-unit",
             "@test-integration"

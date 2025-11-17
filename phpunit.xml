@@ -20,4 +20,8 @@
             <directory suffix=".php">App</directory>
         </include>
     </source>
+    <php>
+        <env name="LOG_DIR" value="/tmp"/>
+        <env name="APP_ENV" value="DEV"/>
+    </php>
 </phpunit>

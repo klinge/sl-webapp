@@ -84,7 +84,7 @@ class ContainerConfigurator
             ->addArgument(\App\Models\SeglingRepository::class)
             ->addArgument(\App\Models\BetalningRepository::class)
             ->addArgument(\App\Models\MedlemRepository::class)
-            ->addArgument(\App\Models\Roll::class)
+            ->addArgument(\App\Models\RollRepository::class)
             ->addArgument(Logger::class);
 
         $container->add(\App\Services\RollService::class)

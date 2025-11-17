@@ -1,0 +1,1 @@
+Hello {{ name }}, please verify your account!

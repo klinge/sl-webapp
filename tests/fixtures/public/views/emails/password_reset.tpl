@@ -1,0 +1,1 @@
+Hello {{ name }}, reset your password here!
