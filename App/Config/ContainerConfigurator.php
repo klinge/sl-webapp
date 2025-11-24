@@ -18,6 +18,7 @@ use App\Services\Github\DeploymentService;
 use App\Utils\Session;
 use App\Utils\View;
 use Monolog\Logger;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class ContainerConfigurator
 {
@@ -30,9 +31,16 @@ class ContainerConfigurator
         $container->add(Session::class);
         $container->add(\App\Utils\View::class)
             ->addArgument(Application::class);
+        // Register PHPMailer
+        $container->add(\PHPMailer\PHPMailer\PHPMailer::class, function () {
+            return new \PHPMailer\PHPMailer\PHPMailer(true);
+        });
+
         $container->add(\App\Utils\Email::class)
+            ->addArgument(\PHPMailer\PHPMailer\PHPMailer::class)
             ->addArgument(Application::class)
             ->addArgument(Logger::class);
+
         $container->add(\App\Services\UrlGeneratorService::class)
             ->addArgument(Application::class);
 

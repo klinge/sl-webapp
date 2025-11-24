@@ -17,16 +17,17 @@ class Email
     private Logger $logger;
 
     /**
-     * Initialize Email service with application and logger dependencies.
+     * Initialize Email service with dependencies.
      *
+     * @param PHPMailer $mailer PHPMailer instance for sending emails
      * @param Application $app Application instance for configuration access
      * @param Logger $logger Logger instance for email sending logs
      */
-    public function __construct(Application $app, Logger $logger)
+    public function __construct(PHPMailer $mailer, Application $app, Logger $logger)
     {
+        $this->mailer = $mailer;
         $this->app = $app;
         $this->logger = $logger;
-        $this->mailer = new PHPMailer(true);
         $this->configure();
     }
 
