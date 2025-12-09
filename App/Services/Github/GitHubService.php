@@ -4,26 +4,43 @@ declare(strict_types=1);
 
 namespace App\Services\Github;
 
+/**
+ * GitHub webhook validation service.
+ *
+ * Provides security validation for GitHub webhook requests:
+ * - HMAC-SHA256 signature verification using shared secret
+ * - Repository ID validation (only accepts repo 781366756)
+ * - Release branch pattern matching (release/vX.Y format)
+ *
+ * Used by WebhookController to ensure only authentic requests
+ * from the correct repository trigger deployments.
+ */
 class GitHubService
 {
+    /** @var int Expected GitHub repository ID */
     private const REPOSITORY_ID = 781366756;
+
+    /** @var string Regex pattern for release branches (e.g., release/v1.0, release/v2.5) */
     private const RELEASE_BRANCH_PATTERN = '/^release\/v\d+(\.\d+)?$/';
 
     /**
-     * Initialize GitHubService with webhook secret for signature validation.
+     * Initialize service with webhook secret.
      *
-     * @param string $webhookSecret Secret key for validating GitHub webhook signatures
+     * @param string $webhookSecret Shared secret configured in GitHub webhook settings
      */
     public function __construct(private string $webhookSecret)
     {
     }
 
     /**
-     * Validate GitHub webhook signature for security.
+     * Validate webhook signature using HMAC-SHA256.
      *
-     * @param string $rawRequestBody The raw request body from GitHub
-     * @param string $signature The signature header from GitHub (without 'sha256=' prefix)
-     * @return bool True if signature is valid, false otherwise
+     * Computes HMAC-SHA256 hash of request body using webhook secret
+     * and compares with GitHub's signature using timing-safe comparison.
+     *
+     * @param string $rawRequestBody Raw HTTP request body from GitHub
+     * @param string $signature Signature from X-Hub-Signature-256 header (without 'sha256=' prefix)
+     * @return bool True if signature matches, false otherwise
      */
     public function validateSignature(string $rawRequestBody, string $signature): bool
     {
@@ -32,10 +49,13 @@ class GitHubService
     }
 
     /**
-     * Check if webhook payload is from the expected repository.
+     * Verify webhook is from expected repository.
      *
-     * @param array<string, mixed> $payload GitHub webhook payload data
-     * @return bool True if payload is from the correct repository
+     * Checks repository.id in payload matches REPOSITORY_ID constant.
+     * Prevents processing webhooks from other repositories.
+     *
+     * @param array<string, mixed> $payload Decoded GitHub webhook payload
+     * @return bool True if repository ID matches expected value (781366756)
      */
     public function isValidRepository(array $payload): bool
     {
@@ -43,10 +63,14 @@ class GitHubService
     }
 
     /**
-     * Check if branch name matches release branch pattern.
+     * Check if branch matches release pattern.
      *
-     * @param string $branch The branch name to check
-     * @return bool True if branch follows release pattern (release/vX.Y)
+     * Only branches matching release/vX.Y pattern trigger deployment.
+     * Examples: release/v1.0, release/v2.5, release/v10.15
+     * Non-matches: main, develop, release/test, v1.0
+     *
+     * @param string $branch Branch name to validate
+     * @return bool True if branch matches release/vX.Y pattern
      */
     public function isReleaseBranch(string $branch): bool
     {
@@ -54,10 +78,15 @@ class GitHubService
     }
 
     /**
-     * Extract branch name from Git reference.
+     * Extract branch name from Git ref.
      *
-     * @param string $ref Git reference (e.g., 'refs/heads/main')
-     * @return string The branch name without 'refs/heads/' prefix
+     * GitHub webhook payload includes full ref path.
+     * Strips 'refs/heads/' prefix to get branch name.
+     *
+     * Example: 'refs/heads/release/v1.0' → 'release/v1.0'
+     *
+     * @param string $ref Full Git reference from webhook payload
+     * @return string Branch name without refs/heads/ prefix
      */
     public function extractBranchName(string $ref): string
     {

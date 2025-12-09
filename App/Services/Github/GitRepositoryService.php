@@ -6,8 +6,30 @@ namespace App\Services\Github;
 
 use Monolog\Logger;
 
+/**
+ * Git repository operations service for staging directory.
+ *
+ * Manages git operations to maintain an up-to-date staging copy
+ * of the repository. This staging copy is later deployed to production
+ * by a separate cron job.
+ *
+ * Operations:
+ * - Clone repository if not present in staging directory
+ * - Fetch latest changes from remote
+ * - Checkout specified release branch
+ * - Pull latest commits for the branch
+ *
+ * All git commands are executed via shell with proper escaping.
+ * Errors are logged and returned as status arrays.
+ */
 class GitRepositoryService
 {
+    /**
+     * Initialize service with staging directory path.
+     *
+     * @param string $repoBaseDirectory Base directory for staging repositories
+     * @param Logger $logger Monolog logger for operation tracking
+     */
     public function __construct(
         private string $repoBaseDirectory,
         private Logger $logger
@@ -15,10 +37,29 @@ class GitRepositoryService
     }
 
     /**
-     * @return array{status: string, message: string}
+     * Update staging repository to latest commit on specified branch.
+     *
+     * Orchestrates the complete update workflow:
+     * 1. Validate repository URL format
+     * 2. Clone repository if not present, or fetch if exists
+     * 3. Checkout the target branch
+     * 4. Pull latest changes from origin
+     *
+     * Repository is cloned/updated in: {repoBaseDirectory}/{repo-name}
+     * Example: /var/staging/sl-webapp
+     *
+     * @param string $branch Branch name to checkout (e.g., 'release/v1.0')
+     * @param string $repoUrl Git clone URL from webhook payload
+     * @return array{status: string, message: string} Success or error status with message
      */
     public function updateRepository(string $branch, string $repoUrl): array
     {
+        // Validate repository URL format to prevent command injection
+        if (!$this->isValidRepositoryUrl($repoUrl)) {
+            $this->logger->error("Invalid repository URL format: " . $repoUrl);
+            return ['status' => 'error', 'message' => 'Invalid repository URL'];
+        }
+
         $cloneDir = $this->repoBaseDirectory . '/' . basename($repoUrl, '.git');
         $this->logger->debug("Fetching github repo to directory: " . $cloneDir);
 
@@ -49,7 +90,28 @@ class GitRepositoryService
     }
 
     /**
-     * @return array{status: string, message: string}
+     * Validate repository URL format.
+     *
+     * Ensures URL is a valid GitHub HTTPS clone URL to prevent command injection.
+     * Only allows alphanumeric characters, hyphens, and underscores in org/repo names.
+     *
+     * @param string $repoUrl Repository URL to validate
+     * @return bool True if URL is valid GitHub HTTPS format
+     */
+    private function isValidRepositoryUrl(string $repoUrl): bool
+    {
+        return preg_match('#^https://github\.com/[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+\.git$#', $repoUrl) === 1;
+    }
+
+    /**
+     * Clone repository to staging directory.
+     *
+     * Executes: git clone {repoUrl} {cloneDir}
+     * Only called when repository doesn't exist in staging.
+     *
+     * @param string $repoUrl Git clone URL
+     * @param string $cloneDir Target directory for clone
+     * @return array{status: string, message: string} Success or error status
      */
     private function cloneRepository(string $repoUrl, string $cloneDir): array
     {
@@ -65,7 +127,13 @@ class GitRepositoryService
     }
 
     /**
-     * @return array{status: string, message: string}
+     * Fetch latest changes from all remotes.
+     *
+     * Executes: git -C {cloneDir} fetch --all
+     * Updates remote tracking branches without modifying working directory.
+     *
+     * @param string $cloneDir Repository directory path
+     * @return array{status: string, message: string} Success or error status
      */
     private function fetchRepository(string $cloneDir): array
     {
@@ -80,7 +148,14 @@ class GitRepositoryService
     }
 
     /**
-     * @return array{status: string, message: string}
+     * Checkout specified branch.
+     *
+     * Executes: git -C {cloneDir} checkout {branch}
+     * Switches working directory to target branch.
+     *
+     * @param string $cloneDir Repository directory path
+     * @param string $branch Branch name to checkout
+     * @return array{status: string, message: string} Success or error status
      */
     private function checkoutBranch(string $cloneDir, string $branch): array
     {
@@ -96,7 +171,14 @@ class GitRepositoryService
     }
 
     /**
-     * @return array{status: string, message: string}
+     * Pull latest commits from origin for current branch.
+     *
+     * Executes: git -C {cloneDir} pull origin {branch}
+     * Updates working directory with latest commits from remote.
+     *
+     * @param string $cloneDir Repository directory path
+     * @param string $branch Branch name to pull
+     * @return array{status: string, message: string} Success or error status
      */
     private function pullLatestChanges(string $cloneDir, string $branch): array
     {

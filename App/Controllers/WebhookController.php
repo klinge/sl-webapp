@@ -13,10 +13,39 @@ use Psr\Http\Message\ResponseInterface;
 use Monolog\Logger;
 use League\Container\Container;
 
+/**
+ * Handles GitHub webhook requests for automated deployment.
+ *
+ * This controller implements a two-stage deployment workflow:
+ * 1. Receives and validates GitHub webhook push events
+ * 2. Updates staging repository and schedules deployment via trigger file
+ *
+ * Workflow:
+ * - GitHub sends webhook on push to release branch (release/vX.Y pattern)
+ * - Validates event type, HMAC-SHA256 signature, repository ID (781366756)
+ * - Clones/updates repository in staging directory
+ * - Creates trigger file for cron job to copy staging to production
+ *
+ * Security:
+ * - Validates webhook signature using shared secret
+ * - Only processes events from configured repository
+ * - Only deploys release branches matching pattern
+ */
 class WebhookController extends BaseController
 {
     private string $remoteIp;
 
+    /**
+     * Initialize webhook controller with required services.
+     *
+     * @param UrlGeneratorService $urlGenerator URL generation service
+     * @param ServerRequestInterface $request PSR-7 HTTP request
+     * @param Logger $logger Monolog logger instance
+     * @param Container $container DI container
+     * @param GitHubService $githubService GitHub webhook validation service
+     * @param GitRepositoryService $gitRepositoryService Git operations service
+     * @param DeploymentService $deploymentService Deployment scheduling service
+     */
     public function __construct(
         UrlGeneratorService $urlGenerator,
         ServerRequestInterface $request,
@@ -30,6 +59,21 @@ class WebhookController extends BaseController
         $this->remoteIp = $this->request->getServerParams()['REMOTE_ADDR'];
     }
 
+    /**
+     * Process incoming GitHub webhook request.
+     *
+     * Validates the webhook, checks if it's a release branch push,
+     * updates the staging repository, and schedules deployment.
+     *
+     * Response codes:
+     * - 200: Ping event or non-release branch (ignored)
+     * - 200: Successful deployment scheduled
+     * - 400: Invalid request (missing headers, bad format, unsupported event)
+     * - 401: Invalid signature
+     * - 500: Repository or deployment operation failed
+     *
+     * @return ResponseInterface JSON response with status and message
+     */
     public function handle(): ResponseInterface
     {
         $this->logger->info(
@@ -124,14 +168,17 @@ class WebhookController extends BaseController
     }
 
     /**
-     * Verifies and validates the incoming GitHub webhook request.
+     * Verify and validate incoming GitHub webhook request.
      *
-     * This method performs several checks on the incoming request to ensure its authenticity and integrity.
+     * Performs security checks in order:
+     * 1. Verifies X-GitHub-Event header exists
+     * 2. Checks event is 'push' or 'ping'
+     * 3. Verifies X-Hub-Signature-256 header exists
+     * 4. Validates signature header format (sha256=...)
+     * 5. Validates HMAC-SHA256 signature against webhook secret
+     * 6. Confirms repository ID matches expected value
      *
-     * If it's a 'ping' event, it responds with a 'pong'.
-     * For 'push' events, it processes the payload for further action.
-     *
-     * @return array<string, mixed> The validated GitHub webhook payload for 'push' events, or an empty array for other cases
+     * @return array<string, mixed> Validated webhook payload for push events, empty array for ping or validation failures
      */
     public function verifyRequest(): array
     {

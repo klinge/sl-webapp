@@ -303,4 +303,220 @@ class MedlemRepositoryTest extends TestCase
 
         $this->assertTrue(true);
     }
+
+    public function testGetAll(): void
+    {
+        $memberIds = [['id' => 1], ['id' => 2]];
+        $memberData = [
+            'id' => 1,
+            'fornamn' => 'John',
+            'efternamn' => 'Doe',
+            'email' => 'john@example.com',
+            'fodelsedatum' => '1990-01-01',
+            'gatuadress' => '123 Main St',
+            'postnummer' => '12345',
+            'postort' => 'Stockholm',
+            'mobil' => '0701234567',
+            'telefon' => '0812345678',
+            'kommentar' => 'Test',
+            'godkant_gdpr' => 1,
+            'pref_kommunikation' => 1,
+            'foretag' => 0,
+            'standig_medlem' => 1,
+            'skickat_valkomstbrev' => 0,
+            'isAdmin' => 0,
+            'password' => null,
+            'created_at' => '2024-01-01',
+            'updated_at' => '2024-01-01'
+        ];
+
+        $mockStmt1 = $this->createMock(PDOStatement::class);
+        $mockStmt2 = $this->createMock(PDOStatement::class);
+        $mockStmt3 = $this->createMock(PDOStatement::class);
+
+        $this->mockPdo->expects($this->exactly(5))
+            ->method('prepare')
+            ->willReturnOnConsecutiveCalls($mockStmt1, $mockStmt2, $mockStmt3, $mockStmt2, $mockStmt3);
+
+        $mockStmt1->expects($this->once())
+            ->method('fetchAll')
+            ->with(PDO::FETCH_ASSOC)
+            ->willReturn($memberIds);
+
+        $mockStmt2->expects($this->exactly(2))
+            ->method('fetch')
+            ->with(PDO::FETCH_ASSOC)
+            ->willReturn($memberData);
+
+        $mockStmt3->expects($this->exactly(2))
+            ->method('fetchAll')
+            ->with(PDO::FETCH_ASSOC)
+            ->willReturn([]);
+
+        $result = $this->repository->getAll();
+
+        $this->assertCount(2, $result);
+        $this->assertContainsOnlyInstancesOf(Medlem::class, $result);
+    }
+
+    public function testSaveNewMedlem(): void
+    {
+        $medlem = new Medlem();
+        $medlem->fornamn = 'John';
+        $medlem->efternamn = 'Doe';
+        $medlem->email = 'john@example.com';
+        $medlem->fodelsedatum = '1990-01-01';
+        $medlem->adress = '123 Main St';
+        $medlem->postnummer = '12345';
+        $medlem->postort = 'Stockholm';
+        $medlem->mobil = '0701234567';
+        $medlem->telefon = '0812345678';
+        $medlem->kommentar = 'Test';
+        $medlem->godkant_gdpr = true;
+        $medlem->pref_kommunikation = true;
+        $medlem->isAdmin = false;
+        $medlem->foretag = false;
+        $medlem->standig_medlem = true;
+        $medlem->skickat_valkomstbrev = false;
+        $medlem->roller = [];
+
+        $this->mockPdo->expects($this->exactly(2))
+            ->method('prepare')
+            ->willReturn($this->mockStmt);
+
+        $this->mockPdo->expects($this->once())
+            ->method('lastInsertId')
+            ->willReturn('123');
+
+        $this->mockPdo->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->mockStmt->expects($this->once())
+            ->method('fetchAll')
+            ->with(PDO::FETCH_COLUMN)
+            ->willReturn([]);
+
+        $this->mockPdo->expects($this->once())
+            ->method('commit');
+
+        $result = $this->repository->save($medlem);
+
+        $this->assertTrue($result);
+        $this->assertEquals(123, $medlem->id);
+    }
+
+    public function testSaveExistingMedlem(): void
+    {
+        $medlem = new Medlem();
+        $medlem->id = 1;
+        $medlem->fornamn = 'John';
+        $medlem->efternamn = 'Doe';
+        $medlem->email = 'john@example.com';
+        $medlem->fodelsedatum = '1990-01-01';
+        $medlem->adress = '123 Main St';
+        $medlem->postnummer = '12345';
+        $medlem->postort = 'Stockholm';
+        $medlem->mobil = '0701234567';
+        $medlem->telefon = '0812345678';
+        $medlem->kommentar = 'Test';
+        $medlem->godkant_gdpr = true;
+        $medlem->pref_kommunikation = true;
+        $medlem->isAdmin = false;
+        $medlem->foretag = false;
+        $medlem->standig_medlem = true;
+        $medlem->skickat_valkomstbrev = false;
+        $medlem->roller = [];
+
+        $this->mockPdo->expects($this->exactly(2))
+            ->method('prepare')
+            ->willReturn($this->mockStmt);
+
+        $this->mockPdo->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->mockStmt->expects($this->once())
+            ->method('fetchAll')
+            ->with(PDO::FETCH_COLUMN)
+            ->willReturn([]);
+
+        $this->mockPdo->expects($this->once())
+            ->method('commit');
+
+        $result = $this->repository->save($medlem);
+
+        $this->assertTrue($result);
+    }
+
+    public function testSaveFailure(): void
+    {
+        $medlem = new Medlem();
+        $medlem->fornamn = 'John';
+        $medlem->efternamn = 'Doe';
+        $medlem->email = 'john@example.com';
+        $medlem->fodelsedatum = '1990-01-01';
+        $medlem->adress = '123 Main St';
+        $medlem->postnummer = '12345';
+        $medlem->postort = 'Stockholm';
+        $medlem->mobil = '0701234567';
+        $medlem->telefon = '0812345678';
+        $medlem->kommentar = 'Test';
+        $medlem->godkant_gdpr = true;
+        $medlem->pref_kommunikation = true;
+        $medlem->isAdmin = false;
+        $medlem->foretag = false;
+        $medlem->standig_medlem = true;
+        $medlem->skickat_valkomstbrev = false;
+
+        $this->mockPdo->expects($this->once())
+            ->method('prepare')
+            ->willThrowException(new Exception('Database error'));
+
+        $this->mockLogger->expects($this->once())
+            ->method('error')
+            ->with($this->stringContains('Failed to save medlem'));
+
+        $result = $this->repository->save($medlem);
+
+        $this->assertFalse($result);
+    }
+
+    public function testGetByIdReturnsNull(): void
+    {
+        $this->mockPdo->expects($this->once())
+            ->method('prepare')
+            ->willReturn($this->mockStmt);
+
+        $this->mockStmt->expects($this->once())
+            ->method('fetch')
+            ->with(PDO::FETCH_ASSOC)
+            ->willReturn(false);
+
+        $result = $this->repository->getById(999);
+
+        $this->assertNull($result);
+    }
+
+    public function testDelete(): void
+    {
+        $medlem = new Medlem();
+        $medlem->id = 1;
+
+        $this->mockPdo->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->mockPdo->expects($this->exactly(2))
+            ->method('prepare')
+            ->willReturn($this->mockStmt);
+
+        $this->mockStmt->expects($this->exactly(2))
+            ->method('execute')
+            ->willReturn(true);
+
+        $this->mockPdo->expects($this->once())
+            ->method('commit');
+
+        $result = $this->repository->delete($medlem);
+
+        $this->assertTrue($result);
+    }
 }
