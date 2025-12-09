@@ -8,7 +8,6 @@ use Dotenv\Dotenv;
 use League\Route\Router;
 use Monolog\Logger;
 use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Laminas\Diactoros\ServerRequestFactory;
 use League\Container\Container;
 use App\Config\RouteConfig;
@@ -19,7 +18,6 @@ use App\Middleware\ApplicationHandler;
 use App\Middleware\CsrfMiddleware;
 use App\Utils\Session;
 use App\Utils\ResponseEmitter;
-use Exception;
 
 /**
  * The main Application class that bootstraps the application and handles routing.
