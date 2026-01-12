@@ -38,6 +38,30 @@ class ViewTest extends TestCase
         $this->assertStringContainsString('Test Template', (string) $response->getBody());
     }
 
+    public function testRenderWithCustomStatusCode()
+    {
+        $response = $this->view->render('test', [], 404);
+
+        $this->assertInstanceOf(HtmlResponse::class, $response);
+        $this->assertEquals(404, $response->getStatusCode());
+        $this->assertStringContainsString('Test Template', (string) $response->getBody());
+    }
+
+    public function testRenderWithDifferentStatusCodes()
+    {
+        // Test 500 status code
+        $response500 = $this->view->render('test', [], 500);
+        $this->assertEquals(500, $response500->getStatusCode());
+
+        // Test 301 status code
+        $response404 = $this->view->render('test', [], 404);
+        $this->assertEquals(404, $response404->getStatusCode());
+
+        // Test default 200 status code
+        $response200 = $this->view->render('test');
+        $this->assertEquals(200, $response200->getStatusCode());
+    }
+
     public function testRenderThrowsExceptionForNonExistentTemplate()
     {
         $this->expectException(\Exception::class);
