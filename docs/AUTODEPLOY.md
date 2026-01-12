@@ -46,6 +46,13 @@ Manages git operations in the staging directory:
 
 Creates trigger files to signal deployment readiness. Files are named `deploy_{timestamp}.trigger`.
 
+### Deploy shell script
+**Location:**: in a suitable bin directory on the receiving server
+
+The shell script checks if any trigger files exist pulls the repo to a staging directory and then moves the repo from staging 
+to prod. Make sure any important files that's in gitignore is backed up (env and db for example). Shell script is not 
+part of this repo. 
+
 ## Configuration
 
 ### Environment Variables

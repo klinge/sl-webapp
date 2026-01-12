@@ -45,10 +45,11 @@ class View
      *
      * @param string $template The name of the template file (without .php extension)
      * @param array<string, mixed> $data Additional data to be passed to the view
+     * @param int $statusCode HTTP status code for the response
      * @return ResponseInterface The rendered HTML response
      * @throws \Exception If the view file is not found
      */
-    public function render(string $template, array $data = []): ResponseInterface
+    public function render(string $template, array $data = [], int $statusCode = 200): ResponseInterface
     {
         //TODO Keeps having data in the viewData array even if it would be better to just juse key:value-pairs
         $viewData = array_merge($data, Session::getSessionDataForViews());
@@ -71,7 +72,7 @@ class View
         //Return the response object without emitting
         return new \Laminas\Diactoros\Response\HtmlResponse(
             $result,
-            200
+            $statusCode
         );
     }
 

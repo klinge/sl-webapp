@@ -36,11 +36,11 @@ class HomeController extends BaseController
 
     public function pageNotFound(): ResponseInterface
     {
-        return $this->view->render('404');
+        return $this->view->render('404', [], 404);
     }
 
     public function technicalError(): ResponseInterface
     {
-        return $this->view->render('viewTechnicalError');
+        return $this->view->render('viewTechnicalError', [], 404);
     }
 }
