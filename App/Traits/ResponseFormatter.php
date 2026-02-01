@@ -57,13 +57,14 @@ trait ResponseFormatter
      *
      * @param string $view The view template to render
      * @param string $message Error message to display on the current page
+     * @param int $status The http status code to pass to the client, default to 400
      * @param array<string, mixed> $data The data to pass to the view
      * @return ResponseInterface The rendered view response
      */
-    protected function renderWithError(string $view, string $message, array $data = []): ResponseInterface
+    protected function renderWithError(string $view, string $message, int $status = 400, array $data = []): ResponseInterface
     {
         Session::setFlashMessage('error', $message);
-        return $this->view->render($view, $data);
+        return $this->view->render($view, $data, $status);
     }
 
     /**

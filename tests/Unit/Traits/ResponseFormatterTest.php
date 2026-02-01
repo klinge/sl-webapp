@@ -81,7 +81,7 @@ class ResponseFormatterTest extends TestCase
             ->with('test-view', ['data' => 'value'])
             ->willReturn($mockResponse);
 
-        $response = $this->callProtectedMethod($this->testClass, 'renderWithError', ['test-view', 'Error message', ['data' => 'value']]);
+        $response = $this->callProtectedMethod($this->testClass, 'renderWithError', ['test-view', 'Error message', 403, ['data' => 'value']]);
 
         $this->assertEquals('Error message', Session::get('flash_message')['message']);
         $this->assertInstanceOf(ResponseInterface::class, $response);

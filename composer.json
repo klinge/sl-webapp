@@ -1,9 +1,9 @@
 {
     "require": {
-        "vlucas/phpdotenv": "*",
+        "vlucas/phpdotenv": "^5",
         "phpmailer/phpmailer": "^7.0",
-        "monolog/monolog": "^3.7",
-        "andkab/php-turnstile": "^1.0",
+        "monolog/monolog": "^3",
+        "andkab/php-turnstile": "^1",
         "laminas/laminas-diactoros": "^3.5",
         "guzzlehttp/guzzle": "^7.0",
         "league/container": "^5.1",

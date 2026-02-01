@@ -45,7 +45,7 @@ class PasswordController extends AuthBaseController
     public function sendPwdRequestToken(): ResponseInterface
     {
         if (!$this->validateRecaptcha()) {
-            return $this->renderWithError(self::NEWPASSWORD_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
+            return $this->renderWithError(self::NEWPASSWORD_VIEW, self::RECAPTCHA_ERROR_MESSAGE, 422);
         }
 
         $email = $this->request->getParsedBody()['email'] ?? '';

@@ -72,7 +72,7 @@ class LoginController extends AuthBaseController
     {
         //First validate recaptcha and send user back to login page if failed
         if (!$this->validateRecaptcha()) {
-            return $this->renderWithError(self::LOGIN_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
+            return $this->renderWithError(self::LOGIN_VIEW, self::RECAPTCHA_ERROR_MESSAGE, 422);
         }
 
         $providedEmail = $this->request->getParsedBody()['email'] ?? '';
@@ -80,7 +80,7 @@ class LoginController extends AuthBaseController
 
         if (empty($providedEmail) || empty($providedPassword)) {
             $this->logger->info("Failed login. Empty email or password. IP: " . $this->remoteIp);
-            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
+            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD, 403);
         }
 
         $result = $this->medlemRepo->getMemberByEmail($providedEmail);
@@ -88,18 +88,18 @@ class LoginController extends AuthBaseController
         //User not found
         if (!$result) {
             $this->logger->info("Failed login. Email not existing: " . $providedEmail . ' IP: ' . $this->remoteIp);
-            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
+            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD, 403);
         }
         //Get medlem object from repository
         $medlem = $this->medlemRepo->getById($result['id']);
         if (!$medlem) {
             $this->logger->error("Technical error. Could not create member object for member id: " . $result['id']);
-            return $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!');
+            return $this->renderWithError(self::LOGIN_VIEW, 'Tekniskt fel. Försök igen eller kontakta en administratör!', 500);
         }
         //Fail if passwork did not verify
         if (!$this->passwordService->verifyPassword($providedPassword, $medlem->password)) {
             $this->logger->info("Failed login. Incorrect password for member: " . $providedEmail . ' IP: ' . $this->remoteIp);
-            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD);
+            return $this->renderWithError(self::LOGIN_VIEW, self::BAD_EMAIL_OR_PASSWORD, 403);
         }
         // User is successfully logged in, regenerate session id because it's a safe practice
         $this->logger->info("Member logged in. Member email: " . $medlem->email .  ' IP: ' . $this->remoteIp);

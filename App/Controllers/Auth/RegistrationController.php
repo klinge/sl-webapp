@@ -46,7 +46,7 @@ class RegistrationController extends AuthBaseController
     public function register(): ResponseInterface
     {
         if (!$this->validateRecaptcha()) {
-            return $this->renderWithError(self::REGISTER_VIEW, self::RECAPTCHA_ERROR_MESSAGE);
+            return $this->renderWithError(self::REGISTER_VIEW, self::RECAPTCHA_ERROR_MESSAGE, 422);
         }
 
         $result = $this->userAuthService->registerUser($this->request->getParsedBody());
